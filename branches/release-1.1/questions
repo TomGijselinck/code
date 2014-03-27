@@ -1,0 +1,6 @@
+- do you need to include IllegalArgumentException in every method?
+- can you develop code using the fact that the used units in the assignment
+	will not change in future phases of the assignment? E.g. radians for angles,
+	metres for lengths, ...
+- do you need to include derived properties as object/class properties? E.g.
+	the mass of a worm which is derived from its radius.

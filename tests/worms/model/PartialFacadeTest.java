@@ -5,9 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import worms.model.Facade;
+import worms.util.Util;
 import worms.model.ModelException;
 import worms.model.Worm;
-import worms.util.Util;
 
 public class PartialFacadeTest {
 

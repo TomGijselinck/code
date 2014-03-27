@@ -1,6 +1,10 @@
 package worms.model;
 
 /**
+import worms_dev.Worm;
+**/
+
+/**
  * Implement this interface to connect your code to the user interface.
  * 
  * <ul>

@@ -94,6 +94,11 @@ public class WormTest {
 	public void canMove_ActiveLegaCase() {
 		assertTrue(wormRadius2.canActivelyMoveSteps(1));
 	}
+	
+	@Test
+	public void canMove_ActiveLegalCaseUpwardOrientation() {
+		assertTrue(wormDirectionQuarterPi.canActivelyMoveSteps(1));
+	}
 
 	@Test
 	public void canMove_ActiveFalseCase() {
@@ -114,6 +119,25 @@ public class WormTest {
 		worm.move(3, true);
 		assertTrue(fuzzyEquals(0, worm.getPosition().getX()));
 		assertTrue(fuzzyEquals(3, worm.getPosition().getY()));
+	}
+	
+	@Test
+	public void move_ActiveUpwardOrientation() {
+		wormDirectionQuarterPi.move(10, true);
+		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4),
+				wormDirectionQuarterPi.getPosition().getX()));
+		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4),
+				wormDirectionQuarterPi.getPosition().getY()));
+	}
+	
+	@Test
+	public void move_ActiveMultipleIntervals() {
+		wormDirectionQuarterPi.move(5, true);
+		wormDirectionQuarterPi.move(5, true);
+		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4),
+				wormDirectionQuarterPi.getPosition().getX()));
+		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4),
+				wormDirectionQuarterPi.getPosition().getY()));
 	}
 
 	@Test(expected = IllegalStepsException.class)

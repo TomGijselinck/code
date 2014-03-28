@@ -22,9 +22,14 @@ public class WormTest {
 	private static Worm standardWorm;
 
 	/**
-	 * Variable referencing a worm with direction of Pi/4 radians.
+	 * Variable referencing a worm with upward direction of Pi/4 radians.
 	 */
-	private static Worm wormDirectionQuarterPi;
+	private static Worm wormUpwardDirection;
+
+	/**
+	 * Variable referencing a worm with downward direction of 7/4*Pi radians.
+	 */
+	private static Worm wormDownwardDirection;
 
 	/**
 	 * Variable referencing a worm with radius of 2.
@@ -40,8 +45,10 @@ public class WormTest {
 	@Before
 	public void setUpMutableFixture() throws Exception {
 		standardWorm = new Worm(new Position(0, 0), 0, 1, "Standard");
-		wormDirectionQuarterPi = new Worm(new Position(0, 0), Math.PI / 4, 1,
-				"Quarter pi");
+		wormUpwardDirection = new Worm(new Position(0, 0), Math.PI / 4, 1,
+				"Upward direction");
+		wormDownwardDirection = new Worm(new Position(0, 0), Math.PI * 7 / 4,
+				1, "Downward direction");
 	}
 
 	/**
@@ -96,6 +103,11 @@ public class WormTest {
 	}
 
 	@Test
+	public void canMove_ActiveLegalCaseUpwardOrientation() {
+		assertTrue(wormUpwardDirection.canActivelyMoveSteps(1));
+	}
+
+	@Test
 	public void canMove_ActiveFalseCase() {
 		assertFalse(wormRadius2.canActivelyMoveSteps(100000));
 	}
@@ -116,6 +128,25 @@ public class WormTest {
 		assertTrue(fuzzyEquals(3, worm.getPosition().getY()));
 	}
 
+	@Test
+	public void move_ActiveUpwardOrientation() {
+		wormUpwardDirection.move(10, true);
+		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4), wormUpwardDirection
+				.getPosition().getX()));
+		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4), wormUpwardDirection
+				.getPosition().getY()));
+	}
+
+	@Test
+	public void move_ActiveMultipleIntervals() {
+		wormUpwardDirection.move(5, true);
+		wormUpwardDirection.move(5, true);
+		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4), wormUpwardDirection
+				.getPosition().getX()));
+		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4), wormUpwardDirection
+				.getPosition().getY()));
+	}
+
 	@Test(expected = IllegalStepsException.class)
 	public void moveActive_IllegalCase() throws Exception {
 		standardWorm.move(10000, true);
@@ -131,14 +162,15 @@ public class WormTest {
 
 	@Test
 	public void jump_SingleCase() {
-		Worm wormBefore = standardWorm;
-		standardWorm.jump();
-		assertTrue(fuzzyEquals(
-				wormBefore.getPosition().getX() + wormBefore.jumpDistance(),
-				standardWorm.getPosition().getX()));
-		assertTrue(fuzzyEquals(wormBefore.getPosition().getY(), standardWorm
+		Position positionBefore = new Position(wormUpwardDirection
+				.getPosition().getX(), wormUpwardDirection.getPosition().getY());
+		double jumpdistance = wormUpwardDirection.jumpDistance();
+		wormUpwardDirection.jump();
+		assertTrue(fuzzyEquals(positionBefore.getX() + jumpdistance,
+				wormUpwardDirection.getPosition().getX()));
+		assertTrue(fuzzyEquals(positionBefore.getY(), wormUpwardDirection
 				.getPosition().getY()));
-		assertEquals(0, standardWorm.getCurrentActionPoints());
+		assertEquals(0, wormUpwardDirection.getCurrentActionPoints());
 	}
 
 	@Test(expected = IllegalJumpException.class)
@@ -176,47 +208,46 @@ public class WormTest {
 	@Test
 	public void jumpTime_SingleCase() {
 		assertTrue(fuzzyEquals(
-				wormDirectionQuarterPi.jumpDistance()
-						/ (wormDirectionQuarterPi.jumpSpeed() * Math.cos(wormDirectionQuarterPi
+				wormUpwardDirection.jumpDistance()
+						/ (wormUpwardDirection.jumpSpeed() * Math.cos(wormUpwardDirection
 								.getDirection())),
-				wormDirectionQuarterPi.jumpTime()));
+				wormUpwardDirection.jumpTime()));
 	}
 
 	@Test
 	public void jumpStep_LegalCase() {
-		Position resultPosition = wormDirectionQuarterPi.jumpStep(1);
-		Position expectedPosition = wormDirectionQuarterPi.getPosition();
+		Position resultPosition = wormUpwardDirection.jumpStep(1);
+		Position expectedPosition = wormUpwardDirection.getPosition();
 		expectedPosition.translate(
-				wormDirectionQuarterPi.getPosition().getX()
-						+ wormDirectionQuarterPi.jumpSpeed()
-						* Math.cos(wormDirectionQuarterPi.getDirection()) * 4,
-				wormDirectionQuarterPi.getPosition().getY()
-						+ wormDirectionQuarterPi.jumpSpeed()
-						* Math.sin(wormDirectionQuarterPi.getDirection()) - 0.5
-						* wormDirectionQuarterPi.g * Math.pow(4, 2));
+				wormUpwardDirection.getPosition().getX()
+						+ wormUpwardDirection.jumpSpeed()
+						* Math.cos(wormUpwardDirection.getDirection()) * 4,
+				wormUpwardDirection.getPosition().getY()
+						+ wormUpwardDirection.jumpSpeed()
+						* Math.sin(wormUpwardDirection.getDirection()) - 0.5
+						* wormUpwardDirection.g * Math.pow(4, 2));
 		assertTrue(fuzzyEquals(expectedPosition.getX(), resultPosition.getX()));
 		assertTrue(fuzzyEquals(expectedPosition.getY(), resultPosition.getY()));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void jumpStep_IllegalTimeInterval() throws Exception {
-		wormDirectionQuarterPi.jumpStep(2);
+		wormUpwardDirection.jumpStep(2);
 	}
 
 	@Test
 	public void jumpSpeed_SingleCase() {
-		double F = 5 * wormDirectionQuarterPi.getCurrentActionPoints()
-				+ wormDirectionQuarterPi.getMass() * wormDirectionQuarterPi.g;
-		assertTrue(fuzzyEquals(F / wormDirectionQuarterPi.getMass() * 0.5,
-				wormDirectionQuarterPi.jumpSpeed()));
+		double F = 5 * wormUpwardDirection.getCurrentActionPoints()
+				+ wormUpwardDirection.getMass() * wormUpwardDirection.g;
+		assertTrue(fuzzyEquals(F / wormUpwardDirection.getMass() * 0.5,
+				wormUpwardDirection.jumpSpeed()));
 	}
 
 	@Test
 	public void jumpDistance_SingleCase() {
-		assertTrue(fuzzyEquals(Math.pow(wormDirectionQuarterPi.jumpSpeed(), 2)
-				* Math.sin(2 * wormDirectionQuarterPi.getDirection())
-				/ wormDirectionQuarterPi.g,
-				wormDirectionQuarterPi.jumpDistance()));
+		assertTrue(fuzzyEquals(Math.pow(wormUpwardDirection.jumpSpeed(), 2)
+				* Math.sin(2 * wormUpwardDirection.getDirection())
+				/ wormUpwardDirection.g, wormUpwardDirection.jumpDistance()));
 	}
 
 	@Test
@@ -255,6 +286,33 @@ public class WormTest {
 				standardWorm.getDirection()));
 		assertTrue(fuzzyEquals((initialAP - 75),
 				standardWorm.getCurrentActionPoints()));
+	}
+
+	@Test
+	public void move_AfterTurningUpward() {
+		wormDownwardDirection.turn(Math.PI / 2);
+		wormDownwardDirection.move(10, true);
+		assertTrue(fuzzyEquals(Math.PI / 4,
+				wormDownwardDirection.getDirection()));
+		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4),
+				wormDownwardDirection.getPosition().getX()));
+		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4),
+				wormDownwardDirection.getPosition().getY()));
+	}
+
+	@Test
+	public void jump_AfterTurningUpward() {
+		Position positionBefore = new Position(wormDownwardDirection
+				.getPosition().getX(), wormDownwardDirection.getPosition().getY());
+		wormDownwardDirection.turn(Math.PI/2);
+		assertTrue(fuzzyEquals(Math.PI/4, wormDownwardDirection.getDirection()));
+		double jumpdistance = wormDownwardDirection.jumpDistance();
+		wormDownwardDirection.jump();
+		assertTrue(fuzzyEquals(positionBefore.getX() + jumpdistance,
+				wormDownwardDirection.getPosition().getX()));
+		assertTrue(fuzzyEquals(positionBefore.getY(), wormDownwardDirection
+				.getPosition().getY()));
+		assertEquals(0, wormDownwardDirection.getCurrentActionPoints());
 	}
 
 	@Test

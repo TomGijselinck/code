@@ -323,8 +323,8 @@ public class Worm {
 	 * @post	The new direction of this worm is equal to modulo angle range of  
 	 * 			the sum of the old direction from this worm and the given angle.
 	 * 			The resulting angle is a valid angle.
-	 * 		  | double newAngle = (this.getDirection() + angle)%(angleRange)
-	 * 		  |	if (newAngle >= 0)
+	 * 		  | let double newAngle = (this.getDirection() + angle)%(angleRange) in
+	 * 		  |	if (newAngle > 0)
 	 * 		  |		new.getDirection() == newAngle;
 	 * 		  |	if (newAngle < 0)
 	 * 		  |		new.getDirection() == newAngle + angleRange;
@@ -338,7 +338,7 @@ public class Worm {
 	public void turn(double angle) {
 		assert canTurn(angle);
 		double newAngle = (this.getDirection() + angle) % (getAngleRange());
-		if (newAngle >= 0) {
+		if (newAngle > 0) {
 			setDirection(newAngle);
 			setCurrentActionPoints((int) (getCurrentActionPoints() - 60
 					* Math.abs(angle) / (getAngleRange())));

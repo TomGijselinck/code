@@ -254,7 +254,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Returns the initial velocity this worm has when jumping.
+	 * Returns the initial velocity this worm has in m/s when jumping.
 	 * 
 	 * @return	The resulting speed of this worm is equal to the speed as a
 	 * 			result of the jump force exerted by the worm in an interval of 
@@ -269,7 +269,8 @@ public class Worm {
 	}
 	
 	/**
-	 * Returns the horizontal distance covered when this worm jumps.
+	 * Returns the horizontal distance covered when this worm jumps, expressed
+	 * in metres.
 	 * 
 	 * @return	The resulting jump distance of this worm is equal to the 
 	 * 			distance covered by	this worm at its jump speed in the direction 
@@ -305,7 +306,7 @@ public class Worm {
 	
 	//DIRECTION RELATED METHODS
 	/**
-	 * Return the direction of this worm.
+	 * Return the direction of this worm expressed in radians.
 	 *   The direction is the angle expressed in radians at which a worm is 
 	 *   facing.
 	 */
@@ -453,7 +454,7 @@ public class Worm {
 	
 	//RADIUS RELATED METHODS
 	/**
-	 * Return the radius of this worm.
+	 * Return the radius of this worm expressed in metres.
 	 *   The radius of a worm defines the circular shape of that worm.
 	 */
 	@Basic
@@ -462,7 +463,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Return the lower radius bound of this worm.
+	 * Return the lower radius bound of this worm expressed in metres.
 	 */
 	@Basic @Immutable
 	public double getLowerRadiusBound() {
@@ -491,12 +492,13 @@ public class Worm {
 	}
 	
 	/**
-	 * Variable registering the lower radius bound of this worm.
+	 * Variable registering the lower radius bound of this worm expresssed in 
+	 * metres.
 	 */
 	private final double lowerRadiusBound = 0.25;
 	
 	/**
-	 * Return the mass of this worm.
+	 * Return the mass of this worm in kilograms.
 	 *   The mass of a worm is derived from its radius which specifies a
 	 *   spherical body from which the mass is calculated.
 	 *   
@@ -510,7 +512,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Return the worm density of all worms.
+	 * Return the worm density of all worms expressed in kg/m³.
 	 */
 	private static double getWormDensity() {
 		return wormDensity;
@@ -535,7 +537,7 @@ public class Worm {
 	}
 	
 	/**
-	 * 
+	 *	TODO informal specification toevoegen
 	 * @param 	radius
 	 * 			The new radius for this worm.
 	 * @post	The new radius of this worm is equal to the given radius.

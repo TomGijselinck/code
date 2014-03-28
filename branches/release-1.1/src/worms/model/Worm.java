@@ -464,7 +464,7 @@ public class Worm {
 	/**
 	 * Return the lower radius bound of this worm.
 	 */
-	@Basic
+	@Basic @Immutable
 	public double getLowerRadiusBound() {
 		return lowerRadiusBound;
 	}

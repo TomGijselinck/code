@@ -586,16 +586,19 @@ public class Worm {
 	 * 			equal to the given current action points.
 	 * 		  |	if (actionPoints <= 0) this.currentActionPoints = 0;
 	 * 		  | if ( (actionPoints > 0) && (actionPoints < getActionPointsMaximum()))
-			  |		currentActionPoints = actionPoints;
-			  | if (actionPoints >= getActionPointsMaximum())
-			  | 	this.currentActionPoints = getActionPointsMaximum();
+	 *		  |		currentActionPoints = actionPoints;
+	 *		  | if (actionPoints >= getActionPointsMaximum())
+	 *		  | 	this.currentActionPoints = getActionPointsMaximum();
 	 */
 	public void setCurrentActionPoints(int actionPoints) {
-		if (actionPoints <= 0) currentActionPoints = 0;
-		if ( (actionPoints > 0) && (actionPoints < getActionPointsMaximum()))
-				currentActionPoints = actionPoints;
-		if (actionPoints >= getActionPointsMaximum())
+		if (actionPoints <= 0) {
+			currentActionPoints = 0;
+		} else if ((actionPoints > 0)
+				&& (actionPoints < getActionPointsMaximum())) {
+			currentActionPoints = actionPoints;
+		} else if (actionPoints >= getActionPointsMaximum()) {
 			this.currentActionPoints = getActionPointsMaximum();
+		}
 	}
 	
 	/**

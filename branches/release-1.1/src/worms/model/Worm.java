@@ -6,7 +6,7 @@ import be.kuleuven.cs.som.annotate.*;
  * A class of worms involving a position, a direction, a radius, a mass
  * a maximum of action points, current action points and a name.
  * 
- * @version 1.0
+ * @version 1.1
  * @author 	Tom Gijselinck
  *
  */
@@ -14,6 +14,7 @@ import be.kuleuven.cs.som.annotate.*;
 public class Worm {
 	
 	//CONTSTRUCTORS
+	//TODO isValidPosition() toevoegen?
 	/**
 	 * Initialize this new worm with given position, given direction, 
 	 * given radius and given name.
@@ -107,9 +108,9 @@ public class Worm {
 	 * 			of this worm incremented by the number of steps to be taken in
 	 * 			the direction this worm faces.
 	 * 		  |	new.getPosition() == 
-	 * 		  |		this.getPosition().translate(
+	 * 		  |		this.setPosition(getPosition().translate(
 	 * 		  |			steps*this.getRadius()*Math.cos(this.getDirection()),
-	 * 		  |			steps*this.getRadius()*Math.sin(this.getDirection()) )
+	 * 		  |			steps*this.getRadius()*Math.sin(this.getDirection()) ))
 	 * @post	If the movement is active the new current action points of this 
 	 * 			worm is equal to the initial current action points decremented 
 	 * 			with the consumed action points.
@@ -120,9 +121,9 @@ public class Worm {
 	 * 		  |		  		- steps*4*Math.sin(this.getDirection())
 	 * @effect	The new position of this worm is the initial position of this
 	 * 			worm translated by the given number of steps.
-	 * 		  |	this.getPosition().translate(
+	 * 		  |	this.setPosition(getPosition().translate(
 	 * 		  |		steps*this.getRadius()*Math.cos(this.getDirection()),
-	 * 		  |		steps*this.getRadius()*Math.sin(this.getDirection()) )
+	 * 		  |		steps*this.getRadius()*Math.sin(this.getDirection()) ))
 	 * @throws	IllegalStepsException(steps, this)
 	 * 			This worm cannot actively move the given number of steps.
 	 * 		  | ! canActivelyMoveSteps(steps)
@@ -131,8 +132,8 @@ public class Worm {
 			throws IllegalStepsException {
 		if (! canActivelyMoveSteps(steps))
 			throw new IllegalStepsException(steps, this);
-		getPosition().translate(steps*getRadius()*Math.cos(getDirection()),
-			steps*getRadius()*Math.sin(getDirection()) );
+		setPosition(getPosition().translate(steps*getRadius()*Math.cos(getDirection()),
+			steps*getRadius()*Math.sin(getDirection()) ));
 		if (isActive) {
 			setCurrentActionPoints(getCurrentActionPoints() 
 				- (int) Math.round(steps*Math.cos(getDirection())
@@ -150,7 +151,7 @@ public class Worm {
 	 *   		of this worm translated by the jump distance if its direction
 	 *   		is upwards.
 	 *   	  |	new.getPosition ==
-	 *   	  |		this.getPosition.translate(jumpDistance(),0)
+	 *   	  |		this.setPosition(getPosition.translate(jumpDistance(),0))
 	 *   	  |	}
 	 * @post	The new current action points of this worm is equal to zero.
 	 * 		  |	new.getActionPoints() == 0
@@ -159,12 +160,12 @@ public class Worm {
 	 * 		  |	! canJump()
 	 * @effect	The new position of this worm is the initial position of this
 	 * 			worm translated by the jump distance.
-	 * 		  |	this.getPosition().translate(jumpDistance(), 0)
+	 * 		  |	this.setPosition(getPosition().translate(jumpDistance(), 0))
 	 */
 	public void jump() throws IllegalCoordinateException, IllegalJumpException {
 		if (! canJump())
 			throw new IllegalJumpException(this);
-		getPosition().translate(jumpDistance(),0);
+		setPosition(getPosition().translate(jumpDistance(),0));
 		setCurrentActionPoints(0);
 	}
 	
@@ -234,22 +235,18 @@ public class Worm {
 	 * 			interval at the jump speed of this worm.
 	 * 		  |	result ==
 	 * 		  |		getPosition.translate(
-	 * 		  |			getPosition().getX() 
-	 * 		  |				+ jumpSpeed()*Math.cos(getDirection())*timeInterval,
-	 * 		  |			getPosition().getY() 
-	 * 		  |				+ jumpSpeed()*Math.sin(getDirection())
+	 * 		  |			+ jumpSpeed()*Math.cos(getDirection())*timeInterval,
+	 * 		  |			jumpSpeed()*Math.sin(getDirection())
 	 * 		  |				- 0.5*g*Math.pow(timeInterval, 2) )
 	 */
-	public Position jumpStep(double timeInterval) 
+	public Position jumpStep(double timeInterval)
 			throws IllegalArgumentException {
-		if (timeInterval > jumpTime()) throw new IllegalArgumentException();
-		Position flightPosition = getPosition();
-		flightPosition.translate( 
-			getPosition().getX() 
-				+ jumpSpeed()*Math.cos(getDirection())*timeInterval,
-			getPosition().getY() 
-				+ jumpSpeed()*Math.sin(getDirection())
-				- 0.5*g*Math.pow(timeInterval, 2) );
+		if (timeInterval > jumpTime())
+			throw new IllegalArgumentException();
+		Position flightPosition = getPosition().translate(
+				jumpSpeed() * Math.cos(getDirection()) * timeInterval,
+				jumpSpeed() * Math.sin(getDirection()) - 0.5 * g
+						* Math.pow(timeInterval, 2));
 		return flightPosition;
 	}
 	
@@ -298,7 +295,7 @@ public class Worm {
 	/**
 	 * Variable referencing the position of this worm.
 	 */
-	private Position position = new Position();
+	private Position position = Position.ORIGIN;
 	
 	
 	
@@ -324,11 +321,13 @@ public class Worm {
 	 * @post	The new direction of this worm is equal to modulo angle range of  
 	 * 			the sum of the old direction from this worm and the given angle.
 	 * 			The resulting angle is a valid angle.
-	 * 		  | let double newAngle = (this.getDirection() + angle)%(angleRange) in
-	 * 		  |	if (newAngle > 0)
-	 * 		  |		new.getDirection() == newAngle;
-	 * 		  |	if (newAngle < 0)
-	 * 		  |		new.getDirection() == newAngle + angleRange;
+	 * 		  | let 
+	 * 		  |		double newAngle = (this.getDirection() + angle)%(angleRange) 
+	 * 		  |	in
+	 * 		  |		if (newAngle > 0)
+	 * 		  |			new.getDirection() == newAngle;
+	 * 		  |		if (newAngle < 0)
+	 * 		  |			new.getDirection() == newAngle + angleRange;
 	 * @post	The new current action points is equal to the initial current 
 	 * 			action points decremented by the fraction of the angle range 
 	 * 			times sixty.

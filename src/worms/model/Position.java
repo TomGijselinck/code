@@ -3,13 +3,18 @@ package worms.model;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
- * A class of positions involving an X coordinate and a Y coordinate expressed
- * in metres.
+ * A class of positions involving an X coordinate and a Y coordinate.
  * 
- * @version	1.0
+ * @invar	The X coordinate of each position must be a valid coordinate.
+ * 		  |	isValidCoordinate(getX())
+ * @invar	The Y coordinate of each position must be a valid coordinate.
+ * 		  |	isValidCoordinate(getY())
+ * 
+ * @version	1.1
  * @author 	Tom Gijselinck
  *
  */
+@Value
 public class Position {
 
 	//CONTSTRUCTORS
@@ -35,18 +40,24 @@ public class Position {
 	 * 		  |	! isValidCoordinate(y)
 	 */
 	public Position(double x, double y) {
-		setX(x);
-		setY(y);
+		if (! isValidCoordinate(x)) {
+			throw new IllegalCoordinateException(x, this);
+		}
+		if (! isValidCoordinate(y)) {
+			throw new IllegalCoordinateException(y, this);
+		}
+		this.x = x;
+		this.y = y;
 	}
 	
 	/**
-	 * Initialize this new position with the origin (0,0) as its position.
+	 * Variable referencing a position at the origin (0,0).
 	 * 
-	 * @effect	This new position is initialized with zero as its X coordinate
-	 * 			and zero as its Y coordinate.
-	 * 		  |	this(0,0)
+	 * @return	The position ORIGIN is equal to a position initialized with x 0,
+	 * 			and with y 0.
+	 * 		  |	ORIGIN.equals(new Position(0,0))
 	 */
-	public Position() {}
+	public final static Position ORIGIN = new Position(0, 0);
 	
 	//X COORDINATE
 	/**
@@ -55,24 +66,6 @@ public class Position {
 	@Basic
 	public double getX() {
 		return this.x;
-	}
-	
-	/**
-	 * Set the X coordinate of this position to the given coordinate.
-	 * 
-	 * @param	x
-	 * 			The new X coordinate for this position.
-	 * @post	The new X coordinate of this position is equal to the given
-	 * 			coordinate.
-	 * 		  |	new.getX() == x
-	 * @throws	IllegalCoordinateException(x, this)
-	 * 			The given coordinate is not a valid coordinate for any position.
-	 * 		  | ! isValidCoordinate(x)
-	 */
-	public void setX(double x) {
-		if (! isValidCoordinate(x))
-			throw new IllegalCoordinateException(x, this);
-		this.x = x;
 	}
 	
 	/**
@@ -87,24 +80,6 @@ public class Position {
 	@Basic
 	public double getY() {
 		return this.y;
-	}
-	
-	/**
-	 * Set the Y coordinate of this position to the given coordinate.
-	 * 
-	 * @param	y
-	 * 			The new Y coordinate for this position.
-	 * @post	The new Y coordinate of this position is equal to the given
-	 * 			coordinate.
-	 * 		  |	new.getY() == y
-	 * @throws	IllegalCoordinateException(y, this)
-	 * 			The given coordinate is not a valid coordinate for any position.
-	 * 		  | ! isValidCoordinate(y)
-	 */
-	public void setY(double y) {
-		if (! isValidCoordinate(y))
-			throw new IllegalCoordinateException(y, this);
-		this.y = y;
 	}
 	
 	/**
@@ -126,35 +101,24 @@ public class Position {
 		return (Double.isNaN(coordinate) == false);
 	}
 	
-	
 	/**
-	 * Translate the X coordinate of this position by dx and the Y coordinate 
-	 * of this position by dy.
+	 * Compute the position as the X coordinate being the X coordinate of this 
+	 * position incremented by dx and the Y coordinate being the Y coordinate 
+	 * of this position incremented by dy.
 	 * 
 	 * @param 	dx
-	 * 			The distance to move this position along the X axis.
+	 * 			The distance to add to the X coordinate of this position.
 	 * @param 	dy
-	 * 			The distance to move this position along the Y axis.
-	 * @post	The new position of this position is equal to the position 
-	 * 			(x+dx, y+dy).
-	 * 		  |	new.getX() = this.getX() + dx
-	 * 		  |	new.getY() = this.getY() + dy
-	 * @throws	IllegalCoordinateException(x+dx, this)
-	 * 			The new X coordinate x+dx for this position is not a valid 
-	 * 			coordinate for any position.
-	 * 		  |	! isValidCoordinate(x+dx)
-	 * @throws	IllegalCoordinateException(y+dy, this)
-	 * 			The new Y coordinate y+dy for this position is not a valid 
-	 * 			coordinate for any position.
-	 * 		  |	! isValidCoordinate(y+dy)
+	 * 			The distance to add to the Y coordinate of this position.
+	 * @return	The resulting position is equal to a position with X coordinate 
+	 * 		 	as the X coordinate of this position incremented by dx and Y 
+	 * 			coordinate as the Y coordinate of this position incremented by
+	 * 			dy.
+	 * 		  |	result.equals(
+	 * 		  |		new Position(this.getX() + dx, this.getY() + dy))
 	 */
-	public void translate(double dx, double dy) {
-		if (! isValidCoordinate(x+dx))
-			throw new IllegalCoordinateException(x+dx, this);
-		if (! isValidCoordinate(y+dy))
-			throw new IllegalCoordinateException(y+dy, this);
-		setX(getX() + dx);
-		setY(getY() + dy);
+	public Position translate(double dx, double dy) {
+		return new Position(getX() + dx, getY() + dy);
 	}
 	
 	/**
@@ -181,4 +145,16 @@ public class Position {
 				( this.getX() == otherPosition.getX())
 			   && (this.getY() == otherPosition.getY());
 	}
+	
+	/**
+	 * Return the hash code of this position.
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = (int) (31 * hash + x);
+		hash = (int) (31 * hash + y);
+		return hash;
+	}
+	
 }

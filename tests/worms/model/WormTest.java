@@ -9,7 +9,7 @@ import static worms.util.Util.*;
 /**
  * A class collecting tests for the class of worms.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Tom Gijselinck
  * 
  */
@@ -217,15 +217,13 @@ public class WormTest {
 	@Test
 	public void jumpStep_LegalCase() {
 		Position resultPosition = wormUpwardDirection.jumpStep(1);
-		Position expectedPosition = wormUpwardDirection.getPosition();
-		expectedPosition.translate(
-				wormUpwardDirection.getPosition().getX()
-						+ wormUpwardDirection.jumpSpeed()
-						* Math.cos(wormUpwardDirection.getDirection()) * 4,
-				wormUpwardDirection.getPosition().getY()
-						+ wormUpwardDirection.jumpSpeed()
+		Position expectedPosition = 
+				wormUpwardDirection.getPosition().translate(
+						wormUpwardDirection.jumpSpeed()
+						* Math.cos(wormUpwardDirection.getDirection()),
+						wormUpwardDirection.jumpSpeed()
 						* Math.sin(wormUpwardDirection.getDirection()) - 0.5
-						* wormUpwardDirection.g * Math.pow(4, 2));
+						* wormUpwardDirection.g * Math.pow(1, 2));
 		assertTrue(fuzzyEquals(expectedPosition.getX(), resultPosition.getX()));
 		assertTrue(fuzzyEquals(expectedPosition.getY(), resultPosition.getY()));
 	}

@@ -227,6 +227,9 @@ public class Worm {
 	 * Returns the in-flight position of a jumping worm after a given time 
 	 * interval after launch.
 	 * 
+	 * @throws	IllegalJumpException
+	 * 			This worm cannot jump.
+	 * 		  |	! canJump()
 	 * @throws	IllegalArgumentException
 	 * 			The given time interval is greater than the jump time.
 	 * 		  |	timeInterval > jumpTime()
@@ -240,7 +243,9 @@ public class Worm {
 	 * 		  |				- 0.5*g*Math.pow(timeInterval, 2) )
 	 */
 	public Position jumpStep(double timeInterval)
-			throws IllegalArgumentException {
+			throws IllegalArgumentException, IllegalJumpException {
+		if (! canJump())
+			throw new IllegalJumpException(this);
 		if (timeInterval > jumpTime())
 			throw new IllegalArgumentException();
 		Position flightPosition = getPosition().translate(

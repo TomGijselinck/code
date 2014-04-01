@@ -1,8 +1,10 @@
  package worms.model;
 
+import worms.exceptions.IllegalPositionException;
 import worms.exceptions.IllegalCoordinateException;
 import worms.exceptions.IllegalJumpException;
 import worms.exceptions.IllegalNameException;
+import worms.exceptions.IllegalPositionException;
 import worms.exceptions.IllegalRadiusException;
 import worms.exceptions.IllegalStepsException;
 import be.kuleuven.cs.som.annotate.*;
@@ -11,6 +13,8 @@ import be.kuleuven.cs.som.annotate.*;
  * A class of worms involving a position, a direction, a radius, a mass
  * a maximum of action points, current action points and a name.
  * 
+ * @invar	The position of each worm must be a valid position for any worm.
+ * 		  |	isValidPosition(getPosition())
  * @invar	The direction of each worm must be a valid direction for any worm.
  * 		  |	isValidDirection(getDirection())
  * @invar	Each worm can have its radius as its radius.
@@ -26,7 +30,6 @@ import be.kuleuven.cs.som.annotate.*;
 public class Worm {
 	
 	//CONTSTRUCTORS
-	//TODO isValidPosition() toevoegen?
 	/**
 	 * Initialize this new worm with given position, given direction, 
 	 * given radius and given name.
@@ -44,6 +47,7 @@ public class Worm {
 	 * 		  |	isValidDirection(direction)
 	 * @post	The new position for this new worm is equal to the given
 	 * 			position.
+	 * 		  |	new.getPosition() == position
 	 * @post	The new direction for this new worm is equal to the given
 	 * 			direction.
 	 * 		  |	new.getDirection() == direction
@@ -52,23 +56,22 @@ public class Worm {
 	 * @post	The new name for this new worm is equal to the given name.
 	 * @post	The new current action points for this new worm is equal to the 
 	 * 			action points maximum of this worm.
+	 * @throws	IllegalPositionException
+	 * 			The given position for this new worm is not a valid position for
+	 * 			any worm.
+	 * 		  |	! isValidPosition(position)
 	 * @throws	IllegalRadiusException(radius, this)
 	 * 			This new worm cannot have the given radius as its radius.
 	 * 		  |	! canHaveAsRadius(radius)
 	 * @throws	IllegalNameException(name, this)
-	 * 			The given name for this worm is not a valid name for any worm.
-	 * 		  |	! isValidName(name)
-	 * @invar	The direction of each worm must be a valid direction for any
+	 * 		  	The given name for this new worm is not a valid name for any 
 	 * 			worm.
-	 * 		  |	isValidDirection(getDirection())
+	 * 		  |	! isValidName(name)
 	 */
 	@Raw
-	public Worm(Position position, double direction, double radius, String name) 
-			throws IllegalRadiusException, IllegalNameException {
-		if (! canHaveAsRadius(radius))
-			throw new IllegalRadiusException(radius, this);
-		if (! isValidName(name))
-			throw new IllegalNameException(name, this);
+	public Worm(Position position, double direction, double radius, String name)
+			throws IllegalPositionException, IllegalRadiusException,
+			IllegalNameException {
 		assert isValidDirection(direction);
 		setPosition(position);
 		setDirection(direction);
@@ -99,7 +102,7 @@ public class Worm {
 	
 	
 	
-	//POSITION RELATED METHODS
+	//POSITION RELATED METHODS (defensive)
 	/**
 	 * Return the position of this worm.
 	 */
@@ -312,8 +315,14 @@ public class Worm {
 	 * 			The new position for this worm.
 	 * @post	The new position of this worm is equal to the given position.
 	 * 		  |	new.getPosition() == position
+	 * @throws	IllegalPositionException
+	 * 			The given position for this worm is not a valid position for any
+	 * 			worm.
+	 * 		  |	! isValidPosition(position)
 	 */
 	private void setPosition(Position position) {
+		if (! isValidPosition(position))
+			throw new IllegalPositionException(position, this);
 		this.position = position;
 	}
 	
@@ -322,11 +331,20 @@ public class Worm {
 	 */
 	private Position position = Position.ORIGIN;
 	
+	/**
+	 * @param	position
+	 * 			The position to check.
+	 * @return	True if and only if the given position is an effective position.
+	 * 		  |	result ==
+	 * 		  |		position != null
+	 */
+	public boolean isValidPosition(Position position) {
+		return position != null;
+	}
 	
 	
 	
-	
-	//DIRECTION RELATED METHODS
+	//DIRECTION RELATED METHODS (nominal)
 	/**
 	 * Return the direction of this worm expressed in radians.
 	 *   The direction is the angle expressed in radians at which a worm is 
@@ -476,7 +494,7 @@ public class Worm {
 	
 	
 	
-	//RADIUS RELATED METHODS
+	//RADIUS RELATED METHODS (defensive)
 	/**
 	 * Return the radius of this worm expressed in metres.
 	 *   The radius of a worm defines the circular shape of that worm.
@@ -585,7 +603,7 @@ public class Worm {
 	
 	
 	
-	//ACTION POINTS RELATED METHODS
+	//ACTION POINTS RELATED METHODS (total)
 	/**
 	 * Return the current action points of this worm.
 	 *   The current action points of a worm determines how much a worm can 
@@ -634,7 +652,7 @@ public class Worm {
 	
 	
 	
-	//NAME RELATED METHODS
+	//NAME RELATED METHODS (defensive)
 	/**
 	 * Return the name of this worm.
 	 */

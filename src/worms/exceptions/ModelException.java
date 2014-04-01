@@ -1,4 +1,4 @@
-package worms.model;
+package worms.exceptions;
 
 @SuppressWarnings("serial")
 /**

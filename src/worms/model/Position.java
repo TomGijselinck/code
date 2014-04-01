@@ -1,5 +1,6 @@
 package worms.model;
 
+import worms.exceptions.IllegalCoordinateException;
 import be.kuleuven.cs.som.annotate.*;
 
 /**

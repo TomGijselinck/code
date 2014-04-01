@@ -1,4 +1,5 @@
-package worms.model;
+package worms.exceptions;
+import worms.model.Worm;
 import be.kuleuven.cs.som.annotate.*;
 
 

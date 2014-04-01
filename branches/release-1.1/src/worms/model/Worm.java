@@ -292,8 +292,7 @@ public class Worm {
 	 * @post	The new position of this worm is equal to the given position.
 	 * 		  |	new.getPosition() == position
 	 */
-	private void setPosition(Position position) 
-			throws IllegalCoordinateException {
+	private void setPosition(Position position) {
 		this.position = position;
 	}
 	

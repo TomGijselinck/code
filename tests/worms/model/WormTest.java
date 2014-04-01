@@ -233,7 +233,7 @@ public class WormTest {
 		assertTrue(fuzzyEquals(expectedPosition.getX(), resultPosition.getX()));
 		assertTrue(fuzzyEquals(expectedPosition.getY(), resultPosition.getY()));
 	}
-
+	
 	@Test(expected = IllegalArgumentException.class)
 	public void jumpStep_IllegalTimeInterval() throws Exception {
 		wormUpwardDirection.jumpStep(2);

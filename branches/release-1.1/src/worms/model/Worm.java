@@ -248,10 +248,10 @@ public class Worm {
 			throw new IllegalJumpException(this);
 		if (timeInterval > jumpTime())
 			throw new IllegalArgumentException();
-		Position flightPosition = getPosition().translate(
-				jumpSpeed() * Math.cos(getDirection()) * timeInterval,
-				jumpSpeed() * Math.sin(getDirection()) - 0.5 * g
-						* Math.pow(timeInterval, 2));
+		double deltaX = jumpSpeed() * Math.cos(getDirection()) * timeInterval;
+		double deltaY = jumpSpeed() * Math.sin(getDirection()) * timeInterval
+				- 0.5 * g * Math.pow(timeInterval, 2);
+		Position flightPosition = getPosition().translate(deltaX, deltaY);				
 		return flightPosition;
 	}
 	
@@ -266,8 +266,8 @@ public class Worm {
 	 *   	  |		F/this.getMass()*0.5
 	 */
 	public double jumpSpeed() {
-		double F = 5*getCurrentActionPoints() + getMass()*g;
-		return F/getMass()*0.5;
+		double F = 5 * getCurrentActionPoints() + getMass() * g;
+		return F / getMass() * 0.5;
 	}
 	
 	/**

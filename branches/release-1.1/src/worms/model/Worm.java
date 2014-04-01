@@ -578,7 +578,8 @@ public class Worm {
 	}
 	
 	/**
-	 *	TODO informal specification toevoegen
+	 * Set the radius of this worm to the given radius.
+	 * 
 	 * @param 	radius
 	 * 			The new radius for this worm.
 	 * @post	The new radius of this worm is equal to the given radius.
@@ -662,6 +663,7 @@ public class Worm {
 	
 	/**
 	 * Set the name of this worm to the given name.
+	 * 
 	 * @param	name
 	 * 			The new name for this worm.
 	 * @post	The new name of this worm is equal to the given name.

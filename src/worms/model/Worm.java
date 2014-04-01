@@ -4,7 +4,6 @@ import worms.exceptions.IllegalPositionException;
 import worms.exceptions.IllegalCoordinateException;
 import worms.exceptions.IllegalJumpException;
 import worms.exceptions.IllegalNameException;
-import worms.exceptions.IllegalPositionException;
 import worms.exceptions.IllegalRadiusException;
 import worms.exceptions.IllegalStepsException;
 import be.kuleuven.cs.som.annotate.*;

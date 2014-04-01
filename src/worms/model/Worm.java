@@ -6,6 +6,13 @@ import be.kuleuven.cs.som.annotate.*;
  * A class of worms involving a position, a direction, a radius, a mass
  * a maximum of action points, current action points and a name.
  * 
+ * @invar	The direction of each worm must be a valid direction for any worm.
+ * 		  |	isValidDirection(getDirection())
+ * @invar	Each worm can have its radius as its radius.
+ * 		  |	canHaveAsRadius(getRadius())
+ * @invar	The name of each worm must be valid name for any worm.
+ * 		  |	isValidName(getName())
+ * 
  * @version 1.1
  * @author 	Tom Gijselinck
  *

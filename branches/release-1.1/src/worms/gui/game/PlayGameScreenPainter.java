@@ -8,11 +8,11 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
+import worms.exceptions.ModelException;
 import worms.gui.GUIUtils;
 import worms.gui.GameState;
 import worms.gui.game.sprites.WormSprite;
 import worms.model.IFacade;
-import worms.model.ModelException;
 
 public class PlayGameScreenPainter {
 

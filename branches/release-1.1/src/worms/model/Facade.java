@@ -1,5 +1,7 @@
 package worms.model;
 
+import worms.exceptions.ModelException;
+
 
 public class Facade implements IFacade {
 	

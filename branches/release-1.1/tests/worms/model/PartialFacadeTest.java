@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import worms.exceptions.ModelException;
 import worms.model.Facade;
 import worms.util.Util;
-import worms.model.ModelException;
 import worms.model.Worm;
 
 public class PartialFacadeTest {

@@ -4,6 +4,10 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
+import worms.exceptions.IllegalJumpException;
+import worms.exceptions.IllegalNameException;
+import worms.exceptions.IllegalRadiusException;
+import worms.exceptions.IllegalStepsException;
 import static worms.util.Util.*;
 
 /**

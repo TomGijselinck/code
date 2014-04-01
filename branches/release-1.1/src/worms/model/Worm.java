@@ -192,10 +192,16 @@ public class Worm {
 				&& (getCurrentActionPoints() > 0) );
 	}
 	
+	
+	public static double getGravityOfEarth() {
+		return gravityOfEarth;
+	}
+	
 	/**
-	 * Variable registering the Earth's standard acceleration in m/s².
+	 * Variable registering the gravity of the Earth in m/s² referring to the
+	 * acceleration the earth gives to worms on or near its surface.
 	 */
-	public final double g = 9.80665;
+	private static final double gravityOfEarth = 9.80665;
 	
 	/**
 	 * Check whether this worm can actively move the given number of steps.
@@ -255,6 +261,7 @@ public class Worm {
 			throw new IllegalJumpException(this);
 		if (timeInterval > jumpTime())
 			throw new IllegalArgumentException();
+		double g = getGravityOfEarth();
 		double deltaX = jumpSpeed() * Math.cos(getDirection()) * timeInterval;
 		double deltaY = jumpSpeed() * Math.sin(getDirection()) * timeInterval
 				- 0.5 * g * Math.pow(timeInterval, 2);
@@ -273,6 +280,7 @@ public class Worm {
 	 *   	  |		F/this.getMass()*0.5
 	 */
 	public double jumpSpeed() {
+		double g = getGravityOfEarth();
 		double F = 5 * getCurrentActionPoints() + getMass() * g;
 		return F / getMass() * 0.5;
 	}
@@ -288,6 +296,7 @@ public class Worm {
 	 *   	  |		jumpSpeed()^2*Math.sin(2*this.getDirection())/g
 	 */
 	public double jumpDistance() {
+		double g = getGravityOfEarth();
 		return Math.pow(jumpSpeed(), 2)*Math.sin(2*getDirection())/g;
 	}
 	

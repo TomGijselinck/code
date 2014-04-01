@@ -179,7 +179,7 @@ public class WormTest {
 				Worm.getUpperAngleBound() / 2 + 1, 1, "Illegal Jumper");
 		worm.jump();
 	}
-	
+
 	@Test(expected = IllegalJumpException.class)
 	public void jump_SecondJump() throws Exception {
 		wormUpwardDirection.jump();
@@ -222,18 +222,19 @@ public class WormTest {
 
 	@Test
 	public void jumpStep_LegalCase() {
+		double g = Worm.getGravityOfEarth();
 		Position resultPosition = wormUpwardDirection.jumpStep(1);
-		Position expectedPosition = 
-				wormUpwardDirection.getPosition().translate(
+		Position expectedPosition = wormUpwardDirection.getPosition()
+				.translate(
 						wormUpwardDirection.jumpSpeed()
-						* Math.cos(wormUpwardDirection.getDirection()),
+								* Math.cos(wormUpwardDirection.getDirection()),
 						wormUpwardDirection.jumpSpeed()
-						* Math.sin(wormUpwardDirection.getDirection()) - 0.5
-						* wormUpwardDirection.g * Math.pow(1, 2));
+								* Math.sin(wormUpwardDirection.getDirection())
+								- 0.5 * g * Math.pow(1, 2));
 		assertTrue(fuzzyEquals(expectedPosition.getX(), resultPosition.getX()));
 		assertTrue(fuzzyEquals(expectedPosition.getY(), resultPosition.getY()));
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void jumpStep_IllegalTimeInterval() throws Exception {
 		wormUpwardDirection.jumpStep(2);
@@ -241,17 +242,19 @@ public class WormTest {
 
 	@Test
 	public void jumpSpeed_SingleCase() {
+		double g = Worm.getGravityOfEarth();
 		double F = 5 * wormUpwardDirection.getCurrentActionPoints()
-				+ wormUpwardDirection.getMass() * wormUpwardDirection.g;
+				+ wormUpwardDirection.getMass() * g;
 		assertTrue(fuzzyEquals(F / wormUpwardDirection.getMass() * 0.5,
 				wormUpwardDirection.jumpSpeed()));
 	}
 
 	@Test
 	public void jumpDistance_SingleCase() {
+		double g = Worm.getGravityOfEarth();
 		assertTrue(fuzzyEquals(Math.pow(wormUpwardDirection.jumpSpeed(), 2)
-				* Math.sin(2 * wormUpwardDirection.getDirection())
-				/ wormUpwardDirection.g, wormUpwardDirection.jumpDistance()));
+				* Math.sin(2 * wormUpwardDirection.getDirection()) / g,
+				wormUpwardDirection.jumpDistance()));
 	}
 
 	@Test
@@ -307,9 +310,11 @@ public class WormTest {
 	@Test
 	public void jump_AfterTurningUpward() {
 		Position positionBefore = new Position(wormDownwardDirection
-				.getPosition().getX(), wormDownwardDirection.getPosition().getY());
-		wormDownwardDirection.turn(Math.PI/2);
-		assertTrue(fuzzyEquals(Math.PI/4, wormDownwardDirection.getDirection()));
+				.getPosition().getX(), wormDownwardDirection.getPosition()
+				.getY());
+		wormDownwardDirection.turn(Math.PI / 2);
+		assertTrue(fuzzyEquals(Math.PI / 4,
+				wormDownwardDirection.getDirection()));
 		double jumpdistance = wormDownwardDirection.jumpDistance();
 		wormDownwardDirection.jump();
 		assertTrue(fuzzyEquals(positionBefore.getX() + jumpdistance,

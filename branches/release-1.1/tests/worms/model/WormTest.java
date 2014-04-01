@@ -179,6 +179,12 @@ public class WormTest {
 				Worm.getUpperAngleBound() / 2 + 1, 1, "Illegal Jumper");
 		worm.jump();
 	}
+	
+	@Test(expected = IllegalJumpException.class)
+	public void jump_SecondJump() throws Exception {
+		wormUpwardDirection.jump();
+		wormUpwardDirection.jump();
+	}
 
 	@Test
 	public void canJump_TrueCase() {

@@ -3,9 +3,9 @@ package worms.gui.game;
 import java.awt.Color;
 import java.awt.Shape;
 
+import worms.exceptions.ModelException;
 import worms.gui.GUIUtils;
 import worms.gui.game.sprites.WormSprite;
-import worms.model.ModelException;
 
 public class PlayGameScreenDebugPainter extends PlayGameScreenPainter {
 

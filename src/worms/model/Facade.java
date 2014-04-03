@@ -1,10 +1,7 @@
 package worms.model;
 
-/**
-import worms_dev.ModelException;
-import worms_dev.Position;
-import worms_dev.Worm;
-**/
+import worms.exceptions.ModelException;
+
 
 public class Facade implements IFacade {
 	
@@ -39,8 +36,7 @@ public class Facade implements IFacade {
 		worm.turn(angle);
 	}
 	
-	public void jump(Worm worm) 
-			throws ModelException {
+	public void jump(Worm worm) {
 		try {
 			worm.jump();
 		}

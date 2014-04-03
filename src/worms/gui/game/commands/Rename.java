@@ -1,8 +1,8 @@
 package worms.gui.game.commands;
 
+import worms.exceptions.ModelException;
 import worms.gui.game.PlayGameScreen;
 import worms.model.IFacade;
-import worms.model.ModelException;
 import worms.model.Worm;
 
 public class Rename extends InstantaneousCommand {

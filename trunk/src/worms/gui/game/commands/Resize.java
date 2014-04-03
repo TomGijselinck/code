@@ -1,9 +1,9 @@
 package worms.gui.game.commands;
 
+import worms.exceptions.ModelException;
 import worms.gui.game.PlayGameScreen;
 import worms.gui.game.sprites.WormSprite;
 import worms.model.IFacade;
-import worms.model.ModelException;
 import worms.model.Worm;
 
 public class Resize extends InstantaneousCommand {

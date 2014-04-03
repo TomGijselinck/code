@@ -1,12 +1,27 @@
  package worms.model;
 
+import worms.exceptions.IllegalPositionException;
+import worms.exceptions.IllegalCoordinateException;
+import worms.exceptions.IllegalJumpException;
+import worms.exceptions.IllegalNameException;
+import worms.exceptions.IllegalRadiusException;
+import worms.exceptions.IllegalStepsException;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
  * A class of worms involving a position, a direction, a radius, a mass
  * a maximum of action points, current action points and a name.
  * 
- * @version 1.0
+ * @invar	The position of each worm must be a valid position for any worm.
+ * 		  |	isValidPosition(getPosition())
+ * @invar	The direction of each worm must be a valid direction for any worm.
+ * 		  |	isValidDirection(getDirection())
+ * @invar	Each worm can have its radius as its radius.
+ * 		  |	canHaveAsRadius(getRadius())
+ * @invar	The name of each worm must be valid name for any worm.
+ * 		  |	isValidName(getName())
+ * 
+ * @version 1.1
  * @author 	Tom Gijselinck
  *
  */
@@ -31,6 +46,7 @@ public class Worm {
 	 * 		  |	isValidDirection(direction)
 	 * @post	The new position for this new worm is equal to the given
 	 * 			position.
+	 * 		  |	new.getPosition() == position
 	 * @post	The new direction for this new worm is equal to the given
 	 * 			direction.
 	 * 		  |	new.getDirection() == direction
@@ -39,23 +55,22 @@ public class Worm {
 	 * @post	The new name for this new worm is equal to the given name.
 	 * @post	The new current action points for this new worm is equal to the 
 	 * 			action points maximum of this worm.
+	 * @throws	IllegalPositionException
+	 * 			The given position for this new worm is not a valid position for
+	 * 			any worm.
+	 * 		  |	! isValidPosition(position)
 	 * @throws	IllegalRadiusException(radius, this)
 	 * 			This new worm cannot have the given radius as its radius.
 	 * 		  |	! canHaveAsRadius(radius)
 	 * @throws	IllegalNameException(name, this)
-	 * 			The given name for this worm is not a valid name for any worm.
-	 * 		  |	! isValidName(name)
-	 * @invar	The direction of each worm must be a valid direction for any
+	 * 		  	The given name for this new worm is not a valid name for any 
 	 * 			worm.
-	 * 		  |	isValidDirection(getDirection())
+	 * 		  |	! isValidName(name)
 	 */
 	@Raw
-	public Worm(Position position, double direction, double radius, String name) 
-			throws IllegalRadiusException, IllegalNameException {
-		if (! canHaveAsRadius(radius))
-			throw new IllegalRadiusException(radius, this);
-		if (! isValidName(name))
-			throw new IllegalNameException(name, this);
+	public Worm(Position position, double direction, double radius, String name)
+			throws IllegalPositionException, IllegalRadiusException,
+			IllegalNameException {
 		assert isValidDirection(direction);
 		setPosition(position);
 		setDirection(direction);
@@ -86,7 +101,7 @@ public class Worm {
 	
 	
 	
-	//POSITION RELATED METHODS
+	//POSITION RELATED METHODS (defensive)
 	/**
 	 * Return the position of this worm.
 	 */
@@ -107,9 +122,9 @@ public class Worm {
 	 * 			of this worm incremented by the number of steps to be taken in
 	 * 			the direction this worm faces.
 	 * 		  |	new.getPosition() == 
-	 * 		  |		this.getPosition().translate(
+	 * 		  |		this.setPosition(getPosition().translate(
 	 * 		  |			steps*this.getRadius()*Math.cos(this.getDirection()),
-	 * 		  |			steps*this.getRadius()*Math.sin(this.getDirection()) )
+	 * 		  |			steps*this.getRadius()*Math.sin(this.getDirection()) ))
 	 * @post	If the movement is active the new current action points of this 
 	 * 			worm is equal to the initial current action points decremented 
 	 * 			with the consumed action points.
@@ -120,9 +135,9 @@ public class Worm {
 	 * 		  |		  		- steps*4*Math.sin(this.getDirection())
 	 * @effect	The new position of this worm is the initial position of this
 	 * 			worm translated by the given number of steps.
-	 * 		  |	this.getPosition().translate(
+	 * 		  |	this.setPosition(getPosition().translate(
 	 * 		  |		steps*this.getRadius()*Math.cos(this.getDirection()),
-	 * 		  |		steps*this.getRadius()*Math.sin(this.getDirection()) )
+	 * 		  |		steps*this.getRadius()*Math.sin(this.getDirection()) ))
 	 * @throws	IllegalStepsException(steps, this)
 	 * 			This worm cannot actively move the given number of steps.
 	 * 		  | ! canActivelyMoveSteps(steps)
@@ -131,8 +146,8 @@ public class Worm {
 			throws IllegalStepsException {
 		if (! canActivelyMoveSteps(steps))
 			throw new IllegalStepsException(steps, this);
-		getPosition().translate(steps*getRadius()*Math.cos(getDirection()),
-			steps*getRadius()*Math.sin(getDirection()) );
+		setPosition(getPosition().translate(steps*getRadius()*Math.cos(getDirection()),
+			steps*getRadius()*Math.sin(getDirection()) ));
 		if (isActive) {
 			setCurrentActionPoints(getCurrentActionPoints() 
 				- (int) Math.round(steps*Math.cos(getDirection())
@@ -150,7 +165,7 @@ public class Worm {
 	 *   		of this worm translated by the jump distance if its direction
 	 *   		is upwards.
 	 *   	  |	new.getPosition ==
-	 *   	  |		this.getPosition.translate(jumpDistance(),0)
+	 *   	  |		this.setPosition(getPosition.translate(jumpDistance(),0))
 	 *   	  |	}
 	 * @post	The new current action points of this worm is equal to zero.
 	 * 		  |	new.getActionPoints() == 0
@@ -159,12 +174,12 @@ public class Worm {
 	 * 		  |	! canJump()
 	 * @effect	The new position of this worm is the initial position of this
 	 * 			worm translated by the jump distance.
-	 * 		  |	this.getPosition().translate(jumpDistance(), 0)
+	 * 		  |	this.setPosition(getPosition().translate(jumpDistance(), 0))
 	 */
 	public void jump() throws IllegalCoordinateException, IllegalJumpException {
 		if (! canJump())
 			throw new IllegalJumpException(this);
-		getPosition().translate(jumpDistance(),0);
+		setPosition(getPosition().translate(jumpDistance(),0));
 		setCurrentActionPoints(0);
 	}
 	
@@ -184,10 +199,16 @@ public class Worm {
 				&& (getCurrentActionPoints() > 0) );
 	}
 	
+	
+	public static double getGravityOfEarth() {
+		return gravityOfEarth;
+	}
+	
 	/**
-	 * Variable registering the Earth's standard acceleration in m/s².
+	 * Variable registering the gravity of the Earth in m/s² referring to the
+	 * acceleration the earth gives to worms on or near its surface.
 	 */
-	public final double g = 9.80665;
+	private static final double gravityOfEarth = 9.80665;
 	
 	/**
 	 * Check whether this worm can actively move the given number of steps.
@@ -226,6 +247,9 @@ public class Worm {
 	 * Returns the in-flight position of a jumping worm after a given time 
 	 * interval after launch.
 	 * 
+	 * @throws	IllegalJumpException
+	 * 			This worm cannot jump.
+	 * 		  |	! canJump()
 	 * @throws	IllegalArgumentException
 	 * 			The given time interval is greater than the jump time.
 	 * 		  |	timeInterval > jumpTime()
@@ -234,27 +258,26 @@ public class Worm {
 	 * 			interval at the jump speed of this worm.
 	 * 		  |	result ==
 	 * 		  |		getPosition.translate(
-	 * 		  |			getPosition().getX() 
-	 * 		  |				+ jumpSpeed()*Math.cos(getDirection())*timeInterval,
-	 * 		  |			getPosition().getY() 
-	 * 		  |				+ jumpSpeed()*Math.sin(getDirection())
+	 * 		  |			+ jumpSpeed()*Math.cos(getDirection())*timeInterval,
+	 * 		  |			jumpSpeed()*Math.sin(getDirection())
 	 * 		  |				- 0.5*g*Math.pow(timeInterval, 2) )
 	 */
-	public Position jumpStep(double timeInterval) 
-			throws IllegalArgumentException {
-		if (timeInterval > jumpTime()) throw new IllegalArgumentException();
-		Position flightPosition = getPosition();
-		flightPosition.translate( 
-			getPosition().getX() 
-				+ jumpSpeed()*Math.cos(getDirection())*timeInterval,
-			getPosition().getY() 
-				+ jumpSpeed()*Math.sin(getDirection())
-				- 0.5*g*Math.pow(timeInterval, 2) );
+	public Position jumpStep(double timeInterval)
+			throws IllegalArgumentException, IllegalJumpException {
+		if (! canJump())
+			throw new IllegalJumpException(this);
+		if (timeInterval > jumpTime())
+			throw new IllegalArgumentException();
+		double g = getGravityOfEarth();
+		double deltaX = jumpSpeed() * Math.cos(getDirection()) * timeInterval;
+		double deltaY = jumpSpeed() * Math.sin(getDirection()) * timeInterval
+				- 0.5 * g * Math.pow(timeInterval, 2);
+		Position flightPosition = getPosition().translate(deltaX, deltaY);				
 		return flightPosition;
 	}
 	
 	/**
-	 * Returns the initial velocity this worm has when jumping.
+	 * Returns the initial velocity this worm has in m/s when jumping.
 	 * 
 	 * @return	The resulting speed of this worm is equal to the speed as a
 	 * 			result of the jump force exerted by the worm in an interval of 
@@ -264,12 +287,14 @@ public class Worm {
 	 *   	  |		F/this.getMass()*0.5
 	 */
 	public double jumpSpeed() {
-		double F = 5*getCurrentActionPoints() + getMass()*g;
-		return F/getMass()*0.5;
+		double g = getGravityOfEarth();
+		double F = 5 * getCurrentActionPoints() + getMass() * g;
+		return F / getMass() * 0.5;
 	}
 	
 	/**
-	 * Returns the horizontal distance covered when this worm jumps.
+	 * Returns the horizontal distance covered when this worm jumps, expressed
+	 * in metres.
 	 * 
 	 * @return	The resulting jump distance of this worm is equal to the 
 	 * 			distance covered by	this worm at its jump speed in the direction 
@@ -278,6 +303,7 @@ public class Worm {
 	 *   	  |		jumpSpeed()^2*Math.sin(2*this.getDirection())/g
 	 */
 	public double jumpDistance() {
+		double g = getGravityOfEarth();
 		return Math.pow(jumpSpeed(), 2)*Math.sin(2*getDirection())/g;
 	}
 	
@@ -288,24 +314,38 @@ public class Worm {
 	 * 			The new position for this worm.
 	 * @post	The new position of this worm is equal to the given position.
 	 * 		  |	new.getPosition() == position
+	 * @throws	IllegalPositionException
+	 * 			The given position for this worm is not a valid position for any
+	 * 			worm.
+	 * 		  |	! isValidPosition(position)
 	 */
-	private void setPosition(Position position) 
-			throws IllegalCoordinateException {
+	private void setPosition(Position position) {
+		if (! isValidPosition(position))
+			throw new IllegalPositionException(position, this);
 		this.position = position;
 	}
 	
 	/**
 	 * Variable referencing the position of this worm.
 	 */
-	private Position position = new Position();
+	private Position position = Position.ORIGIN;
 	
-	
-	
-	
-	
-	//DIRECTION RELATED METHODS
 	/**
-	 * Return the direction of this worm.
+	 * @param	position
+	 * 			The position to check.
+	 * @return	True if and only if the given position is an effective position.
+	 * 		  |	result ==
+	 * 		  |		position != null
+	 */
+	public boolean isValidPosition(Position position) {
+		return position != null;
+	}
+	
+	
+	
+	//DIRECTION RELATED METHODS (nominal)
+	/**
+	 * Return the direction of this worm expressed in radians.
 	 *   The direction is the angle expressed in radians at which a worm is 
 	 *   facing.
 	 */
@@ -323,11 +363,13 @@ public class Worm {
 	 * @post	The new direction of this worm is equal to modulo angle range of  
 	 * 			the sum of the old direction from this worm and the given angle.
 	 * 			The resulting angle is a valid angle.
-	 * 		  | double newAngle = (this.getDirection() + angle)%(angleRange)
-	 * 		  |	if (newAngle >= 0)
-	 * 		  |		new.getDirection() == newAngle;
-	 * 		  |	if (newAngle < 0)
-	 * 		  |		new.getDirection() == newAngle + angleRange;
+	 * 		  | let 
+	 * 		  |		double newAngle = (this.getDirection() + angle)%(angleRange) 
+	 * 		  |	in
+	 * 		  |		if (newAngle > 0)
+	 * 		  |			new.getDirection() == newAngle;
+	 * 		  |		if (newAngle < 0)
+	 * 		  |			new.getDirection() == newAngle + angleRange;
 	 * @post	The new current action points is equal to the initial current 
 	 * 			action points decremented by the fraction of the angle range 
 	 * 			times sixty.
@@ -338,7 +380,7 @@ public class Worm {
 	public void turn(double angle) {
 		assert canTurn(angle);
 		double newAngle = (this.getDirection() + angle) % (getAngleRange());
-		if (newAngle >= 0) {
+		if (newAngle > 0) {
 			setDirection(newAngle);
 			setCurrentActionPoints((int) (getCurrentActionPoints() - 60
 					* Math.abs(angle) / (getAngleRange())));
@@ -451,9 +493,9 @@ public class Worm {
 	
 	
 	
-	//RADIUS RELATED METHODS
+	//RADIUS RELATED METHODS (defensive)
 	/**
-	 * Return the radius of this worm.
+	 * Return the radius of this worm expressed in metres.
 	 *   The radius of a worm defines the circular shape of that worm.
 	 */
 	@Basic
@@ -462,9 +504,9 @@ public class Worm {
 	}
 	
 	/**
-	 * Return the lower radius bound of this worm.
+	 * Return the lower radius bound of this worm expressed in metres.
 	 */
-	@Basic
+	@Basic @Immutable
 	public double getLowerRadiusBound() {
 		return lowerRadiusBound;
 	}
@@ -491,12 +533,13 @@ public class Worm {
 	}
 	
 	/**
-	 * Variable registering the lower radius bound of this worm.
+	 * Variable registering the lower radius bound of this worm expresssed in 
+	 * metres.
 	 */
 	private final double lowerRadiusBound = 0.25;
 	
 	/**
-	 * Return the mass of this worm.
+	 * Return the mass of this worm in kilograms.
 	 *   The mass of a worm is derived from its radius which specifies a
 	 *   spherical body from which the mass is calculated.
 	 *   
@@ -510,7 +553,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Return the worm density of all worms.
+	 * Return the worm density of all worms expressed in kg/m³.
 	 */
 	private static double getWormDensity() {
 		return wormDensity;
@@ -535,6 +578,7 @@ public class Worm {
 	}
 	
 	/**
+	 * Set the radius of this worm to the given radius.
 	 * 
 	 * @param 	radius
 	 * 			The new radius for this worm.
@@ -559,7 +603,7 @@ public class Worm {
 	
 	
 	
-	//ACTION POINTS RELATED METHODS
+	//ACTION POINTS RELATED METHODS (total)
 	/**
 	 * Return the current action points of this worm.
 	 *   The current action points of a worm determines how much a worm can 
@@ -584,16 +628,19 @@ public class Worm {
 	 * 			equal to the given current action points.
 	 * 		  |	if (actionPoints <= 0) this.currentActionPoints = 0;
 	 * 		  | if ( (actionPoints > 0) && (actionPoints < getActionPointsMaximum()))
-			  |		currentActionPoints = actionPoints;
-			  | if (actionPoints >= getActionPointsMaximum())
-			  | 	this.currentActionPoints = getActionPointsMaximum();
+	 *		  |		currentActionPoints = actionPoints;
+	 *		  | if (actionPoints >= getActionPointsMaximum())
+	 *		  | 	this.currentActionPoints = getActionPointsMaximum();
 	 */
 	public void setCurrentActionPoints(int actionPoints) {
-		if (actionPoints <= 0) currentActionPoints = 0;
-		if ( (actionPoints > 0) && (actionPoints < getActionPointsMaximum()))
-				currentActionPoints = actionPoints;
-		if (actionPoints >= getActionPointsMaximum())
+		if (actionPoints <= 0) {
+			currentActionPoints = 0;
+		} else if ((actionPoints > 0)
+				&& (actionPoints < getActionPointsMaximum())) {
+			currentActionPoints = actionPoints;
+		} else if (actionPoints >= getActionPointsMaximum()) {
 			this.currentActionPoints = getActionPointsMaximum();
+		}
 	}
 	
 	/**
@@ -605,7 +652,7 @@ public class Worm {
 	
 	
 	
-	//NAME RELATED METHODS
+	//NAME RELATED METHODS (defensive)
 	/**
 	 * Return the name of this worm.
 	 */
@@ -616,6 +663,7 @@ public class Worm {
 	
 	/**
 	 * Set the name of this worm to the given name.
+	 * 
 	 * @param	name
 	 * 			The new name for this worm.
 	 * @post	The new name of this worm is equal to the given name.

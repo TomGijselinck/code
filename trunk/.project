@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
+<<<<<<< .mine
+	<name>worms</name>
+=======
 	<name>worms-release-1.1</name>
+>>>>>>> .r33
 	<comment></comment>
 	<projects>
 	</projects>

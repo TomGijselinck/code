@@ -108,7 +108,7 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		getPassableMap().length
 	 */
-	private int getNoHorizontalPixels() { return 1;}
+	public int getNoHorizontalPixels() { return 1;}
 	
 	/**
 	 * Return the number of vertical pixels of the passable map of this world.
@@ -117,7 +117,28 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		getPassableMap()[0].length
 	 */
-	private int getNoVerticalPixels() { return 1;}
+	public int getNoVerticalPixels() { return 1;}
+	
+	
+	
+	
+	/**
+	 * Return the horizontal scale of this world in map pixels per worm-meter.
+	 * 
+	 * @return	...
+	 * 		  |	result ==
+	 * 		  |		getNoHorizontalPixels() / getWidth()
+	 */
+	public double getHorizontalScale() { return 0;}
+	
+	/**
+	 * Return the vertical scale of this world in map pixels per worm-meter.
+	 * 
+	 * @return	...
+	 * 		  |	result ==
+	 * 		  |		getNoVerticalPixels() / getHeight()
+	 */
+	public double getVerticalScale() { return 0;}
 	
 	
 	
@@ -129,8 +150,8 @@ public class World {
 	 * @return	...
 	 * 		  |	let
 	 * 		  |		passableMap = getPassableMap()
-	 * 		  |		&& x = (int) location.getX() / getWidth() * getNoHorizontalPixels()
-	 * 		  |		&& y = (int) location.getY() / getHeight() * getNoVerticalPixels()
+	 * 		  |		&& x = (int) location.getX() * getHorizontalScale()
+	 * 		  |		&& y = (int) location.getY() * getVerticalScale()
 	 * 		  |	in
 	 * 		  |		passableMap[x][y] == true
 	 */

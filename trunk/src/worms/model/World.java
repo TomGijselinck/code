@@ -5,6 +5,10 @@ import be.kuleuven.cs.som.annotate.*;
 /**
  * ...
  * 	 
+ * @invar	Each world has a proper projectile.
+ * 		  |	//TODO formal specification check
+ * 		  |	hasProperProjectile()
+ * 
  * @author 	Tom Gijselinck
  * @version	1.0
  *
@@ -169,6 +173,46 @@ public class World {
 	 * 		  |			 	getHeight() / getNoVerticalPixels() ) )
 	 */
 	public boolean isAdjacent(Position location) { return true;}
+	
+	
+	
+	
+	/**
+	 * Variable referencing the live projectile in this world. 
+	 */
+	private Projectile projectile;
+	
+	/**
+	 * Return the live projectile of this world. 
+	 */
+	@Basic
+	public Projectile getProjectile() { return projectile;}
+	
+	/**
+	 * Checks whether this world can have the given projectile as its 
+	 * projectile.
+	 * @return	...
+	 * 		  |	result ==
+	 * 		  |		...
+	 */
+	public boolean canHaveAsProjectile(Projectile projectile) { return true;}
+	
+	/**
+	 * Check whether this world has a proper projectile attached to it.
+	 * 	Check for consistency of mutual reference implied by bidirectional
+	 * 	association.
+	 */
+	public boolean hasProperProjectile() { return true;}
+	
+	/**
+	 * Set the projectile which is active in this world to the given projectile.
+	 * 
+	 * @param 	projectile
+	 * 			...
+	 * @post	...
+	 * 		  |	this.getProjectile() == projectile
+	 */
+	public void setProjectile(Projectile projectile) {}
 	
 	
 	

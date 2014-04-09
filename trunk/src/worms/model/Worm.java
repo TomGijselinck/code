@@ -166,7 +166,6 @@ public class Worm {
 	 *   		is upwards.
 	 *   	  |	new.getPosition ==
 	 *   	  |		this.setPosition(getPosition.translate(jumpDistance(),0))
-	 *   	  |	}
 	 * @post	The new current action points of this worm is equal to zero.
 	 * 		  |	new.getActionPoints() == 0
 	 * @throws	IllegalJumpException(this)
@@ -717,5 +716,20 @@ public class Worm {
 		return ((name.length() >= 2)
 				&& (Character.isUpperCase(name.charAt(0))));
 	}
+	
+	
+	
+	
+	//SHOOTING AND PROJECTILES
+	public void fireActiveWeapon(double propulsionYield) {}
+	
+	public void selectActiveWeapon(String name) {}
+	
+	
+	
+	
+	//ASSOCIATIONS
+	
+	
 
 }

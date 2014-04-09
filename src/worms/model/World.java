@@ -1,5 +1,6 @@
 package worms.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import be.kuleuven.cs.som.annotate.*;
@@ -260,9 +261,6 @@ public class World {
 	 */
 	private Projectile projectile;
 	
-	
-	
-	
 	/**
 	 * Check whether this world has the given worm as one of the worms attached
 	 * to it.
@@ -311,7 +309,7 @@ public class World {
 	 * 		  |		result.contains(worm) ==
 	 * 		  |		this.hasAsWorm(worm)
 	 */
-	public Set<Worm> getAllWorms() {return null;}
+	public Set<Worm> getAllWorms() {return worms;}
 	
 	/**
 	 * Add the given worm to the set of worms attached to this world.
@@ -344,6 +342,20 @@ public class World {
 	 * 		  |		then ((new worm).getWorld() == null)
 	 */
 	public void removeAsWorm(Worm worm) {}
+	
+	/**
+	 * Set collecting references to worms attached to this world.
+	 * 
+	 * @invar	...
+	 * 		  |	worms != null
+	 * @invar	...
+	 * 		  |	for each worm in Worm:
+	 * 		  |		canHaveAsWorm(worm)
+	 * @invar	...
+	 * 		  |	for each worm in Worm:
+	 * 		  |		(worm.getWorld() == this)
+	 */
+	private final Set<Worm> worms = new HashSet<Worm>();
 	
 	
 	

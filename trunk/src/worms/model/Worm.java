@@ -20,6 +20,8 @@ import be.kuleuven.cs.som.annotate.*;
  * 		  |	canHaveAsRadius(getRadius())
  * @invar	The name of each worm must be valid name for any worm.
  * 		  |	isValidName(getName())
+ * @invar	Each worm has a proper world.
+ * 		  |	hasProperWorld()
  * 
  * @version 1.1
  * @author 	Tom Gijselinck
@@ -726,6 +728,43 @@ public class Worm {
 		return ((name.length() >= 2)
 				&& (Character.isUpperCase(name.charAt(0))));
 	}
+	
+	
+	
+	
+	//ASSOCIATIONS
+	/**
+	 * Return the world where this worm is active in.
+	 */
+	@Basic
+	public World getWorld() { return world;}
+	
+	/**
+	 * Check whether this worm has a proper world attached to it.
+	 * 	Check for consistency of mutual reference implied by bidirectional
+	 * 	association.
+	 * 
+	 * @return	...
+	 * 		  |	result == 
+	 * 		  |		( (getWorld() == null)
+	 * 		  |	   || (getWorld().hasAsWorm(this) == true) )
+	 */
+	public boolean hasProperWorld() { return true;}
+	
+	/**
+	 * Set the world where this worm is attached to, to the given world.
+	 * 
+	 * @param 	world
+	 * 			...
+	 * @post	...
+	 * 		  |	new.getWorld() == world
+	 */
+	public void setWorld(World world) {}
+	
+	/**
+	 * Variable referencing the world where this worm is attached to.
+	 */
+	private World world;
 	
 	
 	

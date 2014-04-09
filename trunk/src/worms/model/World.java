@@ -1,5 +1,7 @@
 package worms.model;
 
+import java.util.Set;
+
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -207,11 +209,7 @@ public class World {
 	
 	
 	
-	/**
-	 * Variable referencing the live projectile in this world. 
-	 */
-	private Projectile projectile;
-	
+	//ASSOCIATIONS
 	/**
 	 * Return the live projectile of this world. 
 	 */
@@ -256,6 +254,96 @@ public class World {
 	 * 		  |	new.getProjectile() == projectile
 	 */
 	public void setProjectile(Projectile projectile) {}
+	
+	/**
+	 * Variable referencing the live projectile in this world. 
+	 */
+	private Projectile projectile;
+	
+	
+	
+	
+	/**
+	 * Check whether this world has the given worm as one of the worms attached
+	 * to it.
+	 * 
+	 * @param 	worm
+	 * 			...
+	 */
+	@Basic
+	public boolean hasAsWorm(Worm worm) { return true;}
+	
+	/**
+	 * Check whether this world can have the given worm as one of its worms.
+	 * 
+	 * @param 	worm
+	 * 			...
+	 * @return	...
+	 * 		  |	if (worm == null)
+	 * 		  |		then result == false
+	 * 			Otherwise, true if and only if this world is not yet terminated
+	 * 			or the given worm is also terminated.
+	 * 		  |	else result ==
+	 * 		  |		( (! this.isTerminated())
+	 * 		  |	   || worm.isTerminated() )
+	 */
+	public boolean canHaveAsWorm(Worm worm) { return true;}
+	
+	/**
+	 * Check whether this world has proper worms attached to it.
+	 * 
+	 * @return	...
+	 * 		  |	result ==
+	 * 		  |		for each worm in Worm:
+	 * 		  |			( if (this.hasAsWorm(worm))
+	 * 		  |				then canHaveAsWorm(worm)
+	 * 		  |				  && (worm.getWorld() == this) )
+	 */
+	public boolean hasProperWorms() { return true;}
+	
+	/**
+	 * Return a set collecting all worms associated with this world.
+	 * 
+	 * @return	...
+	 * 		  |	result != null
+	 * @return	...
+	 * 		  |	for each worm in Worm:
+	 * 		  |		result.contains(worm) ==
+	 * 		  |		this.hasAsWorm(worm)
+	 */
+	public Set<Worm> getAllWorms() {return null;}
+	
+	/**
+	 * Add the given worm to the set of worms attached to this world.
+	 * 
+	 * @param 	worm
+	 * 			...
+	 * @post	...
+	 * 		  |	new.hasAsWorm(worm)
+	 * @post	...
+	 * 		  |	(new worm).getWorld() == this
+	 * @throws	IllegalArgumentException
+	 * 			...
+	 * 		  |	! canHaveAsWorm(worm)
+	 * @throws	IllegalArgumentException
+	 * 			The given worm is already attached to some world.
+	 * 		  |	 ( (worm != null)
+	 * 		  | && (worm.getWorld() != null) )
+	 */
+	public void addAsWorm(Worm worm) {}
+	
+	/**
+	 * Remove the givenworm from the set of worms attached to this world.
+	 * 
+	 * @param 	worm
+	 * 			...
+	 * @post	...
+	 * 		  |	! new.hasAsWorm(worm)
+	 * @post	...
+	 * 		  |	if (this.hasAsWorm(worm))
+	 * 		  |		then ((new worm).getWorld() == null)
+	 */
+	public void removeAsWorm(Worm worm) {}
 	
 	
 	

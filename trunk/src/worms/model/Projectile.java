@@ -22,6 +22,16 @@ public class Projectile {
 	
 	
 	
+	//DESTRUCTOR
+	public void terminate() {}
+	
+	public boolean isTerminated() { return isTerminated;}
+	
+	private boolean isTerminated;
+	
+	
+	
+	
 	/**
 	 * Return the position of this projectile.
 	 */

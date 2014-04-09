@@ -101,6 +101,16 @@ public class Worm {
 	
 	
 	
+	//DESTRUCTOR
+	public void terminate() {}
+	
+	public boolean isTerminated() { return isTerminated;}
+	
+	private boolean isTerminated;
+	
+	
+	
+	
 	//POSITION RELATED METHODS (defensive)
 	/**
 	 * Return the position of this worm.

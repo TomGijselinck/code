@@ -83,6 +83,11 @@ public class Projectile {
 	 * Check whether this projectile has a proper world attached to it.
 	 * 	Check for consistency of mutual reference implied by bidirectional
 	 * 	association.
+	 * 
+	 * @return	...
+	 * 		  |	result == 
+	 * 		  |		( (getWorld() == null)
+	 * 		  |	   || (getWorld().getProjectile() == this) )
 	 */
 	public boolean hasProperWorld() { return true;}
 	
@@ -92,7 +97,7 @@ public class Projectile {
 	 * @param 	world
 	 * 			...
 	 * @post	...
-	 * 		  |	this.getWorld() == world
+	 * 		  |	new.getWorld() == world
 	 */
 	public void setWorld(World world) {}
 	

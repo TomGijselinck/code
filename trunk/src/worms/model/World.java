@@ -201,9 +201,16 @@ public class World {
 	/**
 	 * Checks whether this world can have the given projectile as its 
 	 * projectile.
+	 * 
+	 * @param	projectile
+	 * 			...
 	 * @return	...
-	 * 		  |	result ==
-	 * 		  |		...
+	 * 		  |	if (isTerminated())
+	 * 		  |		then result == (projectile == null)
+	 * 		  |	else result ==
+	 * 		  |		( ( (projectile != null)
+	 * 		  |	     && (! projectile.isTerminated()) )
+	 * 		  |    || (projectile == null) )
 	 */
 	public boolean canHaveAsProjectile(Projectile projectile) { return true;}
 	
@@ -211,6 +218,12 @@ public class World {
 	 * Check whether this world has a proper projectile attached to it.
 	 * 	Check for consistency of mutual reference implied by bidirectional
 	 * 	association.
+	 * 
+	 * @return	...
+	 * 		  |	result ==
+	 * 		  |		( canHaveAsProjectile(getProjectile())
+	 * 		  |	   && ( (getProjectile() == null)
+	 * 		  |		 ||	(getAccount().getWorld() == this) ) )
 	 */
 	public boolean hasProperProjectile() { return true;}
 	
@@ -220,7 +233,7 @@ public class World {
 	 * @param 	projectile
 	 * 			...
 	 * @post	...
-	 * 		  |	this.getProjectile() == projectile
+	 * 		  |	new.getProjectile() == projectile
 	 */
 	public void setProjectile(Projectile projectile) {}
 	

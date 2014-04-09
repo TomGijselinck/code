@@ -88,11 +88,7 @@ public class Projectile {
 	
 	
 	
-	/**
-	 * Variable referencing the world where this projectile is in.
-	 */
-	private World world;
-	
+	//ASSOCIATIONS	
 	/**
 	 * Return the world where this projectile is active in.
 	 */
@@ -120,6 +116,11 @@ public class Projectile {
 	 * 		  |	new.getWorld() == world
 	 */
 	public void setWorld(World world) {}
+	
+	/**
+	 * Variable referencing the world where this projectile is in.
+	 */
+	private World world;
 	
 	
 	

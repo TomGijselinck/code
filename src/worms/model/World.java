@@ -44,6 +44,16 @@ public class World {
 	
 	
 	
+	//DESTRUCTOR
+	public void terminate() {}
+	
+	public boolean isTerminated() { return isTerminated;}
+	
+	private boolean isTerminated;
+	
+	
+	
+	
 	/**
 	 * Return the width of this world.
 	 */

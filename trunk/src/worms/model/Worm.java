@@ -1,5 +1,8 @@
  package worms.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import worms.exceptions.IllegalPositionException;
 import worms.exceptions.IllegalCoordinateException;
 import worms.exceptions.IllegalJumpException;
@@ -766,6 +769,68 @@ public class Worm {
 	 */
 	private World world;
 	
+	/**
+	 * ...
+	 * 
+	 * @param 	weapon
+	 * 			...
+	 */
+	@Basic
+	public boolean hasAsWeapon(Weapon weapon) { return true;}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	weapon
+	 * 			...
+	 * @return	...
+	 * 		  |	if (weapon == null)
+	 * 		  |		then result == false
+	 * 		  |	else result == (! this.isTerminated())
+	 */
+	public boolean canHaveAsWeapon(Weapon weapon) { return true;}
+	
+	/**
+	 * ...
+	 * 
+	 * @return	...
+	 * 		  |	for each weapon in Weapon:
+	 * 		  |		( if (this.hasAsWeapon(weapon))
+	 * 		  |			then canHaveAsWeapon(weapon) )
+	 */
+	public boolean hasProperWeapons() { return true;}
+	
+	/**
+	 * ...
+	 * 
+	 * @post	...
+	 * 		  |	new.hasAsWeapon(weapon)
+	 * @throws	IllegalArgumentException
+	 * 			...
+	 * 		  |	! canHaveAsWeapon(weapon)
+	 */
+	public void adAsWeapon() {}
+	
+	/**
+	 * ...
+	 * 
+	 * @post	...
+	 * 		  |	! new.hasAsWeapon(weapon)
+	 */
+	public void removeAsWeapon() {}
+	
+	/**
+	 * ...
+	 * 
+	 * @invar	...
+	 * 		  |	weapons != null
+	 * @invar	...
+	 * 		  |	for each weapon in Weapon:
+	 * 		  |		canHaveAsWeapon(weapon)
+	 */
+	private final Set<Weapon> weapons = new HashSet<Weapon>();
+	
+	
 	
 	
 	
@@ -773,11 +838,6 @@ public class Worm {
 	public void fireActiveWeapon(double propulsionYield) {}
 	
 	public void selectActiveWeapon(String name) {}
-	
-	
-	
-	
-	//ASSOCIATIONS
 	
 	
 

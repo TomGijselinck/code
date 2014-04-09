@@ -23,10 +23,30 @@ public class Projectile {
 	
 	
 	//DESTRUCTOR
+	/**
+	 * Terminate this projectile.
+	 * 
+	 * @post	...
+	 * 		  |	new.isTerminated()
+	 * @post	This projectile no longer references a world as the world
+	 * 		  	to which it is attached.
+	 * 		  |	new.getWorld() == null
+	 * @post	If this projectile was not already terminated, the world to
+	 * 			which this projectile was attached no longer has a projectile
+	 * 			attached to it.
+	 * 		  |	if (! this.isTerminated())
+	 * 		  |		then (! (new.getWorld()).hasProjectile() )
+	 */
 	public void terminate() {}
 	
+	/**
+	 * Check whether this projectile is terminated.
+	 */
 	public boolean isTerminated() { return isTerminated;}
 	
+	/**
+	 * Variable registering whether this projectile is terminated.
+	 */
 	private boolean isTerminated;
 	
 	

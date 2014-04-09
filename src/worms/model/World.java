@@ -45,10 +45,30 @@ public class World {
 	
 	
 	//DESTRUCTOR
+	/**
+	 * Terminate this world.
+	 * 
+	 * @post	...
+	 * 		  |	new.isTerminated()
+	 * @post	This world no longer references a projectile as the projectile
+	 * 		  	to which it is attached.
+	 * 		  |	new.getProjectile() == null
+	 * @post	If this world was not already terminated, the projectile to
+	 * 			which this world was attached no longer has a world attached to
+	 * 			it.
+	 * 		  |	if (! this.isTerminated())
+	 * 		  |		then (! (new.getProjectile()).hasWorld() )
+	 */
 	public void terminate() {}
 	
+	/**
+	 * Check whether this world is terminated.
+	 */
 	public boolean isTerminated() { return isTerminated;}
 	
+	/**
+	 * Variable registering whether this world is terminated.
+	 */
 	private boolean isTerminated;
 	
 	
@@ -223,7 +243,7 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		( canHaveAsProjectile(getProjectile())
 	 * 		  |	   && ( (getProjectile() == null)
-	 * 		  |		 ||	(getAccount().getWorld() == this) ) )
+	 * 		  |		 ||	(getProjectile().getWorld() == this) ) )
 	 */
 	public boolean hasProperProjectile() { return true;}
 	

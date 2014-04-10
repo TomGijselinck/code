@@ -743,14 +743,30 @@ public class Worm {
 	public World getWorld() { return world;}
 	
 	/**
+	 * ...
+	 * 
+	 * @param 	world
+	 * 			...
+	 * @return	True if and only if the given world is not effective or if it
+	 * 			can have this worm as one of its worms.
+	 * 		  |	result ==
+	 * 		  |		( (world == null)
+	 * 		  |	   || world.canHaveAsWorm(this) )
+	 */
+	public boolean canHaveAsWorld(World world) {return true;}
+	
+	/**
 	 * Check whether this worm has a proper world attached to it.
 	 * 	Check for consistency of mutual reference implied by bidirectional
 	 * 	association and additional restrictions on associated objects.
 	 * 
-	 * @return	...
+	 * @return	True if and only if this worm can have its world as the world to
+	 * 			which it is attached, and if that world is either not effective
+	 * 			or has this worm as one of its worms.
 	 * 		  |	result == 
-	 * 		  |		( (getWorld() == null)
-	 * 		  |	   || (getWorld().hasAsWorm(this) == true) )
+	 * 		  |		( canHaveAsWorld(getWorld())
+	 * 		  |	   && ( (getWorld() == null)
+	 * 		  |	     ||	getWorld().hasAsWorm(this)) )
 	 */
 	public boolean hasProperWorld() { return true;}
 	

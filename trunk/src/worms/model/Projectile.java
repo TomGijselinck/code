@@ -8,6 +8,8 @@ import be.kuleuven.cs.som.annotate.*;
  * 
  * @invar	Each projectile has a proper world attached to it.
  * 		  |	hasProperWorld()
+ * @invar	...
+ * 		  |	hasProperPosition()
  * 	 
  * @author 	Tom Gijselinck
  * @version	1.0

@@ -255,6 +255,9 @@ public class World {
 	 * 			...
 	 * @post	...
 	 * 		  |	new.getProjectile() == projectile
+	 * @throws	IllegalArgumentException
+	 * 			...
+	 * 		  |	! canHaveAsProjectile(projectile)
 	 */
 	public void setProjectile(Projectile projectile) {}
 	

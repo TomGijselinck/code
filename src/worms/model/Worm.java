@@ -745,7 +745,7 @@ public class Worm {
 	/**
 	 * Check whether this worm has a proper world attached to it.
 	 * 	Check for consistency of mutual reference implied by bidirectional
-	 * 	association.
+	 * 	association and additional restrictions on associated objects.
 	 * 
 	 * @return	...
 	 * 		  |	result == 

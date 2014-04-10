@@ -276,14 +276,16 @@ public class World {
 	 * 
 	 * @param 	worm
 	 * 			...
-	 * @return	...
+	 * @return	Returns false if the given worm is not effective.
 	 * 		  |	if (worm == null)
 	 * 		  |		then result == false
-	 * 			Otherwise, true if and only if this world is not yet terminated
-	 * 			or the given worm is also terminated.
+	 * 			Otherwise, true if and only if this world is not yet terminated,
+	 * 			the given worm is not yet terminated and the given worm is not
+	 * 			yet registered as a worm attached to this world.
 	 * 		  |	else result ==
 	 * 		  |		( (! this.isTerminated())
-	 * 		  |	   || worm.isTerminated() )
+	 * 		  |	   && (! worm.isTerminated()) 
+	 * 		  |	   && (! this.hasAsWorm(worm)) )
 	 */
 	public boolean canHaveAsWorm(Worm worm) { return true;}
 	

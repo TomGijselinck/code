@@ -9,8 +9,10 @@ import be.kuleuven.cs.som.annotate.*;
  * ...
  * 	 
  * @invar	Each world has a proper projectile.
- * 		  |	//TODO formal specification check
  * 		  |	hasProperProjectile()
+ * @invar	The worms attached to each world must be proper worms for that 
+ * 			world.
+ * 		  |	hasProperWorms()
  * 
  * @author 	Tom Gijselinck
  * @version	1.0

@@ -25,6 +25,9 @@ import be.kuleuven.cs.som.annotate.*;
  * 		  |	isValidName(getName())
  * @invar	Each worm has a proper world.
  * 		  |	hasProperWorld()
+ * @invar	The weapons attached to each worm must be proper weapons for that
+ * 			worm.
+ * 		  |	hasProperWeapons()
  * 
  * @version 1.1
  * @author 	Tom Gijselinck

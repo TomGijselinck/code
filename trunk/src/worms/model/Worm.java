@@ -15,14 +15,14 @@ import be.kuleuven.cs.som.annotate.*;
  * A class of worms involving a position, a direction, a radius, a mass
  * a maximum of action points, current action points and a name.
  * 
- * @invar	The position of each worm must be a valid position for any worm.
- * 		  |	isValidPosition(getPosition())
  * @invar	The direction of each worm must be a valid direction for any worm.
  * 		  |	isValidDirection(getDirection())
  * @invar	Each worm can have its radius as its radius.
  * 		  |	canHaveAsRadius(getRadius())
  * @invar	The name of each worm must be valid name for any worm.
  * 		  |	isValidName(getName())
+ * @invar	Each worm has a proper position.
+ * 		  |	hasProperPosition()
  * @invar	Each worm has a proper world.
  * 		  |	hasProperWorld()
  * @invar	The weapons attached to each worm must be proper weapons for that
@@ -123,10 +123,11 @@ public class Worm {
 	/**
 	 * Return the position of this worm.
 	 */
-	@Basic
-	public Position getPosition() {
-		return this.position;
-	}
+//TODO: check bij implementatie en verwijder
+//	@Basic
+//	public Position getPosition() {
+//		return this.position;
+//	}
 	
 	/**
 	 * Move this worm a number of given steps in the direction it is facing.
@@ -336,27 +337,31 @@ public class Worm {
 	 * 			worm.
 	 * 		  |	! isValidPosition(position)
 	 */
-	private void setPosition(Position position) {
-		if (! isValidPosition(position))
-			throw new IllegalPositionException(position, this);
-		this.position = position;
-	}
+//TODO: check bij implementatie en vewijder
+//	private void setPosition(Position position) {
+//		if (! isValidPosition(position))
+//			throw new IllegalPositionException(position, this);
+//		this.position = position;
+//	}
 	
 	/**
 	 * Variable referencing the position of this worm.
 	 */
-	private Position position = Position.ORIGIN;
+//TODO: check bij implementatie en verwijder
+//	private Position position = Position.ORIGIN;
 	
 	/**
+	 * 
 	 * @param	position
 	 * 			The position to check.
 	 * @return	True if and only if the given position is an effective position.
 	 * 		  |	result ==
 	 * 		  |		position != null
 	 */
-	public boolean isValidPosition(Position position) {
-		return position != null;
-	}
+	//TODO: overhevelen naar canHaveAsPosition()
+//	public boolean isValidPosition(Position position) {
+//		return position != null;
+//	}
 	
 	
 	
@@ -740,16 +745,59 @@ public class Worm {
 	
 	//ASSOCIATIONS
 	/**
+	 * Return the position of this worm.
+	 */
+	public Position getPosition() { return position;}
+	
+	/**
+	 * Checks whether this worm can have the given position as its position.
+	 * 
+	 * @param	position
+	 * 			The position to check.
+	 * @return	True if the given position is not effective if this worm is 
+	 * 			terminated.
+	 * 		  |	if (isTerminated())
+	 * 		  |		then result == (position == null)
+	 * 			Otherwise true if and only if the given position is effective.
+	 * 		  |	else result == (position != null) 
+	 */
+	public boolean canHaveAsPosition(Position position) { return true;}
+	
+	/**
+	 * Check whether this worm has a proper position.
+	 * 
+	 * @return	True if and only if this worm can have its position as its
+	 * 			position.
+	 * 		  |	result == canHaveAsPosition(getPosition()
+	 */
+	public boolean hasProperPosition() { return true;}
+	
+	/**
+	 * Set the position of this worm to the given position.
+	 * 
+	 * @param 	position
+	 * 			The position to attach this worm to.
+	 * @post	This worm references the given position as its position.
+	 * 		  |	new.getPosition() == position
+	 */
+	private void setPosition(Position position) {}
+	
+	/**
+	 * Variable referencing the position to which this worm is attached.
+	 */
+	private Position position;
+	
+	/**
 	 * Return the world where this worm is active in.
 	 */
 	@Basic
 	public World getWorld() { return world;}
 	
 	/**
-	 * ...
+	 * Check whether this worm can have the given world as its world.
 	 * 
 	 * @param 	world
-	 * 			...
+	 * 			The world to check.
 	 * @return	True if and only if the given world is not effective or if it
 	 * 			can have this worm as one of its worms.
 	 * 		  |	result ==
@@ -777,8 +825,8 @@ public class Worm {
 	 * Set the world where this worm is attached to, to the given world.
 	 * 
 	 * @param 	world
-	 * 			...
-	 * @post	...
+	 * 			The world to which this worm must be attached.
+	 * @post	This worm is attached to the given world.
 	 * 		  |	new.getWorld() == world
 	 */
 	public void setWorld(World world) {}
@@ -789,30 +837,36 @@ public class Worm {
 	private World world;
 	
 	/**
-	 * ...
+	 * Check whether this worm has the given weapon as on of its weapons.
 	 * 
 	 * @param 	weapon
-	 * 			...
+	 * 			The weapon to check.
 	 */
 	@Basic
 	public boolean hasAsWeapon(Weapon weapon) { return true;}
 	
 	/**
-	 * ...
+	 * Check whether this worm can have the given weapon as one of its weapons.
 	 * 
 	 * @param 	weapon
-	 * 			...
-	 * @return	...
+	 * 			The weapon to check.
+	 * @return	False if the given weapon is not effective.
 	 * 		  |	if (weapon == null)
 	 * 		  |		then result == false
-	 * 		  |	else result == (! this.isTerminated())
+	 * 			Otherwise true if and only if this worm is not yet terminated
+	 * 			and the given weapon is not yet registered as a weapon attached
+	 * 			to this worm.
+	 * 		  |	else result == 
+	 * 		  |		( (! this.isTerminated())
+	 * 		  |	   && (! this.hasAsWeapon(weapon)) )
 	 */
 	public boolean canHaveAsWeapon(Weapon weapon) { return true;}
 	
 	/**
-	 * ...
+	 * Check whether this worm has proper weapons attached to it.
 	 * 
-	 * @return	...
+	 * @return	True if and only if this worm can have each of its weapons as
+	 * 			a weapon attached to it.
 	 * 		  |	for each weapon in Weapon:
 	 * 		  |		( if (this.hasAsWeapon(weapon))
 	 * 		  |			then canHaveAsWeapon(weapon) )
@@ -820,30 +874,35 @@ public class Worm {
 	public boolean hasProperWeapons() { return true;}
 	
 	/**
-	 * ...
+	 * Add the given weapon to the set of weapons attached to this worm.
 	 * 
-	 * @post	...
+	 * @param	weapon
+	 * 			The weapon to be added.
+	 * @post	This worm has the given weapon as one of its weapons.
 	 * 		  |	new.hasAsWeapon(weapon)
 	 * @throws	IllegalArgumentException
-	 * 			...
+	 * 			This worm cannot have the given weapon as one if its weapons.
 	 * 		  |	! canHaveAsWeapon(weapon)
 	 */
-	public void adAsWeapon() {}
+	public void adAsWeapon(Weapon weapon) {}
 	
 	/**
-	 * ...
+	 * Remove the given weapon from the set of weapons attached to this worm.
 	 * 
-	 * @post	...
+	 * @param	weapon
+	 * 		  	The weapon to be removed.
+	 * @post	This worm does not have the given weapon as on of its weapons.
 	 * 		  |	! new.hasAsWeapon(weapon)
 	 */
-	public void removeAsWeapon() {}
+	public void removeAsWeapon(Weapon weapon) {}
 	
 	/**
-	 * ...
+	 * Set collecting references to weapons attached to this worm.
 	 * 
-	 * @invar	...
+	 * @invar	The set of weapons is effective.
 	 * 		  |	weapons != null
-	 * @invar	...
+	 * @invar	Each weapon in the set of weapons references a weapon that is an
+	 * 			acceptable weapon for this worm.
 	 * 		  |	for each weapon in Weapon:
 	 * 		  |		canHaveAsWeapon(weapon)
 	 */

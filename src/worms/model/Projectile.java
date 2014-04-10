@@ -53,15 +53,6 @@ public class Projectile {
 	
 	
 	/**
-	 * Return the position of this projectile.
-	 */
-	@Basic
-	public Position getPosition() { return new Position(0, 0);}
-	
-	
-	
-	
-	/**
 	 * Return the orientation of this projectile.
 	 */
 	@Basic
@@ -121,6 +112,50 @@ public class Projectile {
 	 * Variable referencing the world where this projectile is in.
 	 */
 	private World world;
+	
+	/**
+	 * Return the position of this projectile.
+	 */
+	public Position getPosition() { return position;}
+	
+	/**
+	 * Checks whether this projectile can have the given position as its 
+	 * position.
+	 * 
+	 * @param	position
+	 * 			The position to check.
+	 * @return	True if the given position is not effective if this projectile  
+	 * 			is terminated.
+	 * 		  |	if (isTerminated())
+	 * 		  |		then result == (position == null)
+	 * 			Otherwise true if and only if the given position is effective.
+	 * 		  |	else result == (position != null) 
+	 */
+	public boolean canHaveAsPosition(Position position) { return true;}
+	
+	/**
+	 * Check whether this projectile has a proper position.
+	 * 
+	 * @return	True if and only if this projectile can have its position as its
+	 * 			position.
+	 * 		  |	result == canHaveAsPosition(getPosition()
+	 */
+	public boolean hasProperPosition() { return true;}
+	
+	/**
+	 * Set the position of this projectile to the given position.
+	 * 
+	 * @param 	position
+	 * 			The position to attach this projectile to.
+	 * @post	This projectile references the given position as its position.
+	 * 		  |	new.getPosition() == position
+	 */
+	private void setPosition(Position position) {}
+	
+	/**
+	 * Variable referencing the position to which this projectile is attached.
+	 */
+	private Position position;
 	
 	
 	

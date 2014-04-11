@@ -19,7 +19,7 @@ enum Weapon {
 	RIFLE("Rifle", 10), BAZOOKA("Bazooka", 50);
 	
 	/**
-	 * Initialize this weapon with given name and action point cos.
+	 * Initialize this weapon with given name and action point cost.
 	 * 
 	 * @param 	name
 	 * 			...

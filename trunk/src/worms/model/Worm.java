@@ -600,6 +600,19 @@ public class Worm {
 	}
 	
 	/**
+	 * Return the maximum hit points this worm can have.
+	 *   The maximum of hit points of this worm is derived from its mass.
+	 * 
+	 * @return	The resulting maximum hit points is equal to the mass of this
+	 * 			worm rounded to the nearest integer.
+	 * 		  |	result ==
+	 * 		  |		Math.round(getMass())
+	 */
+	public int getHitPointsMaximum() {
+		return (int) Math.round(getMass());
+	}
+	
+	/**
 	 * Set the radius of this worm to the given radius.
 	 * 
 	 * @param 	radius
@@ -669,6 +682,51 @@ public class Worm {
 	 * Variable registering the the current action points of a worm.
 	 */
 	private int currentActionPoints;
+	
+	
+	
+	
+	
+	//HIT POINTS
+	/**
+	 * Return the current amount of hit points this worm has left.
+	 */
+	@Basic
+	public int getCurrentHitPoints() { return currentHitPoints;}
+	
+	/**
+	 * Set the current hit points of this worm to the given hit points.
+	 * 
+	 * @param	hitPoints
+	 *			The new current hit points for this worm.
+	 * @post	If the given current hit points is less than zero, the 
+	 * 			new current hit points for this new worm is equal to zero.
+	 * 			If the given current hit points is greater than or equal to
+	 * 			the maximum amount of hit points, the new current hit
+	 * 			points for this new worm is equal to the maximum hit points. 
+	 * 			Otherwise the new current hit points for this new worm is
+	 * 			equal to the given current hit points.
+	 * 		  |	if (hitPoints <= 0) this.currentHitPoints = 0;
+	 * 		  | if ( (hitPoints > 0) && (hitPoints < getHitPointsMaximum()))
+	 *		  |		currentHitPoints = hitPoints;
+	 *		  | if (hitPoints >= getHitPointsMaximum())
+	 *		  | 	this.currentHitPoints = getHitPointsMaximum();
+	 */
+	public void setCurrentHitPoints(int hitPoints) {
+		if (hitPoints <= 0) {
+			currentHitPoints = 0;
+		} else if ((hitPoints > 0)
+				&& (hitPoints < getActionPointsMaximum())) {
+			currentHitPoints = hitPoints;
+		} else if (hitPoints >= getActionPointsMaximum()) {
+			this.currentHitPoints = getActionPointsMaximum();
+		}
+	}
+	
+	/**
+	 * Variable registering the current hit points of this worm.
+	 */
+	private int currentHitPoints;
 	
 	
 	

@@ -779,6 +779,7 @@ public class Worm {
 	 *		  |				(! Character.isLowerCase(ch))
 	 *		  |				&&	(! Character.isUpperCase(ch))
 	 *		  |				&&	(! Character.isWhitespace(ch))
+	 *		  |				&&  (! Character.isDigit(ch))
 	 *		  |				&&	(ch != '\'')
 	 *		  |				&&	(ch != '\"') )
 	 *		  |			}		
@@ -789,6 +790,7 @@ public class Worm {
 			if (	(! Character.isLowerCase(ch))
 				&&	(! Character.isUpperCase(ch))
 				&&	(! Character.isWhitespace(ch))
+				&&  (! Character.isDigit(ch))
 				&&	(ch != '\'')
 				&&	(ch != '\"') ) {
 						return false;

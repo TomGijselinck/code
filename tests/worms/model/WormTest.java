@@ -392,9 +392,14 @@ public class WormTest {
 
 	@Test(expected = IllegalNameException.class)
 	public void setName_InvalidName() throws Exception {
-		standardWorm.setName("Inval1d nam3");
+		standardWorm.setName("Inval1d nam$");
 	}
 
+	@Test
+	public void isValidName_TrueCase() {
+		assertTrue(standardWorm.isValidName("James o'Hara 007"));
+	}
+	
 	@Test
 	public void isValidName_SingleCharacterName() {
 		assertFalse(standardWorm.isValidName("M"));

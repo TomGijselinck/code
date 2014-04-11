@@ -12,8 +12,8 @@ import worms.exceptions.IllegalStepsException;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
- * A class of worms involving a position, a direction, a radius, a mass
- * a maximum of action points, current action points and a name.
+ * A class of worms involving a position, a direction, a radius, a mass, action 
+ * points, hit points, weapons, a world and a name.
  * 
  * @invar	The direction of each worm must be a valid direction for any worm.
  * 		  |	isValidDirection(getDirection())
@@ -63,6 +63,13 @@ public class Worm {
 	 * @post	The new name for this new worm is equal to the given name.
 	 * @post	The new current action points for this new worm is equal to the 
 	 * 			action points maximum of this worm.
+	 * 		  |	new.getCurrentActionPoints() == new.getActionPointsMaximum()
+	 * @post	The new hit current points for this new worm is equal to the hit
+	 * 			points maximum of this worm.
+	 * 		  |	new.getCurrentHitPoints() == new.getHitPointsMaximum()
+	 * @post	The weapons this new worm has are the Rifle and the Bazooka.
+	 * 		  |	new.hasAsWeapon(Weapon.RIFLE) 
+	 * 		  |	&& new.hasAsWeapon(Weapon.BAZOOKA)
 	 * @throws	IllegalPositionException
 	 * 			The given position for this new worm is not a valid position for
 	 * 			any worm.
@@ -83,27 +90,11 @@ public class Worm {
 		setPosition(position);
 		setDirection(direction);
 		setRadius(radius);
-		setCurrentActionPoints(getActionPointsMaximum());
 		setName(name);
-	}
-	
-	/**
-	 * Initialize this new worm with given name.
-	 * 
-	 * @param 	name
-	 * 			The name for this new worm.
-	 * @effect	This new worm  is initialized with the given name as its name,
-	 * 			the origin (0,0) as its position, the lower angle bound as its 
-	 * 			direction, the lower radius bound as its radius and the action  
-	 * 			points maximum as its current amount of action points.
-	 * 		  |	this(new position(0,0), lowerAngleBound, lowerRadiusBound, 
-	 * 		  |		getActionPointsMaximum(), name)
-	 */
-	public Worm(String name) throws IllegalNameException {
-		this(new Position(0, 0), 0, 1, name);
-		setRadius(getLowerRadiusBound());
 		setCurrentActionPoints(getActionPointsMaximum());
-		setDirection(getLowerAngleBound());
+		setCurrentHitPoints(getHitPointsMaximum());
+		addAsWeapon(Weapon.RIFLE);
+		addAsWeapon(Weapon.BAZOOKA);
 	}
 	
 	
@@ -944,7 +935,7 @@ public class Worm {
 	 * 			This worm cannot have the given weapon as one if its weapons.
 	 * 		  |	! canHaveAsWeapon(weapon)
 	 */
-	public void adAsWeapon(Weapon weapon) {}
+	public void addAsWeapon(Weapon weapon) {}
 	
 	/**
 	 * Remove the given weapon from the set of weapons attached to this worm.

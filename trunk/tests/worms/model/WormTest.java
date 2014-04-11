@@ -89,19 +89,6 @@ public class WormTest {
 	}
 
 	@Test
-	public void shortConstructor_SingleCase() {
-		Worm theWorm = new Worm("The worm");
-		assertEquals("The worm", theWorm.getName());
-		assertTrue(fuzzyEquals(0, theWorm.getPosition().getX()));
-		assertTrue(fuzzyEquals(0, theWorm.getPosition().getY()));
-		assertTrue(fuzzyEquals(0, theWorm.getDirection()));
-		assertTrue(fuzzyEquals(standardWorm.getLowerRadiusBound(),
-				theWorm.getRadius()));
-		assertEquals(theWorm.getActionPointsMaximum(),
-				theWorm.getCurrentActionPoints());
-	}
-
-	@Test
 	public void canMove_ActiveLegaCase() {
 		assertTrue(wormRadius2.canActivelyMoveSteps(1));
 	}

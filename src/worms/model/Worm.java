@@ -784,7 +784,7 @@ public class Worm {
 	 *		  |				&&	(ch != '\"') )
 	 *		  |			}		
 	 */
-	public boolean isValidName(String name) {
+	public static boolean isValidName(String name) {
 		for (int i = 0; i < name.length(); i++) {
 			char ch = name.charAt(i);
 			if (	(! Character.isLowerCase(ch))

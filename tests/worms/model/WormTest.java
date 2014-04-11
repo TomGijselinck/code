@@ -397,22 +397,22 @@ public class WormTest {
 
 	@Test
 	public void isValidName_TrueCase() {
-		assertTrue(standardWorm.isValidName("James o'Hara 007"));
+		assertTrue(Worm.isValidName("James o'Hara 007"));
 	}
 	
 	@Test
 	public void isValidName_SingleCharacterName() {
-		assertFalse(standardWorm.isValidName("M"));
+		assertFalse(Worm.isValidName("M"));
 	}
 
 	@Test
 	public void isValidName_LowerCaseCharacterName() {
-		assertFalse(standardWorm.isValidName("lower case"));
+		assertFalse(Worm.isValidName("lower case"));
 	}
 
 	@Test
 	public void isValidName_IllegalCharacterName() {
-		assertFalse(standardWorm.isValidName("Illegal$ character"));
+		assertFalse(Worm.isValidName("Illegal$ character"));
 	}
 
 }

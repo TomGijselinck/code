@@ -2,6 +2,8 @@ package worms.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.lang.Math;
+import static worms.util.Util.*;
 
 import be.kuleuven.cs.som.annotate.*;
 
@@ -44,7 +46,11 @@ public class World {
 	 * 		  	...
 	 * 		  |	! isValidHeight(height)
 	 */
-	public World(double width, double height, boolean[][] passableMap) {}
+	public World(double width, double height, boolean[][] passableMap) {
+		this.width = width;
+		this.height = height;
+		this.passableMap = passableMap;
+	}
 	
 	
 	
@@ -74,7 +80,7 @@ public class World {
 	/**
 	 * Variable registering whether this world is terminated.
 	 */
-	private boolean isTerminated;
+	private boolean isTerminated = false;
 	
 	
 	
@@ -83,7 +89,9 @@ public class World {
 	 * Return the width of this world.
 	 */
 	@Basic
-	public double getWidth() { return 0;}
+	public double getWidth() { 
+		return width;
+	}
 	
 	/**
 	 * Checks whether the given width is a valid width for any world.
@@ -94,6 +102,11 @@ public class World {
 	 * 		  |		&& width > 0
 	 */
 	public boolean isValidWidth() { return true;}
+	
+	/**
+	 * 
+	 */
+	private double width;
 	
 	
 	
@@ -111,7 +124,9 @@ public class World {
 	 * Return the height of this world.
 	 */
 	@Basic
-	public double getHeight() { return 0;}
+	public double getHeight() { 
+		return height;
+	}
 	
 	/**
 	 * Checks whether the given height is a valid height for any world.
@@ -122,6 +137,11 @@ public class World {
 	 * 		  |		&& height > 0
 	 */
 	public boolean isValidHeight() { return true;}
+	
+	/**
+	 * 
+	 */
+	private double height;
 	
 	
 	
@@ -137,8 +157,12 @@ public class World {
 	
 	/**
 	 * Return the passable map of this world.
+	 * 	A passable map consists of rows and columns of pixels presented as a
+	 * 	matrix.
 	 */
-	public boolean[][] getPassableMap() { return new boolean[1][1];}
+	public boolean[][] getPassableMap() { 
+		return passableMap;
+	}
 	
 	/**
 	 * Return the number of horizontal pixels of the passable map of this world.
@@ -147,7 +171,9 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		getPassableMap().length
 	 */
-	public int getNoHorizontalPixels() { return 1;}
+	public int getNoHorizontalPixels() { 
+		return getPassableMap().length;
+	}
 	
 	/**
 	 * Return the number of vertical pixels of the passable map of this world.
@@ -156,7 +182,14 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		getPassableMap()[0].length
 	 */
-	public int getNoVerticalPixels() { return 1;}
+	public int getNoVerticalPixels() { 
+		return getPassableMap()[0].length;
+	}
+
+	/**
+	 * Variable referencing the passable map of this world.
+	 */
+	private boolean[][] passableMap;
 	
 	
 	
@@ -168,7 +201,9 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		getNoHorizontalPixels() / getWidth()
 	 */
-	public double getHorizontalScale() { return 0;}
+	public double getHorizontalScale() { 
+		return getNoHorizontalPixels() / getWidth();
+	}
 	
 	/**
 	 * Return the vertical scale of this world in map pixels per worm-meter.
@@ -177,37 +212,549 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		getNoVerticalPixels() / getHeight()
 	 */
-	public double getVerticalScale() { return 0;}
+	public double getVerticalScale() { 
+		return getNoVerticalPixels() / getHeight();
+	}
+	
+	/**
+	 * Return the height of each pixel of the passable map of this world in 
+	 * metre.
+	 * 
+	 * @return	...
+	 * 		  |	getWidth() / getNoHorizontalPixels()
+	 */
+	public double getPixelWidth() { 
+		return getWidth() / getNoHorizontalPixels();
+	}
+	
+	/**
+	 * Return the height of each pixel of the passable map of this world in 
+	 * metre.
+	 * 
+	 * @return	...
+	 * 		  |	getHeight() / getNoVerticalPixels()
+	 */
+	public double getPixelHeight(){ 
+		return getHeight() / getNoVerticalPixels();
+	}
 	
 	
 	
 	
 	/**
-	 * Checks whether the given location is passable. If this is not true, the
-	 * given location is impassable.
+	 * Return the row of pixels in the passable map of this world where the 
+	 * given position is located.
+	 * 	The row is selected by the Y coordinate of the given position.
+	 * 
+	 * @return	...
+	 * 		  |	getNoVerticalPixels() - (int) position.getY() * getVerticalScale()
+	 */
+	public int getPixelRow(Position position) { 
+		return (getNoVerticalPixels() - (int) (position.getY() * getVerticalScale()) );
+	}
+	
+	/**
+	 * Return the column of pixels in the passable map of this world where the 
+	 * given position is located.
+	 * 	The column is selected by the X coordinate of the given position.
+	 * 
+	 * @return	...
+	 * 		  |	(int) position.getX() * getHorizontalScale() + 1
+	 */
+	public int getPixelColumn(Position position) { 
+		return (int) (position.getX() * getHorizontalScale() + 1);
+	}
+	
+	/**
+	 * Check whether the given position is passable.
 	 * 
 	 * @return	...
 	 * 		  |	let
 	 * 		  |		passableMap = getPassableMap()
-	 * 		  |		&& x = (int) location.getX() * getHorizontalScale()
-	 * 		  |		&& y = (int) location.getY() * getVerticalScale()
+	 * 		  |		&& x = getPixelRow(position) - 1
+	 * 		  |		&& y = getPixelColumn(position) - 1
 	 * 		  |	in
 	 * 		  |		passableMap[x][y] == true
 	 */
-	public boolean isPassable(Position location) { return true;}
+	public boolean isPassable(Position position) {
+		double x = position.getX();
+		double y = position.getY();
+		double rx = x%getPixelWidth();
+		double ry = y%getPixelHeight();
+		if (fuzzyEquals(rx, 0) && fuzzyEquals(ry, 0)) {
+			//check boven, onder, links en rechts
+			double dx = getPixelWidth()/2;
+			double dy = getPixelHeight()/2;
+			Position left = new Position(x-dx, y);
+			Position right = new Position(x+dx, y);
+			Position top = new Position(x, y+dy);
+			Position bottom = new Position(x, y-dy);
+			if (isImpassable(left)) {
+				return false;
+			} else if (isImpassable(right)) {
+				return false;
+			} else if (isImpassable(top)) {
+				return false;
+			} else if (isImpassable(bottom)) {
+				return false;
+			} else {
+				return true;
+			}
+		} else if (fuzzyEquals(rx, 0) && (! fuzzyEquals(ry, 0))) {
+			//check links en rechts
+			double dx = getPixelWidth()/2;
+			Position left = new Position(x-dx, y);
+			Position right = new Position(x+dx, y);
+			if (isImpassable(left)) {
+				return false;
+			} else if (isImpassable(right)) {
+				return false;
+			} else {
+				return true;
+			}
+		} else if (fuzzyEquals(ry, 0) && (!fuzzyEquals(rx, 0))) {
+			//check boven en onder
+			double dy = getPixelHeight()/2;
+			Position top = new Position(x, y+dy);
+			Position bottom = new Position(x, y-dy);
+			if (isImpassable(top)) {
+				return false;
+			} else if (isImpassable(bottom)) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			//normaal
+			int X = getPixelRow(position) - 1;
+			int Y = getPixelColumn(position) - 1;
+			return (getPassableMap()[X][Y] == true);
+		}
+		
+	}
+	
+	/**
+	 * Check whether the given position is impassable.
+	 * 
+	 * @param 	location
+	 * 			...
+	 * @effect	True if the given position is not passable.
+	 * 		  |	result == (! isPassable(position))
+	 */
+	public boolean isImpassable(Position position) { 
+		return (! isPassable(position));
+	}
+	
+	/**
+	 * 
+	 * @param position
+	 * @param outerRadius
+	 * @param innerRadius
+	 * @return
+	 */
+	public boolean isPassableArea(Position position, double outerRadius,
+			double innerRadius) {
+		double dr;
+		double dtheta;
+		double angle = 0;
+		double radius;
+		double x;
+		double y;
+		double x0 = position.getX();
+		double y0 = position.getY();
+		
+		if (getHorizontalScale() > getVerticalScale()) {
+			dr = 1/getHorizontalScale();
+		} else {
+			dr = 1/getVerticalScale();
+		}
+		dtheta = dr/outerRadius;
+		
+		while (angle < 2*Math.PI) {
+			//System.out.println("new angle: " + angle);
+			radius = innerRadius;
+			while (radius <= outerRadius) {
+				//System.out.println("new radius: " + radius);
+				x = radius * Math.cos(angle) + x0;
+				y = radius * Math.sin(angle) + y0;
+				//System.out.println("x/y: " + x + "/" + y);
+				if (isImpassable(new Position(x, y))) {
+					return false;
+				}
+				radius = radius + dr;
+			}
+			x = outerRadius * Math.cos(angle) + x0;
+			y = outerRadius * Math.sin(angle) + y0;
+			if (isImpassable(new Position(x, y))) {
+				return false;
+			}
+			angle = angle + dtheta;
+			
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Check whether the area between a inner circle with given inner radius and
+	 * an outer circle with given outer radius at the given position is 
+	 * passable.
+	 * 	If the given inner radius is zero, the area to check is the area of a
+	 * 	circle with radius equal to the given outer radius and point of center
+	 * 	the given position.
+	 * 
+	 * @param 	position
+	 * 			...
+	 * @param 	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	for each position in radius of position:
+	 * 		  |		if (isImpassable(position))
+	 * 		  |			then result == false
+	 * 		  |		else result == true
+	 * 
+	 */
+	public boolean isPassableAreaCartesian(Position position, double outerRadius,
+			double innerRadius) { 
+		double x = 0;
+		double y = 0;
+		double x0 = position.getX();
+		double y0 = position.getY();
+		double dx = getPixelWidth();
+		double dy = getPixelHeight();
+		double xmax;
+		double xmin;
+		double ymax;
+		double ymin;
+		double A1;
+		double A2;
+		
+		//RIGHT SHIFTING INNER CIRCLE
+		xmax = x0 + innerRadius;
+		x = x0;
+		while (fuzzyLessThan(x, xmax)) {
+			System.out.println("right shift x: " + x);
+			A1 = Math.pow(outerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A1, 0)) {
+				A1 = 0;
+			}
+			A2 = Math.pow(innerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A2, 0)) {
+				A2 = 0;
+			}
+			
+			//TOP SHIFTING
+			ymax = y0 + Math.sqrt(A1);
+			y = y0 + Math.sqrt(A2);
+			while (fuzzyLessThan(y, ymax)) {
+				System.out.println("top shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y + dy;
+			}
+			System.out.println("final top shift y: " + ymax);
+			if (isImpassable(new Position(x, ymax))) {
+				System.out.println("false (x, ymax): (" + x + ", " + ymax + ")");
+				return false;
+			}
+			
+			//BOTTOM SHIFTING
+			ymin = y0 - Math.sqrt(A1);
+			y = y0 - Math.sqrt(A2);
+			while (fuzzyGreaterThan(y, ymin)) {
+				System.out.println("bottom shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y - dy;
+			}
+			System.out.println("final bottom shift y: " + ymin);
+			if (isImpassable(new Position(x, ymin))) {
+				System.out.println("false (x, ymin): (" + x + ", " + ymin + ")");
+				return false;
+			}
+			
+			x = x + dx;
+		}
+		
+		
+		//RIGHT SHIFTING OUTER CIRCLE
+		xmax = x0 + outerRadius;
+		x = x0 + innerRadius;
+		while (fuzzyLessThan(x, xmax)) {
+			System.out.println("right shift x: " + x);
+			A1 = Math.pow(outerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A1, 0)) {
+				A1 = 0;
+			}
+			A2 = Math.pow(innerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A2, 0)) {
+				A2 = 0;
+			}
+			
+			//TOP SHIFTING
+			ymax = y0 + Math.sqrt(A1);
+			y = y0 + Math.sqrt(A2);
+			while (fuzzyLessThan(y, ymax)) {
+				System.out.println("top shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y + dy;
+			}
+			System.out.println("final top shift y: " + ymax);
+			if (isImpassable(new Position(x, ymax))) {
+				System.out.println("false (x, ymax): (" + x + ", " + ymax + ")");
+				return false;
+			}
+			
+			//BOTTOM SHIFTING
+			ymin = y0 - Math.sqrt(A1);
+			y = y0 - Math.sqrt(A2);
+			while (fuzzyGreaterThan(y, ymin)) {
+				System.out.println("bottom shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y - dy;
+			}
+			System.out.println("final bottom shift y: " + ymin);
+			if (isImpassable(new Position(x, ymin))) {
+				System.out.println("false (x, ymin): (" + x + ", " + ymin + ")");
+				return false;
+			}
+			
+			x = x + dx;
+		}
+		
+		
+		//FINAL RIGHT SHIFT
+		A1 = Math.pow(outerRadius, 2) - Math.pow(xmax-x0, 2);
+		if (fuzzyEquals(A1, 0)) {
+			A1 = 0;
+		}
+		ymax = y0 + Math.sqrt(A1);
+		System.out.println("final right shift xmax/ymax: " + xmax + "/" + ymax);
+		if (isImpassable(new Position(xmax, ymax))) {
+			System.out.println("false (xmax, ymax): (" + xmax + ", " + ymax + ")");
+			return false;
+		}
+		
+		
+		//LEFT SHIFTING INNER CIRCLE
+		xmin = x0 - innerRadius;
+		x = x0;
+		while (fuzzyGreaterThan(x, xmin)) {
+			System.out.println("left shift x: " + x);
+			A1 = Math.pow(outerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A1, 0)) {
+				A1 = 0;
+			}
+			A2 = Math.pow(innerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A2, 0)) {
+				A2 = 0;
+			}
+			
+			//TOP SHIFTING
+			ymax = y0 + Math.sqrt(A1);
+			y = y0 + Math.sqrt(A2);
+			while (fuzzyLessThan(y, ymax)) {
+				System.out.println("top shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y + dy;
+			}
+			System.out.println("final top shift y: " + ymax);
+			if (isImpassable(new Position(x, ymax))) {
+				System.out.println("false (x, ymax): (" + x + ", " + ymax + ")");
+				return false;
+			}
+			
+			//BOTTOM SHIFTING
+			ymin = y0 - Math.sqrt(A1);
+			y = y0 - Math.sqrt(A2);
+			while (fuzzyGreaterThan(y, ymin)) {
+				System.out.println("bottom shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y - dy;
+			}
+			System.out.println("final bottom shift y: " + ymin);
+			if (isImpassable(new Position(x, ymin))) {
+				System.out.println("false (x, ymin): (" + x + ", " + ymin + ")");
+				return false;
+			}
+			
+			x = x - dx;
+		}
+		
+		
+		//LEFT SHIFTING OUTER CIRCLE
+		xmin = x0 - outerRadius;
+		x = x0 - innerRadius;
+		while (fuzzyGreaterThan(x, xmin)) {
+			System.out.println("left shift x: " + x);
+			A1 = Math.pow(outerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A1, 0)) {
+				A1 = 0;
+			}
+			A2 = Math.pow(innerRadius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(A2, 0)) {
+				A2 = 0;
+			}
+			
+			//TOP SHIFTING
+			ymax = y0 + Math.sqrt(A1);
+			y = y0 + Math.sqrt(A2);
+			while (fuzzyLessThan(y, ymax)) {
+				System.out.println("top shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y + dy;
+			}
+			System.out.println("final top shift y: " + ymax);
+			if (isImpassable(new Position(x, ymax))) {
+				System.out.println("false (x, ymax): (" + x + ", " + ymax + ")");
+				return false;
+			}
+			
+			//BOTTOM SHIFTING
+			ymin = y0 - Math.sqrt(A1);
+			y = y0 - Math.sqrt(A2);
+			while (fuzzyGreaterThan(y, ymin)) {
+				System.out.println("bottom shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y - dy;
+			}
+			System.out.println("final bottom shift y: " + ymin);
+			if (isImpassable(new Position(x, ymin))) {
+				System.out.println("false (x, ymin): (" + x + ", " + ymin + ")");
+				return false;
+			}
+			
+			x = x - dx;
+		}
+		
+		
+		//FINAL LEFT SHIFT
+		A1 = Math.pow(outerRadius, 2) - Math.pow(xmin-x0, 2);
+		if (fuzzyEquals(A1, 0)) {
+			A1 = 0;
+		}
+		ymax = y0 + Math.sqrt(A1);
+		System.out.println("final left shift xmin/ymax: " + xmin + "/" + ymax);
+		if (isImpassable(new Position(xmin, ymax))) {
+			System.out.println("false (xmin, ymax): (" + xmin + ", " + ymax + ")");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Check whether the given position is passable for an object with the given
+	 * radius.
+	 * 
+	 * @param 	position
+	 * 			...
+	 * @param 	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	for each position in radius of position:
+	 * 		  |		if (isImpassable(position))
+	 * 		  |			then result == false
+	 * 		  |		else result == true
+	 * 
+	 */
+	public boolean isPassableForObject(Position position, double radius) {
+		return isPassableArea(position, radius, 0);
+	}
+	
+	/**
+	 * Check whether the given position is passable for an object with the given
+	 * radius.
+	 * 
+	 * @param 	position
+	 * 			...
+	 * @param 	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	for each position in radius of position:
+	 * 		  |		if (isImpassable(position))
+	 * 		  |			then result == false
+	 * 		  |		else result == true
+	 * 
+	 */
+	public boolean isPassableForObject2(Position position, double radius) { 
+		double x = 0;
+		double y = 0;
+		double x0 = position.getX();
+		double y0 = position.getY();
+		double dx = getPixelWidth();
+		double dy = getPixelHeight();
+		
+		double xmax = x0 + radius;
+		x = x0 - radius;
+		while (fuzzyLessThan(x, xmax)) {
+			//System.out.println("right shift x: " + x);
+			double D = Math.pow(radius, 2) - Math.pow(x-x0, 2);
+			if (fuzzyEquals(D, 0)) {
+				D = 0;
+			}
+			double ymax = y0 + Math.sqrt(D);
+			y = y0 - Math.sqrt(D);
+			while (fuzzyLessThan(y, ymax)) {
+				//System.out.println("top shift y: " + y);
+				if (isImpassable(new Position(x, y))) {
+					//System.out.println("false (x, y): (" + x + ", " + y + ")");
+					return false;
+				}
+				y = y + dy;
+			}
+			//System.out.println("final top shift y: " + ymax);
+			if (isImpassable(new Position(x, ymax))) {
+				System.out.println("false (x, y): (" + x + ", " + ymax + ")");
+				return false;
+			}
+			x = x + dx;
+		}
+		double D = Math.pow(radius, 2) - Math.pow(xmax-x0, 2);
+		if (fuzzyEquals(D, 0)) {
+			D = 0;
+		}
+		double ymax = y0 + Math.sqrt(D);
+		//System.out.println("final right/top shift x/y: " + xmax + "/" + ymax);
+		if (isImpassable(new Position(xmax, ymax))) {
+			//System.out.println("false (x, y): (" + xmax + ", " + ymax + ")");
+			return false;
+		}
+		return true;
+	}
 	
 	/**
 	 * Checks whether the given location is passable and adjacent to an
-	 * impassable location.
+	 * impassable location for an object with the given radius.
 	 * 
 	 * @return	...
 	 * 		  |	result ==
-	 * 		  |		isPassable(location)
-	 * 		  |		&& isPassable(location.translate(
-	 * 		  |				getWidth() / getNoHorizontalPixels(),
-	 * 		  |			 	getHeight() / getNoVerticalPixels() ) )
+	 * 		  |		( isPassable(location)
+	 * 		  |	   && )
 	 */
-	public boolean isAdjacent(Position location) { return true;}
+	public boolean isAdjacent(Position location, double radius) { return true;}
 	
 	
 	

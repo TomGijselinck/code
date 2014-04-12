@@ -25,10 +25,23 @@ public class Util {
 			return Double.compare(x, y) < 0;
 		}
 	}
+	
+	public static boolean fuzzyLessThan(double x, double y) {
+		return fuzzyLessThan(x, y, DEFAULT_EPSILON);
+	}
+	
+	public static boolean fuzzyLessThan(double x, double y, double eps) {
+		if (fuzzyEquals(x, y, eps)) {
+			return false;
+		} else {
+			return Double.compare(x, y) < 0;
+		}
+	}
 
 	public static boolean fuzzyGreaterThanOrEqualTo(double x, double y) {
 		return fuzzyGreaterThanOrEqualTo(x, y, DEFAULT_EPSILON);
 	}
+
 
 	public static boolean fuzzyGreaterThanOrEqualTo(double x, double y,
 			double eps) {
@@ -38,7 +51,20 @@ public class Util {
 			return Double.compare(x, y) > 0;
 		}
 	}
-
+	
+	public static boolean fuzzyGreaterThan(double x, double y) {
+		return fuzzyGreaterThan(x, y, DEFAULT_EPSILON);
+	}
+	
+	public static boolean fuzzyGreaterThan(double x, double y,
+			double eps) {
+		if (fuzzyEquals(x, y, eps)) {
+			return false;
+		} else {
+			return Double.compare(x, y) > 0;
+		}
+	}
+	
 	public static double absoluteError(double expected, double actual) {
 		return Math.abs(expected - actual);
 	}

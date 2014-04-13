@@ -50,6 +50,7 @@ public class World {
 		this.width = width;
 		this.height = height;
 		this.passableMap = passableMap;
+		this.isTerminated = false;
 	}
 	
 	
@@ -69,6 +70,11 @@ public class World {
 	 * 			it.
 	 * 		  |	if (! this.isTerminated())
 	 * 		  |		then (! (new.getProjectile()).hasWorld() )
+	 * @post	No worms are any longer attached to this world.
+	 * 		  |	new.getNbWorms() == 0
+	 * @effect	Each worm attached to this world is removed from this world.
+	 * 		  |	for each worm in getAllWorms():
+	 * 		  |		this.removeAsWorm(worm)
 	 */
 	public void terminate() {}
 	
@@ -265,6 +271,10 @@ public class World {
 		return (int) (position.getX() * getHorizontalScale() + 1);
 	}
 	
+	
+	
+	
+	//PASSABILITY (total)
 	/**
 	 * Check whether the given position is passable.
 	 * 
@@ -328,7 +338,13 @@ public class World {
 			//normaal
 			int X = getPixelRow(position) - 1;
 			int Y = getPixelColumn(position) - 1;
-			return (getPassableMap()[X][Y] == true);
+			if ((X < 0) || (X >= getNoHorizontalPixels())
+					|| (Y < 0) || (Y >= getNoVerticalPixels())) {
+				// outside world borders
+				return true;
+			} else {
+				return (getPassableMap()[X][Y] == true);
+			}
 		}
 		
 	}
@@ -427,11 +443,25 @@ public class World {
 	 * @param 	radius
 	 * 			...
 	 * @effect	...
-	 * 		  |	result == (isPassableArea(position, radius, 0))
+	 * 		  |	result == isPassableArea(position, radius, 0)
 	 * 
 	 */
 	public boolean isPassableForObject(Position position, double radius) {
 		return isPassableArea(position, radius, 0);
+	}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	position
+	 * 			...
+	 * @param 	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	result == (! isPassableArea(position, radius, 0))
+	 */
+	public boolean isImpassableForObject(Position position, double radius) {
+		return (! isPassableForObject(position, radius));
 	}
 	
 	/**
@@ -456,7 +486,7 @@ public class World {
 	
 	
 	
-	//ASSOCIATIONS
+	//ASSOCIATIONS (defensive)
 	/**
 	 * Return the live projectile of this world. 
 	 */
@@ -518,7 +548,7 @@ public class World {
 	 * 			...
 	 */
 	@Basic
-	public boolean hasAsWorm(Worm worm) { return true;}
+	public boolean hasAsWorm(Worm worm) { return false;}
 	
 	/**
 	 * Check whether this world can have the given worm as one of its worms.
@@ -529,14 +559,21 @@ public class World {
 	 * 		  |	if (worm == null)
 	 * 		  |		then result == false
 	 * 			Otherwise, true if and only if this world is not yet terminated,
-	 * 			the given worm is not yet terminated and the given worm is not
-	 * 			yet registered as a worm attached to this world.
+	 * 			the given worm is not yet terminated, the given worm is not yet
+	 * 			registered as a worm attached to this world and the position of
+	 * 			the given worm is a valid position for that worm in this world.
 	 * 		  |	else result ==
 	 * 		  |		( (! this.isTerminated())
 	 * 		  |	   && (! worm.isTerminated()) 
-	 * 		  |	   && (! this.hasAsWorm(worm)) )
+	 * 		  |	   && (! this.hasAsWorm(worm)) 
+	 * 		  |	   && this.isAdjacent(worm.getPosition(), worm.getRadius()) )
 	 */
-	public boolean canHaveAsWorm(Worm worm) { return true;}
+	public boolean canHaveAsWorm(Worm worm) {
+		return ( (! this.isTerminated())
+				&& (! worm.isTerminated())
+				&& (! this.hasAsWorm(worm)) 
+				&& this.isAdjacent(worm.getPosition(), worm.getRadius()) );
+	}
 	
 	/**
 	 * Check whether this world has proper worms attached to it.
@@ -582,7 +619,7 @@ public class World {
 	public void addAsWorm(Worm worm) {}
 	
 	/**
-	 * Remove the givenworm from the set of worms attached to this world.
+	 * Remove the given worm from the set of worms attached to this world.
 	 * 
 	 * @param 	worm
 	 * 			...
@@ -612,5 +649,7 @@ public class World {
 	
 	
 	public void startGame() {}
+	
+	public Worm getWinningWorm() { return null;}
 	
 }

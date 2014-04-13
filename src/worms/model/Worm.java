@@ -326,25 +326,6 @@ public class Worm {
 		return Math.pow(jumpSpeed(), 2)*Math.sin(2*getDirection())/g;
 	}
 	
-	/**
-	 * Variable referencing the position of this worm.
-	 */
-//TODO: check bij implementatie en verwijder
-//	private Position position = Position.ORIGIN;
-	
-	/**
-	 * 
-	 * @param	position
-	 * 			The position to check.
-	 * @return	True if and only if the given position is an effective position.
-	 * 		  |	result ==
-	 * 		  |		position != null
-	 */
-	//TODO: overhevelen naar canHaveAsPosition()
-//	public boolean isValidPosition(Position position) {
-//		return position != null;
-//	}
-	
 	
 	
 	//DIRECTION RELATED METHODS (nominal)
@@ -913,13 +894,15 @@ public class Worm {
 	private World world;
 	
 	/**
-	 * Check whether this worm has the given weapon as on of its weapons.
+	 * Check whether this worm has the given weapon as one of its weapons.
 	 * 
 	 * @param 	weapon
 	 * 			The weapon to check.
 	 */
 	@Basic
-	public boolean hasAsWeapon(Weapon weapon) { return true;}
+	public boolean hasAsWeapon(Weapon weapon) {
+		return weapons.contains(weapon);
+	}
 	
 	/**
 	 * Check whether this worm can have the given weapon as one of its weapons.
@@ -936,7 +919,14 @@ public class Worm {
 	 * 		  |		( (! this.isTerminated())
 	 * 		  |	   && (! this.hasAsWeapon(weapon)) )
 	 */
-	public boolean canHaveAsWeapon(Weapon weapon) { return true;}
+	public boolean canHaveAsWeapon(Weapon weapon) {
+		if (weapon == null) {
+			return false;
+		} else {
+			return ( (! this.isTerminated())
+				  && (! this.hasAsWeapon(weapon)));
+		}
+	}
 	
 	/**
 	 * Check whether this worm has proper weapons attached to it.
@@ -960,7 +950,12 @@ public class Worm {
 	 * 			This worm cannot have the given weapon as one if its weapons.
 	 * 		  |	! canHaveAsWeapon(weapon)
 	 */
-	public void addAsWeapon(Weapon weapon) {}
+	public void addAsWeapon(Weapon weapon) {
+		if (! canHaveAsWeapon(weapon)) {
+			throw new IllegalArgumentException();
+		}
+		weapons.add(weapon);
+	}
 	
 	/**
 	 * Remove the given weapon from the set of weapons attached to this worm.
@@ -970,7 +965,9 @@ public class Worm {
 	 * @post	This worm does not have the given weapon as on of its weapons.
 	 * 		  |	! new.hasAsWeapon(weapon)
 	 */
-	public void removeAsWeapon(Weapon weapon) {}
+	public void removeAsWeapon(Weapon weapon) {
+		weapons.remove(weapon);
+	}
 	
 	/**
 	 * Set collecting references to weapons attached to this worm.

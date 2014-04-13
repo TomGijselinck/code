@@ -87,6 +87,7 @@ public class WormTest {
 		wormDownwardDirection = new Worm(new Position(0, 0), Math.PI * 7 / 4,
 				1, "Downward direction");
 		world = new World(5, 5, passableMap);
+		world.addAsWorm(standardWorm);
 	}
 
 	/**
@@ -452,6 +453,38 @@ public class WormTest {
 	@Test
 	public void canHaveAsWorld_EffectiveWorld() {
 		assertTrue(standardWorm.canHaveAsWorld(world));
+	}
+	
+	@Test
+	public void hasProperWorld_SingleCase() {
+		assertTrue(standardWorm.hasProperWorld());
+	}
+	
+	@Test
+	public void hasAsWeapon_SingleCase() {
+		assertTrue(standardWorm.hasAsWeapon(Weapon.RIFLE));
+	}
+	
+	@Test
+	public void canHaveAsWeapon_TrueCase() {
+		standardWorm.removeAsWeapon(Weapon.RIFLE);
+		assertTrue(standardWorm.canHaveAsWeapon(Weapon.RIFLE));
+	}
+	
+	@Test
+	public void canHaveAsWeapon_NonEffectiveWeapon() {
+		assertFalse(standardWorm.canHaveAsWeapon(null));
+	}
+	
+	@Test
+	public void canHaveAsWeapon_TerminatedWorm() {
+		standardWorm.terminate();
+		assertFalse(standardWorm.canHaveAsWeapon(Weapon.RIFLE));
+	}
+	
+	@Test
+	public void canHaveAsWeapon_HasWeaponAlready() {
+		assertFalse(standardWorm.canHaveAsWeapon(Weapon.RIFLE));
 	}
 
 }

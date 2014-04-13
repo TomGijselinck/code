@@ -29,7 +29,7 @@ import be.kuleuven.cs.som.annotate.*;
  * 			worm.
  * 		  |	hasProperWeapons()
  * 
- * @version 1.1
+ * @version 2.0
  * @author 	Tom Gijselinck
  *
  */
@@ -70,6 +70,8 @@ public class Worm {
 	 * @post	The weapons this new worm has are the Rifle and the Bazooka.
 	 * 		  |	new.hasAsWeapon(Weapon.RIFLE) 
 	 * 		  |	&& new.hasAsWeapon(Weapon.BAZOOKA)
+	 * @post	This new worm is not terminated.
+	 * 		  |	! new.isTerminated()
 	 * @throws	IllegalPositionException
 	 * 			The given position for this new worm is not a valid position for
 	 * 			any worm.
@@ -95,31 +97,39 @@ public class Worm {
 		setCurrentHitPoints(getHitPointsMaximum());
 		addAsWeapon(Weapon.RIFLE);
 		addAsWeapon(Weapon.BAZOOKA);
+		isTerminated = false;
 	}
 	
 	
 	
 	
 	//DESTRUCTOR
-	public void terminate() {}
+	/**
+	 * Terminate this worm.
+	 * 
+	 * @post	This worm is terminated.
+	 * 		  |	new.isTerminated()
+	 */
+	public void terminate() {
+		isTerminated = true;
+	}
 	
-	public boolean isTerminated() { return isTerminated;}
+	/**
+	 * Check whether this worm is terminated.
+	 */
+	public boolean isTerminated() {
+		return isTerminated;
+	}
 	
+	/**
+	 * Variable registering whether this worm is terminated.
+	 */
 	private boolean isTerminated;
 	
 	
 	
 	
-	//POSITION RELATED METHODS (defensive)
-	/**
-	 * Return the position of this worm.
-	 */
-//TODO: check bij implementatie en verwijder
-//	@Basic
-//	public Position getPosition() {
-//		return this.position;
-//	}
-	
+	//POSITION RELATED METHODS (defensive)	
 	/**
 	 * Move this worm a number of given steps in the direction it is facing.
 	 *   Active moving costs action points proportional to the horizontal and
@@ -315,25 +325,6 @@ public class Worm {
 		double g = getGravityOfEarth();
 		return Math.pow(jumpSpeed(), 2)*Math.sin(2*getDirection())/g;
 	}
-	
-	/**
-	 * Set the position of this worm to the given position.
-	 * 
-	 * @param 	position
-	 * 			The new position for this worm.
-	 * @post	The new position of this worm is equal to the given position.
-	 * 		  |	new.getPosition() == position
-	 * @throws	IllegalPositionException
-	 * 			The given position for this worm is not a valid position for any
-	 * 			worm.
-	 * 		  |	! isValidPosition(position)
-	 */
-//TODO: check bij implementatie en vewijder
-//	private void setPosition(Position position) {
-//		if (! isValidPosition(position))
-//			throw new IllegalPositionException(position, this);
-//		this.position = position;
-//	}
 	
 	/**
 	 * Variable referencing the position of this worm.
@@ -798,30 +789,40 @@ public class Worm {
 	/**
 	 * Return the position of this worm.
 	 */
-	public Position getPosition() { return position;}
+	public Position getPosition() {
+		return position;
+	}
 	
 	/**
-	 * Checks whether this worm can have the given position as its position.
+	 * Checks whether any worm can have the given position as its position.
 	 * 
 	 * @param	position
 	 * 			The position to check.
-	 * @return	True if the given position is not effective if this worm is 
-	 * 			terminated.
+	 * @return	True if the given position is not effective for any worm that 
+	 * 			is terminated.
 	 * 		  |	if (isTerminated())
 	 * 		  |		then result == (position == null)
 	 * 			Otherwise true if and only if the given position is effective.
 	 * 		  |	else result == (position != null) 
 	 */
-	public boolean canHaveAsPosition(Position position) { return true;}
+	public boolean isValidPosition(Position position) {
+		if (isTerminated()) {
+			return (position == null);
+		} else {
+			return (position != null);
+		}
+	}
 	
 	/**
 	 * Check whether this worm has a proper position.
 	 * 
 	 * @return	True if and only if this worm can have its position as its
 	 * 			position.
-	 * 		  |	result == canHaveAsPosition(getPosition()
+	 * 		  |	result == isValidPosition(getPosition())
 	 */
-	public boolean hasProperPosition() { return true;}
+	public boolean hasProperPosition() {
+		return isValidPosition(getPosition());
+	}
 	
 	/**
 	 * Set the position of this worm to the given position.
@@ -830,8 +831,16 @@ public class Worm {
 	 * 			The position to attach this worm to.
 	 * @post	This worm references the given position as its position.
 	 * 		  |	new.getPosition() == position
+	 * @throws	IllegalPositionException
+	 * 			The given position for this worm is not a valid position for any
+	 * 			worm.
+	 * 		  |	! isValidPosition(position)
 	 */
-	private void setPosition(Position position) {}
+	private void setPosition(Position position) {
+		if (! isValidPosition(position))
+			throw new IllegalPositionException(position, this);
+		this.position = position;
+	}
 	
 	/**
 	 * Variable referencing the position to which this worm is attached.
@@ -842,7 +851,9 @@ public class Worm {
 	 * Return the world where this worm is active in.
 	 */
 	@Basic
-	public World getWorld() { return world;}
+	public World getWorld() {
+		return world;
+	}
 	
 	/**
 	 * Check whether this worm can have the given world as its world.
@@ -855,7 +866,9 @@ public class Worm {
 	 * 		  |		( (world == null)
 	 * 		  |	   || world.canHaveAsWorm(this) )
 	 */
-	public boolean canHaveAsWorld(World world) {return true;}
+	public boolean canHaveAsWorld(World world) {
+		return ((world == null) || (world.canHaveAsWorm(this)));
+	}
 	
 	/**
 	 * Check whether this worm has a proper world attached to it.
@@ -870,7 +883,11 @@ public class Worm {
 	 * 		  |	   && ( (getWorld() == null)
 	 * 		  |	     ||	getWorld().hasAsWorm(this)) )
 	 */
-	public boolean hasProperWorld() { return true;}
+	public boolean hasProperWorld() {
+		return ( canHaveAsWorld(getWorld())
+			  && ( (getWorld() == null)
+				||	getWorld().hasAsWorm(this)) );
+	}
 	
 	/**
 	 * Set the world where this worm is attached to, to the given world.
@@ -879,8 +896,16 @@ public class Worm {
 	 * 			The world to which this worm must be attached.
 	 * @post	This worm is attached to the given world.
 	 * 		  |	new.getWorld() == world
+	 * @throws	IllegalArgumentException
+	 * 			...
+	 * 		  |	(! canHaveAsWorld(world))
 	 */
-	public void setWorld(World world) {}
+	public void setWorld(World world) {
+		if (! canHaveAsWorld(world)) {
+			throw new IllegalArgumentException();
+		}
+		this.world = world;
+	}
 	
 	/**
 	 * Variable referencing the world where this worm is attached to.

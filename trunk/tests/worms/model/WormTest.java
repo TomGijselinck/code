@@ -21,7 +21,8 @@ import static worms.util.Util.*;
 public class WormTest {
 
 	/**
-	 * Variable referencing a worm with ordinary variable values.
+	 * Variable referencing a worm with position (3.5, 1.5), direction 0, radius
+	 * 1 and name "Standard".
 	 */
 	private static Worm standardWorm;
 
@@ -39,6 +40,38 @@ public class WormTest {
 	 * Variable referencing a worm with radius of 2.
 	 */
 	private static Worm wormRadius2;
+	
+	/**
+	 * Variable referencing a world with width and height of 5 and passableMap
+	 * as the passable map.
+	 */
+	private static World world;
+	
+	// 10x10 pixels
+		//     0 1 2 3 4 5 6 7 8 9
+		//    --------------------
+		//  1| . . . . . . . . . .
+		//  2| . . X . . . . . . .
+		//  3| X X X . . . . X . .
+		//  4| . X X X X X X X . .
+		//  5| . . . . . . . . . .
+		//  6| . . . . . . . . . .
+		//  7| . . . . . . O . . .
+		//  8| . . . . . . . . . .
+		//  9| . . . . . . . . . .
+		// 10| X X X X X X X X X X
+		private boolean[][] passableMap = new boolean[][] {
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	false, 	true,	true,	true,	true,	true,	true,	true},
+				{false, false, 	false, 	true,	true,	true,	true,	false,	true,	true},
+				{true, false, 	false, 	false,	false,	false,	false,	false,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{false, false, 	false, 	false,	false,	false,	false,	false,	false,	false}
+		};
 
 	/**
 	 * Set up a mutable test fixture.
@@ -48,11 +81,12 @@ public class WormTest {
 	 */
 	@Before
 	public void setUpMutableFixture() throws Exception {
-		standardWorm = new Worm(new Position(0, 0), 0, 1, "Standard");
+		standardWorm = new Worm(new Position(3.5, 1.5), 0, 1, "Standard");
 		wormUpwardDirection = new Worm(new Position(0, 0), Math.PI / 4, 1,
 				"Upward direction");
 		wormDownwardDirection = new Worm(new Position(0, 0), Math.PI * 7 / 4,
 				1, "Downward direction");
+		world = new World(5, 5, passableMap);
 	}
 
 	/**
@@ -68,13 +102,16 @@ public class WormTest {
 	@Test
 	public void extendedConstructor_LegalCase() throws Exception {
 		Worm theWorm = new Worm(new Position(3, 5), 70, 11, "The worm");
-		assertTrue(fuzzyEquals(3, theWorm.getPosition().getX()));
-		assertTrue(fuzzyEquals(5, theWorm.getPosition().getY()));
+		assertTrue(theWorm.getPosition().equals(new Position(3, 5)));
 		assertTrue(fuzzyEquals(70, theWorm.getDirection()));
 		assertTrue(fuzzyEquals(11, theWorm.getRadius()));
+		assertEquals("The worm", theWorm.getName());
 		assertEquals(theWorm.getActionPointsMaximum(),
 				theWorm.getCurrentActionPoints());
-		assertEquals("The worm", theWorm.getName());
+		assertEquals(theWorm.getHitPointsMaximum(), 
+				theWorm.getCurrentHitPoints());
+		assertTrue(theWorm.hasAsWeapon(Weapon.RIFLE));
+		assertTrue(theWorm.hasAsWeapon(Weapon.BAZOOKA));
 	}
 
 	@Test(expected = IllegalRadiusException.class)
@@ -88,6 +125,11 @@ public class WormTest {
 		new Worm(new Position(0, 0), 0, 1, "W");
 	}
 
+	@Test
+	public void hasProperPosition_TrueCase() {
+		assertTrue(standardWorm.hasProperPosition());
+	}
+	
 	@Test
 	public void canMove_ActiveLegaCase() {
 		assertTrue(wormRadius2.canActivelyMoveSteps(1));
@@ -106,8 +148,8 @@ public class WormTest {
 	@Test
 	public void move_ActiveHorizontal() {
 		standardWorm.move(4, true);
-		assertTrue(fuzzyEquals(4, standardWorm.getPosition().getX()));
-		assertTrue(fuzzyEquals(0, standardWorm.getPosition().getY()));
+		assertTrue(fuzzyEquals(7.5, standardWorm.getPosition().getX()));
+		assertTrue(fuzzyEquals(1.5, standardWorm.getPosition().getY()));
 		assertEquals(4444, standardWorm.getCurrentActionPoints());
 	}
 
@@ -146,7 +188,7 @@ public class WormTest {
 	@Test
 	public void move_PassiveSingleCase() {
 		standardWorm.move(1, false);
-		assertEquals(new Position(1, 0), standardWorm.getPosition());
+		assertTrue(standardWorm.getPosition().equals(new Position(4.5, 1.5)));
 		assertEquals(standardWorm.getActionPointsMaximum(),
 				standardWorm.getCurrentActionPoints());
 	}
@@ -400,6 +442,16 @@ public class WormTest {
 	@Test
 	public void isValidName_IllegalCharacterName() {
 		assertFalse(Worm.isValidName("Illegal$ character"));
+	}
+	
+	@Test
+	public void canHaveAsWorld_NonEffectiveWorld() {
+		assertTrue(standardWorm.canHaveAsWorld(null));
+	}
+	
+	@Test
+	public void canHaveAsWorld_EffectiveWorld() {
+		assertTrue(standardWorm.canHaveAsWorld(world));
 	}
 
 }

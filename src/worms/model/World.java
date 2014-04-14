@@ -1,10 +1,11 @@
 package worms.model;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.lang.Math;
-import static worms.util.Util.*;
 
+import static worms.util.Util.*;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -69,19 +70,36 @@ public class World {
 	 * 			which this world was attached no longer has a world attached to
 	 * 			it.
 	 * 		  |	if (! this.isTerminated())
-	 * 		  |		then (! (new.getProjectile()).hasWorld() )
+	 * 		  |		then (! ((new) this.getProjectile()).hasWorld() )
 	 * @post	No worms are any longer attached to this world.
 	 * 		  |	new.getNbWorms() == 0
+	 * @post	...
+	 * 		  |	if (this.hasAsWorm(worm))
+	 * 		  |		then ((new worm).getWorld() == null)
 	 * @effect	Each worm attached to this world is removed from this world.
 	 * 		  |	for each worm in getAllWorms():
 	 * 		  |		this.removeAsWorm(worm)
 	 */
-	public void terminate() {}
+	public void terminate() {
+		//TODO uncomment when implemented: if (! isTerminated()) getProjectile().setWorld(null);
+		setProjectile(null);
+		Iterator<Worm> iterator = worms.iterator();
+		while (iterator.hasNext()) {
+			Worm worm = iterator.next();
+			if (hasAsWorm(worm)) {
+				worm.setWorld(null);
+			}
+			iterator.remove();
+		}
+		isTerminated = true;
+	}
 	
 	/**
 	 * Check whether this world is terminated.
 	 */
-	public boolean isTerminated() { return isTerminated;}
+	public boolean isTerminated() {
+		return isTerminated;
+	}
 	
 	/**
 	 * Variable registering whether this world is terminated.
@@ -338,8 +356,7 @@ public class World {
 			//normaal
 			int X = getPixelRow(position) - 1;
 			int Y = getPixelColumn(position) - 1;
-			if ((X < 0) || (X >= getNoHorizontalPixels())
-					|| (Y < 0) || (Y >= getNoVerticalPixels())) {
+			if (! isInsideWorldBorders(position)) {
 				// outside world borders
 				return true;
 			} else {
@@ -349,6 +366,41 @@ public class World {
 		
 	}
 	
+	/**
+	 * 
+	 * @param position
+	 * @return
+	 */
+	public boolean isInsideWorldBorders(Position position) {
+		int X = getPixelRow(position) - 1;
+		int Y = getPixelColumn(position) - 1;
+		if ((X < 0) || (X >= getNoHorizontalPixels())
+				|| (Y < 0) || (Y >= getNoVerticalPixels())) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 *
+	 * @return
+	 */
+	//TODO afwerken
+	public boolean objectIsInsideWorldBorders(Position position, double radius) {
+		Position top = position.translate(0, radius);
+		Position bottom = position.translate(0, -radius);
+		Position left = position.translate(-radius, 0);
+		Position right = position.translate(radius, 0);
+		
+		if (isInsideWorldBorders(top) && isInsideWorldBorders(bottom)
+				&& isInsideWorldBorders(left) && isInsideWorldBorders(right)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	/**
 	 * Check whether the given position is impassable.
 	 * 
@@ -548,7 +600,9 @@ public class World {
 	 * 			...
 	 */
 	@Basic
-	public boolean hasAsWorm(Worm worm) { return false;}
+	public boolean hasAsWorm(Worm worm) {
+		return worms.contains(worm);
+	}
 	
 	/**
 	 * Check whether this world can have the given worm as one of its worms.
@@ -559,19 +613,17 @@ public class World {
 	 * 		  |	if (worm == null)
 	 * 		  |		then result == false
 	 * 			Otherwise, true if and only if this world is not yet terminated,
-	 * 			the given worm is not yet terminated, the given worm is not yet
-	 * 			registered as a worm attached to this world and the position of
-	 * 			the given worm is a valid position for that worm in this world.
+	 * 			the given worm is not yet terminated and the position of the
+	 * 			given worm is a valid position for that worm in this world.
 	 * 		  |	else result ==
 	 * 		  |		( (! this.isTerminated())
-	 * 		  |	   && (! worm.isTerminated()) 
-	 * 		  |	   && (! this.hasAsWorm(worm)) 
+	 * 		  |	   && (! worm.isTerminated())
 	 * 		  |	   && this.isAdjacent(worm.getPosition(), worm.getRadius()) )
 	 */
 	public boolean canHaveAsWorm(Worm worm) {
-		return ( (! this.isTerminated())
+		if (worm == null) return false;
+		else return ( (! this.isTerminated())
 				&& (! worm.isTerminated())
-				&& (! this.hasAsWorm(worm)) 
 				&& this.isAdjacent(worm.getPosition(), worm.getRadius()) );
 	}
 	
@@ -585,7 +637,19 @@ public class World {
 	 * 		  |				then canHaveAsWorm(worm)
 	 * 		  |				  && (worm.getWorld() == this) )
 	 */
-	public boolean hasProperWorms() { return true;}
+	public boolean hasProperWorms() {
+		Iterator<Worm> iterator = worms.iterator();
+		while (iterator.hasNext()) {
+			Worm worm = iterator.next();
+			if (hasAsWorm(worm)) {
+				if ( (! canHaveAsWorm(worm))
+				  || (worm.getWorld() != this)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	
 	/**
 	 * Return a set collecting all worms associated with this world.
@@ -597,7 +661,9 @@ public class World {
 	 * 		  |		result.contains(worm) ==
 	 * 		  |		this.hasAsWorm(worm)
 	 */
-	public Set<Worm> getAllWorms() {return worms;}
+	public Set<Worm> getAllWorms() {
+		return worms;
+	}
 	
 	/**
 	 * Add the given worm to the set of worms attached to this world.
@@ -616,7 +682,13 @@ public class World {
 	 * 		  |	 ( (worm != null)
 	 * 		  | && (worm.getWorld() != null) )
 	 */
-	public void addAsWorm(Worm worm) {}
+	public void addAsWorm(Worm worm) {
+		if (! canHaveAsWorm(worm)) throw new IllegalArgumentException();
+		if ((worm != null) && (worm.getWorld() != null))
+			throw new IllegalArgumentException();
+		worm.setWorld(this);
+		worms.add(worm);
+	}
 	
 	/**
 	 * Remove the given worm from the set of worms attached to this world.
@@ -628,8 +700,17 @@ public class World {
 	 * @post	...
 	 * 		  |	if (this.hasAsWorm(worm))
 	 * 		  |		then ((new worm).getWorld() == null)
+	 * @throws	IllegalArgumentException
+	 * 			The given worm is not effective.
+	 * 		  |	worm == null
 	 */
-	public void removeAsWorm(Worm worm) {}
+	public void removeAsWorm(Worm worm) {
+		if (worm == null) throw new IllegalArgumentException();
+		if (hasAsWorm(worm)) {
+			worm.setWorld(null);
+		}
+		worms.remove(worm);
+	}
 	
 	/**
 	 * Set collecting references to worms attached to this world.
@@ -648,6 +729,7 @@ public class World {
 	
 	
 	
+	//GAME
 	public void startGame() {}
 	
 	public Worm getWinningWorm() { return null;}

@@ -158,4 +158,9 @@ public class Position {
 		return hash;
 	}
 	
+	@Override
+	public String toString() {
+		return ("(" + getX() + ", " + getY() + ")");
+	}
+	
 }

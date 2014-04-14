@@ -131,48 +131,218 @@ public class Worm {
 	
 	//POSITION RELATED METHODS (defensive)	
 	/**
-	 * Move this worm a number of given steps in the direction it is facing.
-	 *   Active moving costs action points proportional to the horizontal and
-	 *   vertical movement of a worm. Passive movement does not cost any action
-	 *   points.
+	 * Move this worm the given number of steps if the resulting position is
+	 * passable and andjacent to impassable terrain.
 	 * 
 	 * @param 	steps
 	 * 			The number of steps this worm has to move.
-	 * @post	The new position of this worm is equal to the initial position
-	 * 			of this worm incremented by the number of steps to be taken in
-	 * 			the direction this worm faces.
-	 * 		  |	new.getPosition() == 
-	 * 		  |		this.setPosition(getPosition().translate(
-	 * 		  |			steps*this.getRadius()*Math.cos(this.getDirection()),
-	 * 		  |			steps*this.getRadius()*Math.sin(this.getDirection()) ))
-	 * @post	If the movement is active the new current action points of this 
-	 * 			worm is equal to the initial current action points decremented 
-	 * 			with the consumed action points.
-	 * 		  | if (isActive == true)
-	 * 		  |		new.getCurrentActionPoints() ==
-	 * 		  |			this.getCurrentActionPoints() 
-	 * 		  |		  		- steps*Math.cos(this.getDirection())
-	 * 		  |		  		- steps*4*Math.sin(this.getDirection())
-	 * @effect	The new position of this worm is the initial position of this
-	 * 			worm translated by the given number of steps.
-	 * 		  |	this.setPosition(getPosition().translate(
-	 * 		  |		steps*this.getRadius()*Math.cos(this.getDirection()),
-	 * 		  |		steps*this.getRadius()*Math.sin(this.getDirection()) ))
-	 * @throws	IllegalStepsException(steps, this)
-	 * 			This worm cannot actively move the given number of steps.
-	 * 		  | ! canActivelyMoveSteps(steps)
+	 * @post	If there exist adjacent positions, the new position of this worm
+	 * 			will be the position of those positions with the maximum 
+	 * 			distance moved an the least divergence from the orientation of
+	 * 			this worm.
+	 * 		  |	let
+	 * 		  |		t0 = getDirection()
+	 * 		  |		x0 = this.getPosition().getX()
+	 * 		  |		y0 = this.getPosition().getY()
+	 * 		  |		x* = new.getPosition().getX()
+	 * 		  |		y* = new.getPosition().getY()
+	 * 		  |		x = position.getX()
+	 * 		  |		y = position.getY()
+	 * 		  |		position = new Position(x0 + r*cos(t), y0 + r*sin(t))
+	 * 		  | in
+	 * 		  |		if (for some t in (t0 - 0.7875)..(t0 + 0.7875):
+	 * 		  |		  for some r in 0..getRadius():
+	 * 		  |			isAdjacent(position) )
+	 * 		  |		then new.getPosition() == position where 
+	 * 		  |			for each position where isAdjacent(position):
+	 * 		  |		  		( (sqrt((x0 - x*)^2 + (y0 - y*)^2)
+	 * 		  |			  		>= sqrt((x0 - x)^2 + (y0 - y)^2))
+	 * 		  |		   	   && (arctan((x0 - x*)/(y0 - y*))
+	 * 		  |					<= arctan((x0 - x)/(y0 - y))) )
+	 * 		  |			
+	 * 			Else if there exist passable positions, but no adjacent 
+	 * 			positions, this worm will move to the position with maximum 
+	 * 			distance moved and the least divergence from the orientation of
+	 * 			this worm, and will then fall until the resulting position is
+	 * 			adjacent or, if there exist no such position, the worm will
+	 * 			fall out of the map.
+	 * 		  |	else if (for some t in (t0 - 0.7875)..(t0 + 0.7875):
+	 * 		  |		for some r in 0..getRadius():
+	 * 		  |			isPassable(position) )
+	 * 		  |	then new.getPosition() == position where 
+	 * 		  |		for each position where isPassable(position):
+	 * 		  |			( (sqrt((x0 - x*)^2 + (y0 - y*)^2)
+	 * 		  |			  		>= sqrt((x0 - x)^2 + (y0 - y)^2))
+	 * 		  |		   && (arctan((x0 - x*)/(y0 - y*))
+	 * 		  |				<= arctan((x0 - x)/(y0 - y))) )
+	 * 		  |	   && fallllll
+	 * 			Otherwise, if no passable positions exist, this worm will not
+	 * 			move.
+	 * 		  |	else new.getPosition() = this.getPosition()
+	 * @throws	IllegalStepsException
+	 * 			This worm cannot move the given number of steps
+	 * 		  |	(! canMove(steps)
 	 */
-	public void move(int steps, boolean isActive) 
-			throws IllegalStepsException {
-		if (! canActivelyMoveSteps(steps))
-			throw new IllegalStepsException(steps, this);
-		setPosition(getPosition().translate(steps*getRadius()*Math.cos(getDirection()),
-			steps*getRadius()*Math.sin(getDirection()) ));
-		if (isActive) {
-			setCurrentActionPoints(getCurrentActionPoints() 
-				- (int) Math.round(steps*Math.cos(getDirection())
-				+ steps*4*Math.sin(getDirection())) );
+	public void move(int steps) {
+		while (steps > 0) {
+			Position adjacentPosition = getOptimalPosition(this, true);
+			if (adjacentPosition == null) {
+				Position passablePosition = getOptimalPosition(this, false);
+				if (passablePosition == null) {
+					// unable to move
+					steps = 0;
+				} else {
+					setPosition(passablePosition);
+					fall();
+				}
+			} else {
+				setPosition(adjacentPosition);
+				//setCurrentActionPoints(getCurrentActionPoints()
+				//	- (int) (Math.cos(getDirection()) + 1
+				//			+ steps*4*Math.sin(getDirection()) + 1) );
+				//direction moet rekening houden met divergence ==> slope s!
+			}
+			
+			steps -= 1;
 		}
+	}
+	
+	/**
+	 * Let this worm fall until it hits impassabable terrain.
+	 * 
+	 * @post	If there exist an adjacent position straight below this worm, 
+	 * 			the new position of this worm is the first adjacent position
+	 * 			straight below this worm.
+	 * 		  |	let
+	 * 		  |		x0 = getPosition().getX()
+	 * 		  |		y0 = getPosition().getY()
+	 * 		  |		position = new Position(x0, y)
+	 * 		  |	in
+	 * 		  |		if (for some y in 0..y0:
+	 * 		  |			isAdjacent(position) )
+	 * 		  |		then (new.getPosition() == position) where
+	 * 		  |			for each y in 0..y0 where isAdjacent(position):
+	 * 		  |		   		y <= new.getPosition().getY()
+	 * 			Else this worm will fall out of its world.
+	 * 		  |	new.isTerminated()
+	 */
+	public void fall() {
+		boolean falling = true;
+		double radius = getRadius();
+		double dy = radius/10;
+		double travelledFallingMeters = 0;
+		World world = getWorld();
+		
+		while (falling) {
+			Position position = getPosition().translate(0, -dy);
+			travelledFallingMeters += dy;
+			if (! world.objectIsInsideWorldBorders(position, radius)) {
+				this.terminate();
+				falling = false;
+			} else if (getWorld().isAdjacent(position, getRadius())) {
+				falling = false;
+				decreaseHitPoints(3 * (int) travelledFallingMeters + 1); 
+			} else {
+				falling = true;
+				setPosition(position);
+			}
+		}
+	}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	worm
+	 * 			...
+	 * @return	...
+	 */
+	private Position getOptimalPosition(Worm worm, boolean resultIsAdjacent) {
+		double distance;
+		double divergence;
+		double maxDivergence = 0;
+		double maxDistance = getRadius();
+		double minDistance = maxDistance;
+		double dr = maxDistance/58;
+		double dtheta = 0.0175;
+		Position optimalPosition;
+		
+		while (maxDivergence <= 0.7875) {
+			distance = maxDistance;
+			divergence = maxDivergence;
+			
+			while (distance > minDistance) {
+				optimalPosition = getOptimalPositionFromPolCoo(divergence, 
+						distance, resultIsAdjacent);
+				if (optimalPosition != null) {
+					return optimalPosition;
+				}
+				distance -= dr;
+			}
+			divergence = 0;
+			
+			while (divergence <= maxDivergence) {
+				optimalPosition = getOptimalPositionFromPolCoo(divergence, 
+						distance, resultIsAdjacent);
+				if (optimalPosition != null) {
+					return optimalPosition;
+				}
+				divergence += dtheta;
+			}
+			
+			maxDivergence += dtheta;
+			minDistance -= dr;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	x0
+	 * 			...
+	 * @param 	y0
+	 * 			...
+	 * @param 	direction
+	 * 			...
+	 * @param 	divergence
+	 * 			...
+	 * @param 	distance
+	 * 			...
+	 * @return	...
+	 */
+	private Position getOptimalPositionFromPolCoo(double divergence, 
+			double distance, boolean resultIsAdjacent) {
+		double x0 = getPosition().getX();
+		double y0 = getPosition().getY();
+		double direction = getDirection();
+		World world = getWorld();
+		double radius = getRadius();
+		Position left = new Position(
+				x0 + distance * Math.cos(direction + divergence), 
+				y0 + distance * Math.sin(direction + divergence) );
+		Position right = new Position(
+				x0 + distance * Math.cos(direction - divergence), 
+				y0 + distance * Math.sin(direction - divergence) );
+		
+		if (resultIsAdjacent) {
+			if (world.isAdjacent(left, radius)) {
+				return left;
+			}
+			if (world.isAdjacent(right, radius)) {
+				return right;
+			} 
+			return null;
+		} else if (! resultIsAdjacent) {
+			if (world.isPassable(left)) {
+				return left;
+			}
+			if (world.isPassable(right)) {
+				return right;
+			}
+			return null;
+		}
+		return null;
 	}
 	
 	/**
@@ -658,6 +828,18 @@ public class Worm {
 	public int getCurrentHitPoints() { return currentHitPoints;}
 	
 	/**
+	 * 
+	 * @param inflictedHitPoints
+	 */
+	//TODO add specification
+	public void decreaseHitPoints(int inflictedHitPoints) {
+		setCurrentHitPoints(getCurrentHitPoints() - inflictedHitPoints);
+		if (getCurrentHitPoints() <= 0) {
+			this.terminate();
+		}
+	}
+	
+	/**
 	 * Set the current hit points of this worm to the given hit points.
 	 * 
 	 * @param	hitPoints
@@ -817,7 +999,7 @@ public class Worm {
 	 * 			worm.
 	 * 		  |	! isValidPosition(position)
 	 */
-	private void setPosition(Position position) {
+	public void setPosition(Position position) {
 		if (! isValidPosition(position))
 			throw new IllegalPositionException(position, this);
 		this.position = position;

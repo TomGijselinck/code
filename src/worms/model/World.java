@@ -139,7 +139,14 @@ public class World {
 	 * Return the width upper bound for any world.
 	 */
 	@Basic
-	public static double getWidthUpperBound() { return 0;}
+	public static double getWidthUpperBound() { 
+		return widthUpperBound;
+	}
+	
+	/**
+	 * Variable registering the width upper bound of any world.
+	 */
+	private static double widthUpperBound = Double.MAX_VALUE;
 	
 	
 	
@@ -174,7 +181,14 @@ public class World {
 	 * Return the height upper bound for any world.
 	 */
 	@Basic
-	public static double getheighthUpperBound() { return 0;}
+	public static double getheighthUpperBound() { 
+		return heightUpperBound;
+	}
+	
+	/**
+	 * Variable registering the height upper bound of any world.
+	 */
+	private static double heightUpperBound = Double.MAX_VALUE;
 	
 	
 	
@@ -588,6 +602,16 @@ public class World {
 	public void setProjectile(Projectile projectile) {}
 	
 	/**
+	 * Checks whether this world has a live effective projectile attached to it.
+	 * 
+	 * @return	...
+	 * 		  |	result == (getProjectile() != null)
+	 */
+	public boolean hasProjectile() {
+		return (getProjectile() != null);
+	}
+	
+	/**
 	 * Variable referencing the live projectile in this world. 
 	 */
 	private Projectile projectile;
@@ -725,6 +749,23 @@ public class World {
 	 * 		  |		(worm.getWorld() == this)
 	 */
 	private final Set<Worm> worms = new HashSet<Worm>();
+	
+	/**
+	 * Return the projectile and all the worms attached to this world
+	 * 
+	 * @return	The resulting collection contains the projectile attached to 
+	 * 			this world if any, and all worms attached to this world.
+	 * 		  | (if (hasProjectile()) 
+	 * 		  |		then result.contains(getProjectile()) )
+	 * 		  | && ( for each worm in worms:
+	 * 		  |		 result.contains(worm) )
+	 */
+	public Set<Object> getAllWorldObjects() {
+		final Set<Object> allObjects = new HashSet<Object>();
+		allObjects.addAll(worms);
+		if (hasProjectile()) allObjects.add(projectile);
+		return allObjects;
+	}
 	
 	
 	

@@ -48,11 +48,6 @@ public class WormTest {
 	 * Variable referencing a worm with downward direction of 7/4*Pi radians.
 	 */
 	private static Worm wormDownwardDirection;
-
-	/**
-	 * Variable referencing a worm with radius of 2.
-	 */
-	private static Worm wormRadius2;
 	
 	/**
 	 * Variable referencing a world with width and height of 5 and passableMap
@@ -106,16 +101,6 @@ public class WormTest {
 		world.addAsWorm(moveableWorm);
 		world.addAsWorm(wormUpwardDirection);
 		world.addAsWorm(fallableWorm);
-	}
-
-	/**
-	 * Set up an immutable test fixture.
-	 * 
-	 * @post The variable wormRadius2 references a new worm with radius 2.
-	 */
-	@BeforeClass
-	public static void SetUpImmutableFixture() throws Exception {
-		wormRadius2 = new Worm(new Position(0, 0), 0, 2, "Radius of two");
 	}
 
 	@Test
@@ -201,22 +186,17 @@ public class WormTest {
 
 	@Test
 	public void jump_SingleCase() {
-		Position positionBefore = new Position(wormUpwardDirection
-				.getPosition().getX(), wormUpwardDirection.getPosition().getY());
-		double jumpdistance = wormUpwardDirection.jumpDistance();
-		wormUpwardDirection.jump();
-		assertTrue(fuzzyEquals(positionBefore.getX() + jumpdistance,
-				wormUpwardDirection.getPosition().getX()));
-		assertTrue(fuzzyEquals(positionBefore.getY(), wormUpwardDirection
-				.getPosition().getY()));
-		assertEquals(0, wormUpwardDirection.getCurrentActionPoints());
+		moveableWorm.turn(0.3);
+		System.out.println(moveableWorm.getPosition().toString());
+		moveableWorm.jump();
+		System.out.println(moveableWorm.getPosition().toString());
+		assertEquals(0, moveableWorm.getCurrentActionPoints());
 	}
 
 	@Test(expected = IllegalJumpException.class)
 	public void jump_IllegalJump() throws Exception {
-		Worm worm = new Worm(new Position(0, 0),
-				Worm.getUpperAngleBound() / 2 + 1, 1, "Illegal Jumper");
-		worm.jump();
+		standardWorm.decreaseActionPoints(5000);
+		standardWorm.jump();
 	}
 
 	@Test(expected = IllegalJumpException.class)
@@ -231,32 +211,9 @@ public class WormTest {
 	}
 
 	@Test
-	public void canJump_BelowLowerAngleBound() {
-		Worm worm = new Worm(new Position(0, 0), Worm.getLowerAngleBound() - 1,
-				1, "Worm");
-		assertFalse(worm.canJump());
-	}
-
-	@Test
-	public void canJump_AboveUpperAngleBound() {
-		Worm worm = new Worm(new Position(0, 0), Worm.getUpperAngleBound() + 1,
-				1, "Worm");
-		assertFalse(worm.canJump());
-	}
-
-	@Test
 	public void canJump_ZeroActionPoints() {
 		standardWorm.decreaseActionPoints(5000);
 		assertFalse(standardWorm.canJump());
-	}
-
-	@Test
-	public void jumpTime_SingleCase() {
-		assertTrue(fuzzyEquals(
-				wormUpwardDirection.jumpDistance()
-						/ (wormUpwardDirection.jumpSpeed() * Math.cos(wormUpwardDirection
-								.getDirection())),
-				wormUpwardDirection.jumpTime()));
 	}
 
 	@Test
@@ -286,14 +243,6 @@ public class WormTest {
 				+ wormUpwardDirection.getMass() * g;
 		assertTrue(fuzzyEquals(F / wormUpwardDirection.getMass() * 0.5,
 				wormUpwardDirection.jumpSpeed()));
-	}
-
-	@Test
-	public void jumpDistance_SingleCase() {
-		double g = Worm.getGravityOfEarth();
-		assertTrue(fuzzyEquals(Math.pow(wormUpwardDirection.jumpSpeed(), 2)
-				* Math.sin(2 * wormUpwardDirection.getDirection()) / g,
-				wormUpwardDirection.jumpDistance()));
 	}
 
 	@Test
@@ -332,23 +281,6 @@ public class WormTest {
 				standardWorm.getDirection()));
 		assertTrue(fuzzyEquals((initialAP - 75),
 				standardWorm.getCurrentActionPoints()));
-	}
-
-	@Test
-	public void jump_AfterTurningUpward() {
-		Position positionBefore = new Position(wormDownwardDirection
-				.getPosition().getX(), wormDownwardDirection.getPosition()
-				.getY());
-		wormDownwardDirection.turn(Math.PI / 2);
-		assertTrue(fuzzyEquals(Math.PI / 4,
-				wormDownwardDirection.getDirection()));
-		double jumpdistance = wormDownwardDirection.jumpDistance();
-		wormDownwardDirection.jump();
-		assertTrue(fuzzyEquals(positionBefore.getX() + jumpdistance,
-				wormDownwardDirection.getPosition().getX()));
-		assertTrue(fuzzyEquals(positionBefore.getY(), wormDownwardDirection
-				.getPosition().getY()));
-		assertEquals(0, wormDownwardDirection.getCurrentActionPoints());
 	}
 
 	@Test

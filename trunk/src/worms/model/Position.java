@@ -123,6 +123,18 @@ public class Position {
 	}
 	
 	/**
+	 * 
+	 * @param otherPosition
+	 * @return
+	 */
+	//TODO add documentation
+	public double getDistanceFrom(Position otherPosition) {
+		double dx = otherPosition.getX() - getX();
+		double dy = otherPosition.getY() - getY();
+		return (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)));
+	}
+	
+	/**
 	 * Check whether this position is equal to the given object.
 	 * 
 	 * @return	True if and only if the given object is effective, if this 

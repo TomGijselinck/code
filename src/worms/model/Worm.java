@@ -403,27 +403,61 @@ public class Worm {
 	 * 			worm translated by the jump distance.
 	 * 		  |	this.setPosition(getPosition().translate(jumpDistance(), 0))
 	 */
+	//TODO specification checken
 	public void jump() throws IllegalCoordinateException, IllegalJumpException {
 		if (! canJump())
 			throw new IllegalJumpException(this);
-		setPosition(getPosition().translate(jumpDistance(),0));
-		setCurrentActionPoints(0);
+		jumpTime = 0;
+		boolean jumping = true;
+		double dt = getJumpTimeStep(0, 0, 0); //TODO vul in
+		Position startPosition = getPosition().translate(0, 0);
+		Position jumpPosition = getPosition().translate(0, 0);
+		World world = getWorld();
+		double radius = getRadius();
+		
+		while (jumping
+				&& (jumpPosition.getDistanceFrom(startPosition) < radius)) {
+			jumpTime += dt;
+			jumpPosition = jumpStep(jumpTime);
+			if (! world.isPassable(jumpPosition)) {jumping = false;}
+		}
+		
+		while (jumping && (! world.isAdjacent(jumpPosition, radius)) 
+				&& (world.isInsideWorldBorders(jumpPosition))) {
+			jumpTime += dt;
+			jumpPosition = jumpStep(jumpTime);
+			if (! world.isPassable(jumpPosition)) {jumping = false;}
+		
+		}
+		
+		if (world.isAdjacent(jumpPosition, radius)) {
+			setPosition(jumpPosition);
+			setCurrentActionPoints(0);
+		} else {
+			System.out.println("worm cannot jump");
+			System.out.println(jumpPosition.toString());
+		}		
+		
 	}
 	
 	/**
 	 * Checks whether this worm can jump.
 	 * 
-	 * @return	True if and only if this worm is facing upwards and this worm
-	 * 			has current action points greater than zero.
+	 * @return	True if and only if the position of this worm is adjacent and
+	 * 			this worm has current action points greater than zero.
 	 * 		  |	result ==
-	 * 		  |		(this.getDirection >= lowerAngleBound)
-	 *   	  |		&& (this.getDirection() <= upperAngleBound/2)) 
-	 *   	  |		&& (this.getCurrentActionPoints() > 0)
+	 * 		  |		( getWorld().isAdjacent(getPosition(), getRadius())
+	 *   	  |	   && (this.getCurrentActionPoints() > 0) )
 	 */
 	public boolean canJump() {
-		return ( (getDirection() >= lowerAngleBound) 
-				&& (getDirection() <= upperAngleBound/2)
+		return ( getWorld().isAdjacent(getPosition(), getRadius())
 				&& (getCurrentActionPoints() > 0) );
+	}
+	
+	private double getJumpTimeStep(double t0, double v0x, double v0y) {
+		double f = Math.pow(v0x, 2) + Math.pow(v0y, 2); //TODO afwerken
+		
+		return 0.001;
 	}
 	
 	
@@ -432,16 +466,19 @@ public class Worm {
 	/**
 	 * Returns the time in seconds this worm needs for jumping a certain 
 	 * distance.
-	 * 
-	 * @return	The resulting time is equal to the number of seconds it takes to
-	 * 			translate a horizontal distance at the horizontal component of
-	 * 			the initial velocity of this worm.
-	 * 		  |	result ==
-	 * 		  |		jumpDistance()/(jumpSpeed()*Math.cos(getDirection()))
 	 */
+	@Basic
 	public double jumpTime() {
-		return jumpDistance()/(jumpSpeed()*Math.cos(getDirection()));
+		return jumpTime;
 	}
+	
+	/**
+	 * Variable referencing the jump time of the last jump this worm made.
+	 */
+	private double jumpTime = 0;
+	
+	
+	
 	
 	/**
 	 * Returns the in-flight position of a jumping worm after a given time 
@@ -490,21 +527,6 @@ public class Worm {
 		double g = getGravityOfEarth();
 		double F = 5 * getCurrentActionPoints() + getMass() * g;
 		return F / getMass() * 0.5;
-	}
-	
-	/**
-	 * Returns the horizontal distance covered when this worm jumps, expressed
-	 * in metres.
-	 * 
-	 * @return	The resulting jump distance of this worm is equal to the 
-	 * 			distance covered by	this worm at its jump speed in the direction 
-	 * 			it is facing.
-	 * 		  |	result ==
-	 *   	  |		jumpSpeed()^2*Math.sin(2*this.getDirection())/g
-	 */
-	public double jumpDistance() {
-		double g = getGravityOfEarth();
-		return Math.pow(jumpSpeed(), 2)*Math.sin(2*getDirection())/g;
 	}
 	
 	

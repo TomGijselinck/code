@@ -8,7 +8,7 @@ import worms.exceptions.IllegalCoordinateException;
 import worms.exceptions.IllegalJumpException;
 import worms.exceptions.IllegalNameException;
 import worms.exceptions.IllegalRadiusException;
-import worms.exceptions.IllegalStepsException;
+import worms.exceptions.IllegalStepException;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -179,10 +179,11 @@ public class Worm {
 	 * 			Otherwise, if no passable positions exist, this worm will not
 	 * 			move.
 	 * 		  |	else new.getPosition() = this.getPosition()
-	 * @throws	IllegalStepsException
+	 * @throws	IllegalStepException
 	 * 			This worm cannot move the given number of steps
 	 * 		  |	(! canMove(steps)
 	 */
+	//TODO exception uitwerken
 	public void move(int steps) {
 		while (steps > 0) {
 			Position adjacentPosition = getOptimalPosition(this, true);
@@ -196,11 +197,13 @@ public class Worm {
 					fall();
 				}
 			} else {
+				double slope = Math.atan(
+						(this.getPosition().getX() - adjacentPosition.getX())
+						/ (this.getPosition().getY() - adjacentPosition.getY()) );
+				if (! canMove(slope)) throw new IllegalStepException(slope, this);
 				setPosition(adjacentPosition);
-				//setCurrentActionPoints(getCurrentActionPoints()
-				//	- (int) (Math.cos(getDirection()) + 1
-				//			+ steps*4*Math.sin(getDirection()) + 1) );
-				//direction moet rekening houden met divergence ==> slope s!
+				int consumedActionPoints = getConsumedActionPoints(slope);
+				decreaseActionPoints(consumedActionPoints);
 			}
 			
 			steps -= 1;
@@ -225,6 +228,8 @@ public class Worm {
 	 * 		  |		   		y <= new.getPosition().getY()
 	 * 			Else this worm will fall out of its world.
 	 * 		  |	new.isTerminated()
+	 * @post	The current	amount of action points has not changed.
+	 * 		  |	new.getCurrentActionPoints() == this.getCurrentActionPoints()
 	 */
 	public void fall() {
 		boolean falling = true;
@@ -346,6 +351,39 @@ public class Worm {
 	}
 	
 	/**
+	 * Return the action points needed to move one step in the given direction.
+	 * 
+	 * @param 	steps
+	 * 			The number of steps needed to cover with action points.
+	 * @param 	direction
+	 * 			The direction in which the steps will be taken.
+	 * @return	The resulting amount of action points is equal to 
+	 * 			|cos(direction)| + |4 * sin(direction)|.
+	 * 		  |	result == |cos(direction)| + |4 * sin(direction)|
+	 */
+	public int getConsumedActionPoints(double direction) {
+		return (int) Math.ceil((Math.abs(Math
+				.cos(direction)) + Math.abs(4 * Math.sin(direction))));
+	}
+	
+	/**
+	 * Check whether this worm can move one step in the given direction.
+	 * 	Horizontal movement is less expensive than vertical movement.
+	 * 
+	 * @param	direction
+	 * 			The direction in which to check whether this can move
+	 * 			one step.
+	 * @return	True if and only if this worm has enough action points to 
+	 * 			move the given number of steps in the direction it is facing.
+	 * 		  |	result ==
+	 * 		  |	  (this.getCurrentActionPoints() >= 
+	 * 		  |		  getConsumedActionPoints(direction) )
+	 */
+	public boolean canMove(double direction) {
+		return (getCurrentActionPoints() >= getConsumedActionPoints(direction));
+	}
+	
+	/**
 	 * Jump this worm from the current position with respect to its direction
 	 * and its current number of action points if this worm can jump.
 	 *   Jumping of a worm is an active movement and consumes all its remaining
@@ -389,34 +427,7 @@ public class Worm {
 	}
 	
 	
-	public static double getGravityOfEarth() {
-		return gravityOfEarth;
-	}
 	
-	/**
-	 * Variable registering the gravity of the Earth in m/s² referring to the
-	 * acceleration the earth gives to worms on or near its surface.
-	 */
-	private static final double gravityOfEarth = 9.80665;
-	
-	/**
-	 * Check whether this worm can actively move the given number of steps.
-	 * 
-	 * @param	steps
-	 * 			The number of steps to check.
-	 * @return	True if and only if this worm has enough action points to 
-	 * 			actively move the given number of steps in the direction it is
-	 * 			facing.
-	 * 		  |	result ==
-	 * 		  |	  (this.getCurrentActionPoints() >= 
-	 * 		  |		  steps*Math.cos(this.getDirection())
-	 * 		  |		+ steps*4*Math.sin(this.getDirection()) )
-	 */
-	public boolean canActivelyMoveSteps(double steps) {
-		return (getCurrentActionPoints() >= 
-				   steps*Math.cos(getDirection())
-				 + steps*4*Math.sin(getDirection()) );
-	}
 	
 	/**
 	 * Returns the time in seconds this worm needs for jumping a certain 
@@ -495,6 +506,22 @@ public class Worm {
 		double g = getGravityOfEarth();
 		return Math.pow(jumpSpeed(), 2)*Math.sin(2*getDirection())/g;
 	}
+	
+	
+	
+	/**
+	 * Return the gravity of the earth.
+	 */
+	public static double getGravityOfEarth() {
+		return gravityOfEarth;
+	}
+	
+	/**
+	 * Variable registering the gravity of the Earth in m/s² referring to the
+	 * acceleration the earth gives to worms on or near its surface.
+	 */
+	private static final double gravityOfEarth = 9.80665;
+	
 	
 	
 	
@@ -783,6 +810,42 @@ public class Worm {
 	}
 	
 	/**
+	 * Decrease the current number of action points of this worm with the given
+	 * amount of action points.
+	 * 
+	 * @param 	actionPoints
+	 * 			The number of action points to subtract from the current amount
+	 * 			of action points.
+	 * @post	If the given amount of action points is less than zero, the 
+	 * 			new current action points for this new worm is equal to zero.
+	 * 			If the given current action points is greater than or equal to
+	 * 			the maximum amount of action points, the new current action
+	 * 			points for this new worm is equal to the maximum action points. 
+	 * 			Otherwise the new current action points for this new worm is
+	 * 			equal to the given current action points.
+	 * 		  |	let
+	 * 		  |		currentActionPoints = this.getCurrentActionPoints()
+	 * 		  |	in
+	 * 		  |		if (actionPoints >= currentActionPoints) 
+	 * 		  |			then new.getCurrentActionPoints() == 0;
+	 * 		  | 	else if ( (actionPoints > 0) 
+	 * 		  |			&& (actionPoints < currentActionPoints) )
+	 *		  |			then new.getCurrentActionPoints 
+	 *		  |				== currentActionPoints - actionPoints
+	 *		  | 	else if (actionPoints <= 0)
+	 *		  | 		new.getCurrentActionPoints == currentActionPoints
+	 * 
+	 */
+	public void decreaseActionPoints(int actionPoints) {
+		int currentActionPoints = getCurrentActionPoints();
+		if (actionPoints >= currentActionPoints) {
+			setCurrentActionPoints(0);
+		} else if ((actionPoints > 0) && (actionPoints < currentActionPoints)) {
+			setCurrentActionPoints(currentActionPoints - actionPoints);
+		} else if (actionPoints <= 0) {}
+	}
+	
+	/**
 	 * Set the current action points of this worm to the given action points.
 	 * 
 	 * @param	actionPoints
@@ -800,7 +863,7 @@ public class Worm {
 	 *		  | if (actionPoints >= getActionPointsMaximum())
 	 *		  | 	this.currentActionPoints = getActionPointsMaximum();
 	 */
-	public void setCurrentActionPoints(int actionPoints) {
+	private void setCurrentActionPoints(int actionPoints) {
 		if (actionPoints <= 0) {
 			currentActionPoints = 0;
 		} else if ((actionPoints > 0)
@@ -999,7 +1062,7 @@ public class Worm {
 	 * 			worm.
 	 * 		  |	! isValidPosition(position)
 	 */
-	public void setPosition(Position position) {
+	private void setPosition(Position position) {
 		if (! isValidPosition(position))
 			throw new IllegalPositionException(position, this);
 		this.position = position;

@@ -7,7 +7,7 @@ import org.junit.*;
 import worms.exceptions.IllegalJumpException;
 import worms.exceptions.IllegalNameException;
 import worms.exceptions.IllegalRadiusException;
-import worms.exceptions.IllegalStepsException;
+import worms.exceptions.IllegalStepException;
 import static worms.util.Util.*;
 
 /**
@@ -26,10 +26,21 @@ public class WormTest {
 	 */
 	private static Worm standardWorm;
 	
+	/**
+	 * Variable referencing a worm with position (0.5, 1), direction 0, radius 
+	 * 0.5 and name "MoveWorm".
+	 */
 	private static Worm moveableWorm;
+	
+	/**
+	 * Variable referencing a worm with position (2, 4), direction 0, radius 
+	 * 0.5, and name "FallWorm".
+	 */
+	private static Worm fallableWorm;
 
 	/**
-	 * Variable referencing a worm with upward direction of Pi/4 radians.
+	 * Variable referencing a worm with position (2, 4), upward direction of 
+	 * Pi/2 radians, radius 0.5 and name "UpwardWorm".
 	 */
 	private static Worm wormUpwardDirection;
 
@@ -52,7 +63,7 @@ public class WormTest {
 	// 10x10 pixels
 		//     0 1 2 3 4 5 6 7 8 9
 		//    --------------------
-		//  1| . . . . . . . . . .
+		//  1| . . X . . . . . . .
 		//  2| . . X . . . . . . .
 		//  3| X X X . . . . . . .
 		//  4| . X X X X X . . . .
@@ -63,7 +74,7 @@ public class WormTest {
 		//  9| . . . . . . . . . .
 		// 10| X X X X X X X X X X
 		private boolean[][] passableMap = new boolean[][] {
-				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	false, 	true,	true,	true,	true,	true,	true,	true},
 				{true, 	true, 	false, 	true,	true,	true,	true,	true,	true,	true},
 				{false, false, 	false, 	true,	true,	true,	true,	true,	true,	true},
 				{true, false, 	false, 	false,	false,	false,	true,	true,	true,	true},
@@ -84,14 +95,17 @@ public class WormTest {
 	@Before
 	public void setUpMutableFixture() throws Exception {
 		standardWorm = new Worm(new Position(3.5, 1.5), 0, 1, "Standard");
-		wormUpwardDirection = new Worm(new Position(0, 0), Math.PI / 4, 1,
-				"Upward direction");
+		wormUpwardDirection = new Worm(new Position(2, 4), Math.PI / 2, 0.5,
+				"UpwardWorm");
 		wormDownwardDirection = new Worm(new Position(0, 0), Math.PI * 7 / 4,
 				1, "Downward direction");
 		moveableWorm = new Worm(new Position(0.5, 1), 0, 0.5, "MoveWorm");
+		fallableWorm = new Worm(new Position(2, 4), 0, 0.5, "FallWorm");
 		world = new World(5, 5, passableMap);
 		world.addAsWorm(standardWorm);
 		world.addAsWorm(moveableWorm);
+		world.addAsWorm(wormUpwardDirection);
+		world.addAsWorm(fallableWorm);
 	}
 
 	/**
@@ -117,6 +131,7 @@ public class WormTest {
 				theWorm.getCurrentHitPoints());
 		assertTrue(theWorm.hasAsWeapon(Weapon.RIFLE));
 		assertTrue(theWorm.hasAsWeapon(Weapon.BAZOOKA));
+		assertFalse(theWorm.isTerminated());
 	}
 
 	@Test(expected = IllegalRadiusException.class)
@@ -136,66 +151,52 @@ public class WormTest {
 	}
 	
 	@Test
-	public void canMove_LegaCase() {
-		assertTrue(wormRadius2.canActivelyMoveSteps(1));
-	}
-
-	@Test
-	public void canMove_LegalCaseUpwardOrientation() {
-		assertTrue(wormUpwardDirection.canActivelyMoveSteps(1));
+	public void canMove_TrueCase() {
+		assertTrue(standardWorm.canMove(0));
 	}
 
 	@Test
 	public void canMove_FalseCase() {
-		assertFalse(wormRadius2.canActivelyMoveSteps(100000));
+		standardWorm.decreaseActionPoints(5000);
+		assertFalse(standardWorm.canMove(0));
 	}
 
 	@Test
 	public void move_Horizontal() {
-		standardWorm.move(4);
-		assertTrue(fuzzyEquals(7.5, standardWorm.getPosition().getX()));
-		assertTrue(fuzzyEquals(1.5, standardWorm.getPosition().getY()));
-		assertEquals(4444, standardWorm.getCurrentActionPoints());
-	}
-
-	@Test
-	public void move_Vertical() {
-		Worm worm = new Worm(new Position(0, 0), Math.PI / 2, 1, "Vertical");
-		worm.move(3);
-		assertTrue(fuzzyEquals(0, worm.getPosition().getX()));
-		assertTrue(fuzzyEquals(3, worm.getPosition().getY()));
+		int initialActionPoints = moveableWorm.getCurrentActionPoints();
+		moveableWorm.move(3);
+		assertTrue(fuzzyEquals(2, moveableWorm.getPosition().getX()));
+		assertTrue(fuzzyEquals(1, moveableWorm.getPosition().getY()));
+		assertEquals(initialActionPoints - 12,
+				moveableWorm.getCurrentActionPoints());
 	}
 
 	@Test
 	public void move_UpwardOrientation() {
-		wormUpwardDirection.move(10);
-		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4), wormUpwardDirection
+		wormUpwardDirection.move(1);
+		assertTrue(fuzzyEquals(2, wormUpwardDirection
 				.getPosition().getX()));
-		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4), wormUpwardDirection
+		assertTrue(fuzzyEquals(4.5, wormUpwardDirection
 				.getPosition().getY()));
 	}
 
 	@Test
 	public void move_MultipleIntervals() {
-		wormUpwardDirection.move(5);
-		wormUpwardDirection.move(5);
-		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4), wormUpwardDirection
-				.getPosition().getX()));
-		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4), wormUpwardDirection
-				.getPosition().getY()));
+		moveableWorm.move(2);
+		moveableWorm.move(1);
+		assertTrue(fuzzyEquals(2, moveableWorm.getPosition().getX()));
+		assertTrue(fuzzyEquals(1, moveableWorm.getPosition().getY()));
 	}
-
-	@Test(expected = IllegalStepsException.class)
-	public void move_IllegalCase() throws Exception {
-		standardWorm.move(10000);
-	}
-
+//TODO: work out exception
+//	@Test(expected = IllegalStepsException.class)
+//	public void move_IllegalCase() throws Exception {
+//		standardWorm.move(10000);
+//	}
+	
 	@Test
-	public void move_PassiveSingleCase() {
-		standardWorm.move(1);
-		assertTrue(standardWorm.getPosition().equals(new Position(4.5, 1.5)));
-		assertEquals(standardWorm.getActionPointsMaximum(),
-				standardWorm.getCurrentActionPoints());
+	public void  fall_SingleCase() {
+		fallableWorm.move(4);
+		assertTrue(fuzzyEquals(1.05, fallableWorm.getPosition().getY(), 0.01));
 	}
 
 	@Test
@@ -245,7 +246,7 @@ public class WormTest {
 
 	@Test
 	public void canJump_ZeroActionPoints() {
-		standardWorm.setCurrentActionPoints(0);
+		standardWorm.decreaseActionPoints(5000);
 		assertFalse(standardWorm.canJump());
 	}
 
@@ -302,7 +303,7 @@ public class WormTest {
 
 	@Test
 	public void canTurn_FalseCaseActionPoints() {
-		standardWorm.setCurrentActionPoints(0);
+		standardWorm.decreaseActionPoints(5000);
 		standardWorm.canTurn(standardWorm.getAngleRange() / 2);
 	}
 
@@ -331,18 +332,6 @@ public class WormTest {
 				standardWorm.getDirection()));
 		assertTrue(fuzzyEquals((initialAP - 75),
 				standardWorm.getCurrentActionPoints()));
-	}
-
-	@Test
-	public void move_AfterTurningUpward() {
-		wormDownwardDirection.turn(Math.PI / 2);
-		wormDownwardDirection.move(10);
-		assertTrue(fuzzyEquals(Math.PI / 4,
-				wormDownwardDirection.getDirection()));
-		assertTrue(fuzzyEquals(10 * Math.cos(Math.PI / 4),
-				wormDownwardDirection.getPosition().getX()));
-		assertTrue(fuzzyEquals(10 * Math.sin(Math.PI / 4),
-				wormDownwardDirection.getPosition().getY()));
 	}
 
 	@Test
@@ -397,25 +386,24 @@ public class WormTest {
 	}
 
 	@Test
-	public void setCurrentActionPoints_LegalCase() {
-		standardWorm.setCurrentActionPoints(standardWorm
-				.getActionPointsMaximum() - 1);
-		assertEquals(standardWorm.getActionPointsMaximum() - 1,
+	public void decreaseActionPoints_NormalAmount() {
+		standardWorm.decreaseActionPoints(50);
+		assertEquals(standardWorm.getActionPointsMaximum() - 50,
 				standardWorm.getCurrentActionPoints());
 	}
 
 	@Test
-	public void setCurrentActionPoints_NegativeAmount() {
-		standardWorm.setCurrentActionPoints(-10);
-		assertEquals(0, standardWorm.getCurrentActionPoints());
-	}
-
-	@Test
-	public void setCurrentActionPoints_AboveMaximum() {
-		standardWorm.setCurrentActionPoints(standardWorm
-				.getActionPointsMaximum() + 1);
+	public void decreaseActionPoints_NegativeAmount() {
+		standardWorm.decreaseActionPoints(-10);
 		assertEquals(standardWorm.getActionPointsMaximum(),
 				standardWorm.getCurrentActionPoints());
+	}
+	
+	@Test
+	public void decreaseActionPoints_AmountGreaterThanCurrentAP() {
+		int currentAP = standardWorm.getCurrentActionPoints();
+		standardWorm.decreaseActionPoints(currentAP + 1);
+		assertEquals(0, standardWorm.getCurrentActionPoints());
 	}
 
 	@Test
@@ -489,26 +477,6 @@ public class WormTest {
 	@Test
 	public void canHaveAsWeapon_HasWeaponAlready() {
 		assertFalse(standardWorm.canHaveAsWeapon(Weapon.RIFLE));
-	}
-	
-	@Test
-	public void move_SingleCase() {
-		moveableWorm.setWorld(world);
-		moveableWorm.setPosition(new Position(2.25, 4));
-		System.out.println(moveableWorm.getPosition().toString());
-		System.out.println(moveableWorm.getCurrentHitPoints());
-		moveableWorm.move(5);
-		System.out.println(moveableWorm.getPosition().toString());
-		System.out.println(moveableWorm.getCurrentHitPoints());
-	}
-	
-	@Test
-	public void fall_SingleCase() {
-		standardWorm.setWorld(world);
-		standardWorm.setPosition(new Position(3.5, 2));
-		System.out.println(standardWorm.getPosition().toString());
-		standardWorm.fall();
-		System.out.println(standardWorm.getPosition().toString());
 	}
 
 }

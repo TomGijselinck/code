@@ -5,14 +5,14 @@ import be.kuleuven.cs.som.annotate.*;
 
 /**
  * A class of exceptions signaling illegal steps for worms.
- *   Each illegal steps exception involves the illegal steps and the 
- *   worm.
+ *   Each illegal steps exception involves the direction in which the illegal
+ *   step is to be taken and the worm.
  * 
  * @version 1.0
  * @author Tom Gijselinck
  *
  */
-public class IllegalStepsException extends RuntimeException {
+public class IllegalStepException extends RuntimeException {
 
 	/**
 	 * 
@@ -39,24 +39,24 @@ public class IllegalStepsException extends RuntimeException {
 	 * 			cause.
 	 * 		  |	super()
 	 */
-	public IllegalStepsException(double steps, Worm worm) {
-		this.steps = steps;
+	public IllegalStepException(double direction, Worm worm) {
+		this.direction = direction;
 		this.worm = worm;
 	}
 	
 	
 	/**
-	 * Return the steps of this illegal steps exception.
+	 * Return the direction of this illegal steps exception.
 	 */
 	@Basic @Raw @Immutable
-	public double getsteps() {
-		return steps;
+	public double getDirection() {
+		return direction;
 	}
 	
 	/**
-	 * Variable registering the steps of this illegal steps exception.
+	 * Variable registering the direction of this illegal steps exception.
 	 */
-	private final double steps;
+	private final double direction;
 	
 	
 	/**

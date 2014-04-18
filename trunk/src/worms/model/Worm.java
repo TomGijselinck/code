@@ -1,10 +1,16 @@
  package worms.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+
+
+
+
+
 import worms.exceptions.IllegalPositionException;
-import worms.exceptions.IllegalCoordinateException;
 import worms.exceptions.IllegalJumpException;
 import worms.exceptions.IllegalNameException;
 import worms.exceptions.IllegalRadiusException;
@@ -72,6 +78,9 @@ public class Worm {
 	 * 		  |	&& new.hasAsWeapon(Weapon.BAZOOKA)
 	 * @post	This new worm is not terminated.
 	 * 		  |	! new.isTerminated()
+	 * @post	The new active weapon of this new worm is the first weapon in
+	 * 			the list of weapons attached to this worm.
+	 * 		  |	getActiveWeapon() == weapons.get(0)
 	 * @throws	IllegalPositionException
 	 * 			The given position for this new worm is not a valid position for
 	 * 			any worm.
@@ -84,6 +93,7 @@ public class Worm {
 	 * 			worm.
 	 * 		  |	! isValidName(name)
 	 */
+	//TODO weapons doc herschrijven
 	@Raw
 	public Worm(Position position, double direction, double radius, String name)
 			throws IllegalPositionException, IllegalRadiusException,
@@ -95,9 +105,10 @@ public class Worm {
 		setName(name);
 		setCurrentActionPoints(getActionPointsMaximum());
 		setCurrentHitPoints(getHitPointsMaximum());
-		addAsWeapon(Weapon.RIFLE);
-		addAsWeapon(Weapon.BAZOOKA);
+		addAsWeapon(new Rifle());
+		addAsWeapon(new Bazooka());
 		isTerminated = false;
+		activeWeapon = weapons.get(0);
 	}
 	
 	
@@ -154,7 +165,7 @@ public class Worm {
 	 * 		  |		  for some r in 0..getRadius():
 	 * 		  |			isAdjacent(position) )
 	 * 		  |		then new.getPosition() == position where 
-	 * 		  |			for each position where isAdjacent(position):
+	 * 		  |			for each position in isAdjacent(position):
 	 * 		  |		  		( (sqrt((x0 - x*)^2 + (y0 - y*)^2)
 	 * 		  |			  		>= sqrt((x0 - x)^2 + (y0 - y)^2))
 	 * 		  |		   	   && (arctan((x0 - x*)/(y0 - y*))
@@ -170,7 +181,7 @@ public class Worm {
 	 * 		  |		for some r in 0..getRadius():
 	 * 		  |			isPassable(position) )
 	 * 		  |	then new.getPosition() == position where 
-	 * 		  |		for each position where isPassable(position):
+	 * 		  |		for each position in isPassable(position):
 	 * 		  |			( (sqrt((x0 - x*)^2 + (y0 - y*)^2)
 	 * 		  |			  		>= sqrt((x0 - x)^2 + (y0 - y)^2))
 	 * 		  |		   && (arctan((x0 - x*)/(y0 - y*))
@@ -180,11 +191,15 @@ public class Worm {
 	 * 			move.
 	 * 		  |	else new.getPosition() = this.getPosition()
 	 * @throws	IllegalStepException
-	 * 			This worm cannot move the given number of steps
-	 * 		  |	(! canMove(steps)
+	 * 			This worm cannot move the given number of steps in the optimal
+	 * 			direction.
+	 * 		  |	let
+	 * 		  |		slope = arctan((x0 - x*)/(y0 - y*))
+	 * 		  |	in
+	 * 		  |		(! canMove(slope))
 	 */
-	//TODO exception uitwerken
-	public void move(int steps) {
+	//TODO formal documentation
+	public void move(int steps) throws IllegalStepException {
 		while (steps > 0) {
 			Position adjacentPosition = getOptimalPosition(this, true);
 			if (adjacentPosition == null) {
@@ -389,54 +404,44 @@ public class Worm {
 	 *   Jumping of a worm is an active movement and consumes all its remaining
 	 *   current action points.
 	 *   
-	 * @post	The new position of this worm is equal to the initial position
-	 *   		of this worm translated by the jump distance if its direction
-	 *   		is upwards.
-	 *   	  |	new.getPosition ==
-	 *   	  |		this.setPosition(getPosition.translate(jumpDistance(),0))
+	 * @post	If the jump time of this worm is infinite, this worm will jump
+	 * 			outside the world of this worm and thus this worm will be 
+	 * 			terminated.
+	 * 		  |	if (jumpTime() == infinity) then this.terminate()
+	 * 			ELse if the jump time of this worm is equal to zero, this worm
+	 * 			will not jump.
+	 * 		  |	if (jumpTime() == 0) 
+	 * 		  |		then new.getPosition() == this.getPosition()
+	 * 			Otherwise the new position of this worm is equal to the first
+	 * 			position on its jump trajectory that is adjacent to impassable
+	 * 			terrain and at least at a distance equal to its 
+	 * 			radius from its current position.
+	 *   	  |	for each t in 0..jumpTime():
+	 *   	  |		if (t == jumpTime())
+	 *   	  |			then ( (new.getPosition() == jumpStep(t))
+	 *   	  |				&& getWorld().isAdjacent(jumpStep(t)) )
+	 *   	  |		else if (t < jumpTime())
+	 *   	  |			then getWorld().isPassable(jumpStep(t))				
 	 * @post	The new current action points of this worm is equal to zero.
 	 * 		  |	new.getActionPoints() == 0
 	 * @throws	IllegalJumpException(this)
 	 * 			This worm cannot jump.
 	 * 		  |	! canJump()
-	 * @effect	The new position of this worm is the initial position of this
-	 * 			worm translated by the jump distance.
-	 * 		  |	this.setPosition(getPosition().translate(jumpDistance(), 0))
 	 */
-	//TODO specification checken
-	public void jump() throws IllegalCoordinateException, IllegalJumpException {
+	public void jump(double timeStep) 
+			throws IllegalArgumentException, IllegalJumpException {
 		if (! canJump())
 			throw new IllegalJumpException(this);
-		jumpTime = 0;
-		boolean jumping = true;
-		double dt = getJumpTimeStep(0, 0, 0); //TODO vul in
-		Position startPosition = getPosition().translate(0, 0);
-		Position jumpPosition = getPosition().translate(0, 0);
-		World world = getWorld();
-		double radius = getRadius();
-		
-		while (jumping
-				&& (jumpPosition.getDistanceFrom(startPosition) < radius)) {
-			jumpTime += dt;
-			jumpPosition = jumpStep(jumpTime);
-			if (! world.isPassable(jumpPosition)) {jumping = false;}
-		}
-		
-		while (jumping && (! world.isAdjacent(jumpPosition, radius)) 
-				&& (world.isInsideWorldBorders(jumpPosition))) {
-			jumpTime += dt;
-			jumpPosition = jumpStep(jumpTime);
-			if (! world.isPassable(jumpPosition)) {jumping = false;}
-		
-		}
-		
-		if (world.isAdjacent(jumpPosition, radius)) {
-			setPosition(jumpPosition);
+		double jumpTime = jumpTime(timeStep);
+		if (jumpTime == Double.POSITIVE_INFINITY) {
+			terminate();
+		} else if (jumpTime == 0) {
+			//worm will not jump
+		} else if ((jumpTime > 0) && (jumpTime < Double.POSITIVE_INFINITY)) {
+			Position finalDestination = jumpStep(jumpTime, jumpSpeed());
+			setPosition(finalDestination);
 			setCurrentActionPoints(0);
-		} else {
-			System.out.println("worm cannot jump");
-			System.out.println(jumpPosition.toString());
-		}		
+		}
 		
 	}
 	
@@ -454,60 +459,98 @@ public class Worm {
 				&& (getCurrentActionPoints() > 0) );
 	}
 	
-	private double getJumpTimeStep(double t0, double v0x, double v0y) {
-		double f = Math.pow(v0x, 2) + Math.pow(v0y, 2); //TODO afwerken
-		
-		return 0.001;
-	}
-	
-	
-	
-	
 	/**
-	 * Returns the time in seconds this worm needs for jumping a certain 
-	 * distance.
+	 * Returns the time in seconds this worm needs for jumping.
+	 * 
+	 * @param	dt
+	 * 			The time step in which a worm will not completely move through
+	 * 			a piece of impassable terrain.
+	 * @return	If there exists an adjacent position in the jump trajectory of
+	 * 			this worm inside the world of this worm that is at least a 
+	 * 			distance equal to its radius away from its original position,
+	 * 			the resulting jump time is equal to the time until this worms 
+	 * 			reaches that position.
+	 * 		  |	let
+	 * 		  |		jumpPosition = jumpStep(time, jumpSpeed())
+	 * 		  |		R = getRadius()
+	 * 		  |	in
+	 * 		  |		if for some time in double:
+	 * 		  |			if ( getWorld().isAdjacent(jumpPosition, R)
+	 * 		  |			  && (jumpPosition.getDistanceFrom(getPosition())
+	 * 		  |				> getRadius())
+	 * 		  |			  && getWorld().isInsideWorldBorders(jumpPosition) 
+	 * 		  |			  && (for each t in 0..time where t < time:
+	 *   	  |					getWorld().isPassable(jumpStep(t)
+	 *   	  |				 && (! getWorld().isAdjacent(jumpPosition, R))	)
+	 * 		  |				then result == time
+	 * 			Else if this worm hits an impassable piece of terrain at a 
+	 * 			distance equal to the radius of this worm from its original 
+	 * 			position, the resulting jump time is equal to zero.
+	 * 		  |	else if for some time in double:
+	 * 		  |		if ( (jumpPosition.getDistanceFrom(getPosition()) < R)
+	 * 		  |		  && getWorld().isImpassable(jumpPosition) )
+	 * 		  |			then result == 0
+	 * 			Otherwise, if this worm leaves its game world, the resulting 
+	 * 			jump time is equal to positive infinity (i.e. an infinite jump
+	 * 			in an infinite and undefined space).
+	 * 		  |	else if for some time in double:
+	 * 		  |		if (! getWorld().isInsideWorldBorders(jumpPosition))
+	 * 		  |			then result == Double.POSITIVE_INFINITY
 	 */
-	@Basic
-	public double jumpTime() {
+	public double jumpTime(double dt) {
+		double jumpTime = 0;
+		boolean jumping = true;
+		Position startPosition = getPosition().translate(0, 0);
+		Position jumpPosition = getPosition().translate(0, 0);
+		World world = getWorld();
+		double radius = getRadius();
+		double jumpSpeed = jumpSpeed();
+		
+		while (jumping
+				&& (jumpPosition.getDistanceFrom(startPosition) < radius)
+				&& (world.isInsideWorldBorders(jumpPosition))) {
+			jumpTime += dt;
+			jumpPosition = jumpStep(jumpTime, jumpSpeed);
+			if (world.isImpassableForObject(jumpPosition, radius)) {jumping = false;}
+		}
+		
+		while (jumping && (world.isInsideWorldBorders(jumpPosition))) {
+			jumpTime += dt;
+			jumpPosition = jumpStep(jumpTime, jumpSpeed);
+			if (world.isAdjacent(jumpPosition, radius)) {jumping = false;}
+		
+		}
+		
+		if (! world.isAdjacent(jumpPosition, radius)) {
+			jumpTime = 0;
+		}
+		if (! world.isInsideWorldBorders(jumpPosition)) {
+			jumpTime = Double.POSITIVE_INFINITY;
+		}
+		
 		return jumpTime;
 	}
-	
-	/**
-	 * Variable referencing the jump time of the last jump this worm made.
-	 */
-	private double jumpTime = 0;
-	
-	
-	
 	
 	/**
 	 * Returns the in-flight position of a jumping worm after a given time 
 	 * interval after launch.
 	 * 
-	 * @throws	IllegalJumpException
-	 * 			This worm cannot jump.
-	 * 		  |	! canJump()
-	 * @throws	IllegalArgumentException
-	 * 			The given time interval is greater than the jump time.
-	 * 		  |	timeInterval > jumpTime()
+	 * @pre		The given time interval is less than or equal to the time this
+	 * 			worm needs to perform a jump.
+	 * 		  |	timeInterval <= jumpTime()
 	 * @return	The resulting position is equal to the initial position of this
 	 * 			worm translated by the distance covered in the given time
 	 * 			interval at the jump speed of this worm.
 	 * 		  |	result ==
 	 * 		  |		getPosition.translate(
-	 * 		  |			+ jumpSpeed()*Math.cos(getDirection())*timeInterval,
-	 * 		  |			jumpSpeed()*Math.sin(getDirection())
-	 * 		  |				- 0.5*g*Math.pow(timeInterval, 2) )
+	 * 		  |			jumpSpeed() * cos(getDirection()) * timeInterval,
+	 * 		  |			jumpSpeed() * sin(getDirection())
+	 * 		  |				- 0.5 * getGravityOfEarth() * timeInterval^2 )
 	 */
-	public Position jumpStep(double timeInterval)
-			throws IllegalArgumentException, IllegalJumpException {
-		if (! canJump())
-			throw new IllegalJumpException(this);
-		if (timeInterval > jumpTime())
-			throw new IllegalArgumentException();
+	public Position jumpStep(double timeInterval, double initialSpeed) {
 		double g = getGravityOfEarth();
-		double deltaX = jumpSpeed() * Math.cos(getDirection()) * timeInterval;
-		double deltaY = jumpSpeed() * Math.sin(getDirection()) * timeInterval
+		double deltaX = initialSpeed * Math.cos(getDirection()) * timeInterval;
+		double deltaY = initialSpeed * Math.sin(getDirection()) * timeInterval
 				- 0.5 * g * Math.pow(timeInterval, 2);
 		Position flightPosition = getPosition().translate(deltaX, deltaY);				
 		return flightPosition;
@@ -1161,6 +1204,46 @@ public class Worm {
 	private World world;
 	
 	/**
+	 * Return the number of weapons of this worm.
+	 */
+	@Basic
+	public int getNbWeapons() {
+		return weapons.size();
+	}
+	
+	/**
+	 * Return the weapon of this worm at the given index.
+	 * 
+	 * @param 	index
+	 * 			The index of the weapon to be returned.
+	 * @throws	IndexOutOfBoundsException
+	 * 			The given index is not positive or it exceeds the number of 
+	 * 			weapons attached to this worm.
+	 * 		  |	(index < 1) || (index > getNbWeapons()
+	 */
+	public Weapon getWeaponAt(int index) throws IndexOutOfBoundsException {
+		return weapons.get(index - 1);
+	}
+	
+	/**
+	 * Return the index at which the given weapon is registered as a weapon of
+	 * this worm.
+	 * 
+	 * @param	weapon
+	 * 			The weapon to look for.
+	 * @return	The given weapon is registered as a weapon of this worm at the 
+	 * 			resulting index.
+	 * 		  |	getWeaponAt(result) == weapon
+	 * @throws	IllegalArgumentException
+	 * 			The given weapon is not a weapon of this worm.
+	 * 		  |	! hasAsWeapon(weapon)
+	 */
+	public int getIndexOfWeapon(Weapon weapon) {
+		if (! hasAsWeapon(weapon)) throw new IllegalArgumentException();
+		return weapons.indexOf(weapon);
+	}
+	
+	/**
 	 * Check whether this worm has the given weapon as one of its weapons.
 	 * 
 	 * @param 	weapon
@@ -1207,7 +1290,7 @@ public class Worm {
 	public boolean hasProperWeapons() { return true;}
 	
 	/**
-	 * Add the given weapon to the set of weapons attached to this worm.
+	 * Add the given weapon to the list of weapons attached to this worm.
 	 * 
 	 * @param	weapon
 	 * 			The weapon to be added.
@@ -1225,7 +1308,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Remove the given weapon from the set of weapons attached to this worm.
+	 * Remove the given weapon from the list of weapons attached to this worm.
 	 * 
 	 * @param	weapon
 	 * 		  	The weapon to be removed.
@@ -1237,7 +1320,7 @@ public class Worm {
 	}
 	
 	/**
-	 * Set collecting references to weapons attached to this worm.
+	 * List collecting references to weapons attached to this worm.
 	 * 
 	 * @invar	The set of weapons is effective.
 	 * 		  |	weapons != null
@@ -1246,17 +1329,86 @@ public class Worm {
 	 * 		  |	for each weapon in Weapon:
 	 * 		  |		canHaveAsWeapon(weapon)
 	 */
-	private final Set<Weapon> weapons = new HashSet<Weapon>();
+	private final List<Weapon> weapons = new ArrayList<Weapon>();
+	
+	/**
+	 * Return the active weapon of this worm.
+	 */
+	@Basic
+	public Weapon getActiveWeapon() {
+		return activeWeapon;
+	}
+	
+	/**
+	 * Select the next weapon in the list of weapons attached to this worm as
+	 * the new active weapon of this worm.
+	 * 
+	 * @post	The new active weapon of this worm is the next weapon in the 
+	 * 			list of weapons attached to this worm.
+	 * 		  |	new.getActiveWeapon() == 
+	 */
+	//TODO formele specificatie afwerken
+	public void selectNextWeapon() {
+		Weapon currentWeapon = getActiveWeapon();
+		int index = weapons.indexOf(currentWeapon);
+		int maxIndex = weapons.size();
+		if (index + 1 >= maxIndex) {
+			activeWeapon = weapons.get(0);
+		} else {
+			activeWeapon = weapons.get(index + 1);
+		}
+	}
+	
+	/**
+	 * Variable referencing the active weapon of this worm.
+	 */
+	private Weapon activeWeapon;
 	
 	
 	
 	
 	
-	//SHOOTING AND PROJECTILES
-	public void fireActiveWeapon(double propulsionYield) {}
+	//SHOOTING
+	/**
+	 * Fire the active weapon of this worm.
+	 * 
+	 * @param 	propulsionYield
+	 * 			The propulsion yield with which the active weapon of this worm
+	 * 			is fired.
+	 * @throws	IllegalArgumentException
+	 * 			This worm cannot shoot its active weapon.
+	 * 		  |	! canShoot()
+	 */
+	public void shoot(double propulsionYield) {
+		if (! canShoot()) throw new IllegalArgumentException();
+		Weapon weapon = getActiveWeapon();
+		decreaseActionPoints(weapon.getActionPointsCost());
+		double R = weapon.getProjectileRadius();
+		double direction = getDirection();
+		double dx = R * Math.cos(direction);
+		double dy = R * Math.sin(direction);
+		Position initialPosition = getPosition().translate(dx, dy);
+		Projectile projectile = null; //TODO afwerken
+		getWorld().setProjectile(projectile);
+		projectile.jump();
+	}
+	//TODO testen schrijven
 	
-	public void selectActiveWeapon(String name) {}
-	
-	
+	/**
+	 * Checks whether this worm can shoot its active weapon.
+	 * 
+	 * @return	True if and only if this worm is located at impassable terrain
+	 * 			and this worm has at least the amount of action points needed to
+	 * 			fire its active weapon.
+	 * 		  |	result ==
+	 * 		  |		 (  getWorld().isAdjacent(getPosition(), getRadius())
+	 * 		  |		&& (getCurrentActionPoints() 
+	 * 		  |			>= getActiveWeapon().getActionPointCost()) )
+	 */
+	public boolean canShoot() {
+		return ( getWorld().isAdjacent(getPosition(), getRadius())
+			  && (getCurrentActionPoints()
+						>= getActiveWeapon().getActionPointsCost()));	
+	}
 
 }

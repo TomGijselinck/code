@@ -204,26 +204,30 @@ public interface IFacade {
 	double[] getJumpStep(Worm worm, double t);
 
 	/**
-	 * Determine the time that the given projectile can jump until it hits the terrain, hits a worm, or leaves the world.
+	 * Determine the time that the given projectile can jump until it hits the
+	 * terrain, hits a worm, or leaves the world.
 	 * The time should be determined using the given elementary time interval.
 	 * 
 	 * @param projectile The projectile for which to calculate the jump time.
 	 * 
 	 * @param timeStep An elementary time interval during which you may assume
-	 *                 that the projectile will not completely move through a piece of impassable terrain.
+	 *                 that the projectile will not completely move through a 
+	 *                 piece of impassable terrain.
 	 *                 
 	 * @return The time duration of the projectile's jump.
 	 */
 	double getJumpTime(Projectile projectile, double timeStep);
 
 	/**
-	 * Determine the time that the given worm can jump until it hits the terrain or leaves the world.
+	 * Determine the time that the given worm can jump until it hits the terrain
+	 * or leaves the world.
 	 * The time should be determined using the given elementary time interval.
 	 * 
 	 * @param worm The worm for which to calculate the jump time.
 	 * 
 	 * @param timeStep An elementary time interval during which you may assume
-	 *                 that the worm will not completely move through a piece of impassable terrain.
+	 *                 that the worm will not completely move through a piece of 
+	 *                 impassable terrain.
 	 *                 
 	 * @return The time duration of the worm's jump.
 	 */

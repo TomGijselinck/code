@@ -16,6 +16,7 @@ public class WorldTest {
 	private World world2;
 	private Worm worm1;
 	private Worm worm2;
+	private Projectile projectile;
 	
 	// 10x10 pixels
 	//     0 1 2 3 4 5 6 7 8 9
@@ -67,6 +68,7 @@ public class WorldTest {
 		world2 = new World(6, 6, passableMap2);
 		worm1 = new Worm(new Position(0.5, 1), 0, 0.5, "First worm");
 		worm2 = new Worm(new Position(3.5, 1.5), 0, 1, "Second worm");
+		projectile = new Projectile(new Position(2, 4), 10);
 		world1.addAsWorm(worm1);
 		world1.addAsWorm(worm2);
 	}
@@ -195,6 +197,29 @@ public class WorldTest {
 	@Test
 	public void isAdjacent_FalseCase() {
 		assertFalse(world1.isAdjacent(new Position(3.5, 2), 0.5));
+	}
+	
+	@Test
+	public void canHaveAsProjectile_EffectiveProjectileTrueCase() {
+		assertTrue(world1.canHaveAsProjectile(projectile));
+	}
+	
+	@Test
+	public void canHaveAsProjectile_EffectiveProjectileFalseCase() {
+		world1.setProjectile(projectile);
+		projectile.terminate();
+		assertFalse(world1.canHaveAsProjectile(projectile));
+	}
+	
+	@Test
+	public void canHaveAsProjectile_NonEffectiveProjectile() {
+		assertTrue(world1.canHaveAsProjectile(null));
+	}
+	
+	@Test
+	public void hasProperProjectile_SingleCase() {
+		world1.setProjectile(projectile);
+		assertTrue(world1.hasProperProjectile());
 	}
 	
 	@Test

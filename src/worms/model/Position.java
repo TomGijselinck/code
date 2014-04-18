@@ -1,6 +1,5 @@
 package worms.model;
 
-import worms.exceptions.IllegalCoordinateException;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -42,10 +41,10 @@ public class Position {
 	 */
 	public Position(double x, double y) {
 		if (! isValidCoordinate(x)) {
-			throw new IllegalCoordinateException(x, this);
+			throw new IllegalArgumentException();
 		}
 		if (! isValidCoordinate(y)) {
-			throw new IllegalCoordinateException(y, this);
+			throw new IllegalArgumentException();
 		}
 		this.x = x;
 		this.y = y;
@@ -117,8 +116,17 @@ public class Position {
 	 * 			dy.
 	 * 		  |	result.equals(
 	 * 		  |		new Position(this.getX() + dx, this.getY() + dy))
+	 * @throws	IllegalArgumentException
+	 * 			The resulting position has illegal coordinates.
+	 * 		  |	 ( (! isValidCoordinate(dx))
+	 * 		  |	|| (! isValidCoordinate(dy)) )
 	 */
-	public Position translate(double dx, double dy) {
+	public Position translate(double dx, double dy) 
+			throws IllegalArgumentException {
+		if ( (! isValidCoordinate(dx))
+	  	  || (! isValidCoordinate(dy)) ) {
+			throw new IllegalArgumentException();
+		}
 		return new Position(getX() + dx, getY() + dy);
 	}
 	

@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import worms.exceptions.IllegalCoordinateException;
 import static worms.util.Util.*;
 
 /**
@@ -40,21 +39,26 @@ public class PositionTest {
 		assertTrue(fuzzyEquals(2, position.getY()));
 	}
 	
-	@Test (expected = IllegalCoordinateException.class)
+	@Test (expected = IllegalArgumentException.class)
 	public void constructor_IllegalXCoordinate() {
 		new Position(Double.NaN, 1);
 	}
 	
-	@Test (expected = IllegalCoordinateException.class)
+	@Test (expected = IllegalArgumentException.class)
 	public void constructor_IllegalYCoordinate() {
 		new Position(1, Double.NaN);
 	}
 	
 	@Test
-	public void translate_SingleCase() {
+	public void translate_NormalCase() {
 		Position translatedPosition = position1x1y.translate(1, 2);
 		assertTrue(fuzzyEquals(2, translatedPosition.getX()));
 		assertTrue(fuzzyEquals(3, translatedPosition.getY()));
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void translate_IllegalCoordinate() {
+		position1x1y.translate(Double.NaN, 1);
 	}
 	
 	@Test

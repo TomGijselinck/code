@@ -66,10 +66,10 @@ public class World {
 	 * @post	This world no longer references a projectile as the projectile
 	 * 		  	to which it is attached.
 	 * 		  |	new.getProjectile() == null
-	 * @post	If this world was not already terminated, the projectile to
-	 * 			which this world was attached no longer has a world attached to
-	 * 			it.
-	 * 		  |	if (! this.isTerminated())
+	 * @post	If this world was not already terminated and if this world had
+	 * 			an effective projectile, the projectile to which this world was
+	 * 			attached no longer has a world attached to it.
+	 * 		  |	if ((! this.isTerminated()) && (getProjectile != null))
 	 * 		  |		then (! ((new) this.getProjectile()).hasWorld() )
 	 * @post	No worms are any longer attached to this world.
 	 * 		  |	new.getNbWorms() == 0
@@ -81,7 +81,9 @@ public class World {
 	 * 		  |		this.removeAsWorm(worm)
 	 */
 	public void terminate() {
-		//TODO uncomment when implemented: if (! isTerminated()) getProjectile().setWorld(null);
+		if ((! this.isTerminated()) && (getProjectile() != null)) {
+			getProjectile().setWorld(null);
+		}
 		setProjectile(null);
 		Iterator<Worm> iterator = worms.iterator();
 		while (iterator.hasNext()) {
@@ -557,7 +559,9 @@ public class World {
 	 * Return the live projectile of this world. 
 	 */
 	@Basic
-	public Projectile getProjectile() { return projectile;}
+	public Projectile getProjectile() { 
+		return projectile;
+	}
 	
 	/**
 	 * Checks whether this world can have the given projectile as its 
@@ -573,7 +577,15 @@ public class World {
 	 * 		  |	     && (! projectile.isTerminated()) )
 	 * 		  |    || (projectile == null) )
 	 */
-	public boolean canHaveAsProjectile(Projectile projectile) { return true;}
+	public boolean canHaveAsProjectile(Projectile projectile) {
+		if (isTerminated()) {
+			return (projectile == null);
+		} else {
+			return ( (projectile == null)
+				  || ( (projectile != null)
+					&& (! projectile.isTerminated())) );
+		}
+	}
 	
 	/**
 	 * Check whether this world has a proper projectile attached to it.
@@ -586,7 +598,11 @@ public class World {
 	 * 		  |	   && ( (getProjectile() == null)
 	 * 		  |		 ||	(getProjectile().getWorld() == this) ) )
 	 */
-	public boolean hasProperProjectile() { return true;}
+	public boolean hasProperProjectile() {
+		return ( canHaveAsProjectile(getProjectile())
+			  &&  ( (getProjectile() == null)
+				 ||	(getProjectile().getWorld() == this)) ); 
+	}
 	
 	/**
 	 * Set the projectile which is active in this world to the given projectile.
@@ -595,11 +611,23 @@ public class World {
 	 * 			...
 	 * @post	...
 	 * 		  |	new.getProjectile() == projectile
+	 * @post	...
+	 * 		  |	if (projectile != null)
+	 * 		  |		then new.getProjectile().getWorld() == this
 	 * @throws	IllegalArgumentException
 	 * 			...
 	 * 		  |	! canHaveAsProjectile(projectile)
 	 */
-	public void setProjectile(Projectile projectile) {}
+	public void setProjectile(Projectile projectile) 
+			throws IllegalArgumentException {
+		if (! canHaveAsProjectile(projectile)) {
+			throw new IllegalArgumentException();
+		}
+		this.projectile = projectile;
+		if (projectile != null) {
+			getProjectile().setWorld(this);
+		}
+	}
 	
 	/**
 	 * Checks whether this world has a live effective projectile attached to it.

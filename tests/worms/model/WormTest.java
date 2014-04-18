@@ -43,11 +43,6 @@ public class WormTest {
 	 * Pi/2 radians, radius 0.5 and name "UpwardWorm".
 	 */
 	private static Worm wormUpwardDirection;
-
-	/**
-	 * Variable referencing a worm with downward direction of 7/4*Pi radians.
-	 */
-	private static Worm wormDownwardDirection;
 	
 	/**
 	 * Variable referencing a world with width and height of 5 and passableMap
@@ -80,6 +75,8 @@ public class WormTest {
 				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
 				{false, false, 	false, 	false,	false,	false,	false,	false,	false,	false}
 		};
+		
+		private static double timeStep = 0.005;
 
 	/**
 	 * Set up a mutable test fixture.
@@ -92,8 +89,6 @@ public class WormTest {
 		standardWorm = new Worm(new Position(3.5, 1.5), 0, 1, "Standard");
 		wormUpwardDirection = new Worm(new Position(2, 4), Math.PI / 2, 0.5,
 				"UpwardWorm");
-		wormDownwardDirection = new Worm(new Position(0, 0), Math.PI * 7 / 4,
-				1, "Downward direction");
 		moveableWorm = new Worm(new Position(0.5, 1), 0, 0.5, "MoveWorm");
 		fallableWorm = new Worm(new Position(2, 4), 0, 0.5, "FallWorm");
 		world = new World(5, 5, passableMap);
@@ -114,8 +109,8 @@ public class WormTest {
 				theWorm.getCurrentActionPoints());
 		assertEquals(theWorm.getHitPointsMaximum(), 
 				theWorm.getCurrentHitPoints());
-		assertTrue(theWorm.hasAsWeapon(Weapon.RIFLE));
-		assertTrue(theWorm.hasAsWeapon(Weapon.BAZOOKA));
+		assertTrue(theWorm.hasAsWeapon(new Rifle()));
+		assertTrue(theWorm.hasAsWeapon(new Bazooka()));
 		assertFalse(theWorm.isTerminated());
 	}
 
@@ -172,11 +167,12 @@ public class WormTest {
 		assertTrue(fuzzyEquals(2, moveableWorm.getPosition().getX()));
 		assertTrue(fuzzyEquals(1, moveableWorm.getPosition().getY()));
 	}
-//TODO: work out exception
-//	@Test(expected = IllegalStepsException.class)
-//	public void move_IllegalCase() throws Exception {
-//		standardWorm.move(10000);
-//	}
+
+	@Test(expected = IllegalStepException.class)
+	public void move_IllegalCase() throws Exception {
+		standardWorm.decreaseActionPoints(5000);
+		standardWorm.move(1);
+	}
 	
 	@Test
 	public void  fall_SingleCase() {
@@ -187,22 +183,37 @@ public class WormTest {
 	@Test
 	public void jump_SingleCase() {
 		moveableWorm.turn(0.3);
-		System.out.println(moveableWorm.getPosition().toString());
-		moveableWorm.jump();
-		System.out.println(moveableWorm.getPosition().toString());
+		moveableWorm.jump(timeStep);
 		assertEquals(0, moveableWorm.getCurrentActionPoints());
 	}
 
+	@Test
+	public void jump_NotBeyondWormRadius() {
+		Position initialPosition = new Position(1.5, 1.75);
+		Worm worm = new Worm(initialPosition, 1.4, 1.2, "BigWorm");
+		world.addAsWorm(worm);
+		worm.jump(timeStep);
+		assertTrue(worm.getPosition().equals(initialPosition));
+	}
+	
+	@Test
+	public void jump_OutsideWorldBorders() {
+		Worm worm = new Worm(new Position(4, 1), 0.7, 0.5, "Outside Borders");
+		world.addAsWorm(worm);
+		worm.jump(timeStep);
+		assertTrue(worm.isTerminated());
+	}
+	
 	@Test(expected = IllegalJumpException.class)
 	public void jump_IllegalJump() throws Exception {
 		standardWorm.decreaseActionPoints(5000);
-		standardWorm.jump();
+		standardWorm.jump(timeStep);
 	}
 
 	@Test(expected = IllegalJumpException.class)
 	public void jump_SecondJump() throws Exception {
-		wormUpwardDirection.jump();
-		wormUpwardDirection.jump();
+		wormUpwardDirection.jump(timeStep);
+		wormUpwardDirection.jump(timeStep);
 	}
 
 	@Test
@@ -219,7 +230,8 @@ public class WormTest {
 	@Test
 	public void jumpStep_LegalCase() {
 		double g = Worm.getGravityOfEarth();
-		Position resultPosition = wormUpwardDirection.jumpStep(1);
+		double initialSpeed = wormUpwardDirection.jumpSpeed();
+		Position resultPosition = wormUpwardDirection.jumpStep(1, initialSpeed);
 		Position expectedPosition = wormUpwardDirection.getPosition()
 				.translate(
 						wormUpwardDirection.jumpSpeed()
@@ -229,11 +241,6 @@ public class WormTest {
 								- 0.5 * g * Math.pow(1, 2));
 		assertTrue(fuzzyEquals(expectedPosition.getX(), resultPosition.getX()));
 		assertTrue(fuzzyEquals(expectedPosition.getY(), resultPosition.getY()));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void jumpStep_IllegalTimeInterval() throws Exception {
-		wormUpwardDirection.jumpStep(2);
 	}
 
 	@Test
@@ -386,13 +393,13 @@ public class WormTest {
 	
 	@Test
 	public void hasAsWeapon_SingleCase() {
-		assertTrue(standardWorm.hasAsWeapon(Weapon.RIFLE));
+		assertTrue(standardWorm.hasAsWeapon(new Rifle()));
 	}
 	
 	@Test
 	public void canHaveAsWeapon_TrueCase() {
-		standardWorm.removeAsWeapon(Weapon.RIFLE);
-		assertTrue(standardWorm.canHaveAsWeapon(Weapon.RIFLE));
+		standardWorm.removeAsWeapon(new Rifle());
+		assertTrue(standardWorm.canHaveAsWeapon(new Rifle()));
 	}
 	
 	@Test
@@ -403,12 +410,19 @@ public class WormTest {
 	@Test
 	public void canHaveAsWeapon_TerminatedWorm() {
 		standardWorm.terminate();
-		assertFalse(standardWorm.canHaveAsWeapon(Weapon.RIFLE));
+		assertFalse(standardWorm.canHaveAsWeapon(new Rifle()));
 	}
 	
 	@Test
 	public void canHaveAsWeapon_HasWeaponAlready() {
-		assertFalse(standardWorm.canHaveAsWeapon(Weapon.RIFLE));
+		assertFalse(standardWorm.canHaveAsWeapon(new Rifle()));
+	}
+	
+	@Test
+	public void selectNextWeapon_SingleCase() {
+		assertTrue(standardWorm.getActiveWeapon().equals(new Rifle()));
+		standardWorm.selectNextWeapon();
+		assertTrue(standardWorm.getActiveWeapon().equals(new Bazooka()));
 	}
 
 }

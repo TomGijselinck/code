@@ -18,8 +18,25 @@ import be.kuleuven.cs.som.annotate.*;
 public class Projectile {
 	
 	//CONSTRUCTORS
-	
-	public Projectile(double mass) {}
+	/**
+	 * ...
+	 * 
+	 * @param 	mass
+	 * 		  	...
+	 * @post	...
+	 * 		  |	new.getMass() == mass
+	 * @post	...
+	 * 		  |	! new.isTerminated()
+	 */
+	public Projectile(Position position, double direction, int mass,
+			int radius, int damage) {
+		this.position = position;
+		this.direction = direction;
+		this.mass = mass;
+		this.radius = radius;
+		this.damage = damage;
+		this.isTerminated = false;
+	}
 	
 	
 	
@@ -39,12 +56,21 @@ public class Projectile {
 	 * 		  |	if (! this.isTerminated())
 	 * 		  |		then (! (new.getWorld()).hasProjectile() )
 	 */
-	public void terminate() {}
+	public void terminate() {
+		if (! isTerminated()) {
+			getWorld().setProjectile(null);
+		}
+		setWorld(null);
+		isTerminated = true;
+	}
 	
 	/**
 	 * Check whether this projectile is terminated.
 	 */
-	public boolean isTerminated() { return isTerminated;}
+	@Basic
+	public boolean isTerminated() {
+		return isTerminated;
+	}
 	
 	/**
 	 * Variable registering whether this projectile is terminated.
@@ -58,7 +84,15 @@ public class Projectile {
 	 * Return the orientation of this projectile.
 	 */
 	@Basic
-	public double getDirection() { return 0;}
+	public double getDirection() {
+		return direction;
+	}
+	
+	public void setDirection(double direction) {
+		this.direction = direction;
+	}
+	
+	private double direction;
 	
 	
 	
@@ -66,8 +100,13 @@ public class Projectile {
 	/**
 	 * Return the mass of this projectile.
 	 */
-	@Basic
-	public double getMass() { return 0;}
+	@Basic 
+	@Immutable
+	public int getMass() {
+		return mass;
+	}
+	
+	private int mass;
 	
 	
 	
@@ -75,8 +114,24 @@ public class Projectile {
 	/**
 	 * Return the radius of this projectile.
 	 */
-	@Basic
-	public double getRadius() { return 0;}
+	@Basic 
+	@Immutable
+	public double getRadius() {
+		return radius;
+	}
+	
+	private double radius;
+	
+	
+	
+	
+	@Basic 
+	@Immutable
+	public int getDamage() {
+		return damage;
+	}
+	
+	private int damage;
 	
 	
 	
@@ -86,7 +141,25 @@ public class Projectile {
 	 * Return the world where this projectile is active in.
 	 */
 	@Basic
-	public World getWorld() { return world;}
+	public World getWorld() {
+		return world;
+	}
+	
+	/**
+	 * Check whether this projectile can be attached to the given world.
+	 * 
+	 * @param 	world
+	 * 			...
+	 * @return	...
+	 * 		  |	result ==
+	 * 		  |	  ( (world == null)
+	 * 		  |  || world.canHaveAsProjectile(this) )
+	 */
+	public boolean canHaveAsWorld(World world) {
+		return
+			 ( (world == null)
+			|| world.canHaveAsProjectile(this)	);
+	}
 	
 	/**
 	 * Check whether this projectile has a proper world attached to it.
@@ -108,7 +181,9 @@ public class Projectile {
 	 * @post	...
 	 * 		  |	new.getWorld() == world
 	 */
-	public void setWorld(World world) {}
+	public void setWorld(World world) {
+		this.world = world;
+	}
 	
 	/**
 	 * Variable referencing the world where this projectile is in.
@@ -118,7 +193,9 @@ public class Projectile {
 	/**
 	 * Return the position of this projectile.
 	 */
-	public Position getPosition() { return position;}
+	public Position getPosition() {
+		return position;
+	}
 	
 	/**
 	 * Checks whether this projectile can have the given position as its 
@@ -152,7 +229,7 @@ public class Projectile {
 	 * @post	This projectile references the given position as its position.
 	 * 		  |	new.getPosition() == position
 	 */
-	private void setPosition(Position position) {}
+	public void setPosition(Position position) {}
 	
 	/**
 	 * Variable referencing the position to which this projectile is attached.

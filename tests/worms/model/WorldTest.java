@@ -3,6 +3,7 @@ package worms.model;
 import static org.junit.Assert.*;
 
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 
 import org.junit.Before;
@@ -64,11 +65,11 @@ public class WorldTest {
 	
 	@Before
 	public void setup() {
-		world1 = new World(5, 5, passableMap1);
-		world2 = new World(6, 6, passableMap2);
+		world1 = new World(5, 5, passableMap1, new Random());
+		world2 = new World(6, 6, passableMap2, new Random());
 		worm1 = new Worm(new Position(0.5, 1), 0, 0.5, "First worm");
 		worm2 = new Worm(new Position(3.5, 1.5), 0, 1, "Second worm");
-		projectile = new Projectile(new Position(2, 4), 10);
+		projectile = new Projectile(new Position(2, 4), 0.7, 10, 20, 1.5);
 		world1.addAsWorm(worm1);
 		world1.addAsWorm(worm2);
 	}
@@ -122,51 +123,39 @@ public class WorldTest {
 	}
 	
 	@Test
-	public void isPassable_FalseCaseBottomLeft() {
+	public void isPassable_TrueCaseBottomLeft() {
 		Position position = new Position(0.5, 3);
-		assertFalse(world1.isPassable(position));
+		assertTrue(world1.isPassable(position));
 	}
 	
 	@Test
-	public void isPassable_FalseCaseLeft() {
+	public void isPassable_TrueCaseLeft() {
 		Position position = new Position(3.5, 3.7);
-		assertFalse(world1.isPassable(position));
+		assertTrue(world1.isPassable(position));
 	}
 	
 	@Test
-	public void isPassable_FalseCaseTopLeft() {
+	public void isPassable_TrueCaseTopLeft() {
 		Position position = new Position(3.5, 4);
-		assertFalse(world1.isPassable(position));
+		assertTrue(world1.isPassable(position));
 	}
 	
 	@Test
-	public void isPassable_FalseCaseTop() {
+	public void isPassable_TrueCaseTop() {
 		Position position = new Position(2.1, 3.5);
-		assertFalse(world1.isPassable(position));
+		assertTrue(world1.isPassable(position));
 	}
 	
 	@Test
-	public void isPassable_FalseCaseTopRight() {
+	public void isPassable_TrueCaseTopRight() {
 		Position position = new Position(1.5, 4.5);
-		assertFalse(world1.isPassable(position));
+		assertTrue(world1.isPassable(position));
 	}
 	
 	@Test
-	public void isPassable_FalseCaseRight() {
-		Position position = new Position(4, 3.9);
-		assertFalse(world1.isPassable(position));
-	}
-	
-	@Test
-	public void isPassable_FalseCaseBottomRight() {
+	public void isPassable_TrueCaseBottomRight() {
 		Position position = new Position(4, 3);
-		assertFalse(world1.isPassable(position));
-	}
-	
-	@Test
-	public void isPassable_FalseCaseBottom() {
-		Position position = new Position(2.4, 3);
-		assertFalse(world1.isPassable(position));
+		assertTrue(world1.isPassable(position));
 	}
 	
 	@Test
@@ -224,8 +213,8 @@ public class WorldTest {
 	
 	@Test
 	public void canHaveAsWorm_TrueCase() {
-		world1.removeAsWorm(worm1);
-		assertTrue(world1.canHaveAsWorm(worm1));
+		Worm worm = new Worm(new Position(2, 1), 0, 0.5, "Worm");
+		assertTrue(world1.canHaveAsWorm(worm));
 	}
 	
 	@Test
@@ -267,6 +256,28 @@ public class WorldTest {
 		if (world1.hasProjectile()) {
 			assertTrue(allObjects.contains(world1.getProjectile()));
 		}
+	}
+	
+	@Test
+	public void startGame_SingleCase() {
+		world1.startGame();
+		assertTrue(world1.isGameStarted());
+		assertTrue(world1.getCurrentWorm().equals(world1.getWormAt(0)));
+	}
+	
+	@Test
+	public void startNextTurn_SingleCase() {
+		world1.startGame();
+		world1.startNextTurn();
+		assertTrue(world1.getCurrentWorm().equals(world1.getWormAt(1)));
+	}
+	
+	@Test
+	public void addWorm_SingleCase() {
+		world1.addWorm();
+		assertEquals(3, world1.getNbWorms());
+		System.out.println(world1.getWormAt(2).getPosition().toString());
+		System.out.println(world1.getWormAt(2).getRadius());
 	}
 	
 

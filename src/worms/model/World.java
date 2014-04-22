@@ -1,7 +1,10 @@
 package worms.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.lang.Math;
 
@@ -47,7 +50,8 @@ public class World {
 	 * 		  	...
 	 * 		  |	! isValidHeight(height)
 	 */
-	public World(double width, double height, boolean[][] passableMap) {
+	public World(double width, double height, boolean[][] passableMap,
+			Random random) {
 		this.width = width;
 		this.height = height;
 		this.passableMap = passableMap;
@@ -211,8 +215,8 @@ public class World {
 	 * 		  |	result ==
 	 * 		  |		getPassableMap().length
 	 */
-	public int getNoHorizontalPixels() { 
-		return getPassableMap().length;
+	public int getNoHorizontalPixels() {
+		return getPassableMap()[0].length;
 	}
 	
 	/**
@@ -223,7 +227,7 @@ public class World {
 	 * 		  |		getPassableMap()[0].length
 	 */
 	public int getNoVerticalPixels() { 
-		return getPassableMap()[0].length;
+		return getPassableMap().length;
 	}
 
 	/**
@@ -329,29 +333,33 @@ public class World {
 			//check boven, onder, links en rechts
 			double dx = getPixelWidth()/2;
 			double dy = getPixelHeight()/2;
-			Position left = new Position(x-dx, y);
-			Position right = new Position(x+dx, y);
-			Position top = new Position(x, y+dy);
-			Position bottom = new Position(x, y-dy);
-			if (isImpassable(left)) {
-				return false;
-			} else if (isImpassable(right)) {
-				return false;
-			} else if (isImpassable(top)) {
-				return false;
-			} else if (isImpassable(bottom)) {
-				return false;
-			} else {
+			Position topLeft = new Position(x - dx, y + dy);
+			Position topRight = new Position(x + dx, y + dy);
+			Position bottomLeft = new Position(x - dx, y - dy);
+			Position bottomRight = new Position(x + dx, y - dy);
+			boolean topLeftPassable = isPassable(topLeft);
+			boolean topRightPassable = isPassable(topRight);
+			boolean bottomLeftPassable = isPassable(bottomLeft);
+			boolean bottomRightPassable = isPassable(bottomRight);
+			if (topLeftPassable && topRightPassable) {
 				return true;
+			} else if (topRightPassable && bottomRightPassable) {
+				return true;
+			} else if (bottomRightPassable && bottomLeftPassable) {
+				return true;
+			} else if (bottomLeftPassable && topLeftPassable) {
+				return true;
+			} else {
+				return false;
 			}
 		} else if (fuzzyEquals(rx, 0) && (! fuzzyEquals(ry, 0))) {
 			//check links en rechts
 			double dx = getPixelWidth()/2;
 			Position left = new Position(x-dx, y);
 			Position right = new Position(x+dx, y);
-			if (isImpassable(left)) {
-				return false;
-			} else if (isImpassable(right)) {
+			boolean leftImpassable = isImpassable(left);
+			boolean rightImpassable = isImpassable(right);
+			if (leftImpassable && rightImpassable) {
 				return false;
 			} else {
 				return true;
@@ -361,9 +369,9 @@ public class World {
 			double dy = getPixelHeight()/2;
 			Position top = new Position(x, y+dy);
 			Position bottom = new Position(x, y-dy);
-			if (isImpassable(top)) {
-				return false;
-			} else if (isImpassable(bottom)) {
+			boolean topImpassable = isImpassable(top);
+			boolean bottomImpassable = isImpassable(bottom);
+			if (topImpassable && bottomImpassable) {
 				return false;
 			} else {
 				return true;
@@ -388,10 +396,10 @@ public class World {
 	 * @return
 	 */
 	public boolean isInsideWorldBorders(Position position) {
-		int X = getPixelRow(position) - 1;
-		int Y = getPixelColumn(position) - 1;
-		if ((X < 0) || (X >= getNoHorizontalPixels())
-				|| (Y < 0) || (Y >= getNoVerticalPixels())) {
+		double X = position.getX();
+		double Y = position.getY();
+		if ((X < 0) || (X > getWidth())
+				|| (Y < 0) || (Y > getHeight()) ) {
 			return false;
 		} else {
 			return true;
@@ -402,7 +410,7 @@ public class World {
 	 *
 	 * @return
 	 */
-	//TODO afwerken
+	//TODO doc voltooien
 	public boolean objectIsInsideWorldBorders(Position position, double radius) {
 		Position top = position.translate(0, radius);
 		Position bottom = position.translate(0, -radius);
@@ -462,6 +470,16 @@ public class World {
 			dr = 1/getVerticalScale();
 		}
 		dtheta = dr/outerRadius;
+		
+		//Basic checkpoints
+		for (int i = 1; i <= 4; i++) {
+			double alfa = Math.PI * i / 2;
+			x = outerRadius * Math.cos(alfa) + x0;
+			y = outerRadius * Math.sin(alfa) + y0;
+			if (isImpassable(new Position(x, y))) {
+				return false;
+			}
+		}
 		
 		while (angle < 2*Math.PI) {
 			radius = innerRadius;
@@ -543,12 +561,104 @@ public class World {
 	 * @effect	...
 	 * 		  |	result ==
 	 * 		  |		(isPassableForObject(position, radius)
-	 * 		  |	   && isImpassableArea(position, outerRadius, radius) )
+	 * 		  |	   && isImpassableArea(position, 1.1*radius, radius) )
 	 */
+	//TODO doc aanvullen
 	public boolean isAdjacent(Position position, double radius) {
 		double outerRadius = 1.1 * radius;
 		return (isPassableForObject(position, radius)
-				&& isImpassableArea(position, outerRadius, radius));
+				&& isImpassableArea(position, outerRadius, radius)
+				&& objectInsideWorldBorders(position, radius));
+	}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	position
+	 * 			...
+	 * @param 	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	...
+	 */
+	//TODO: doc aanvullen
+	public boolean objectInsideWorldBorders(Position position, double radius) {
+		double dr;
+		double dtheta;
+		double angle = 0;
+		double x;
+		double y;
+		double x0 = position.getX();
+		double y0 = position.getY();
+		
+		if (getHorizontalScale() > getVerticalScale()) {
+			dr = 1/getHorizontalScale();
+		} else {
+			dr = 1/getVerticalScale();
+		}
+		dtheta = dr/radius;
+		
+		while (angle < 2 * Math.PI) {
+			x = radius * Math.cos(angle) + x0;
+			y = radius * Math.sin(angle) + y0;
+			if (! isInsideWorldBorders(new Position(x, y))) {
+				return false;
+			}
+			angle += dtheta;
+		}
+		return true;
+	}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	position
+	 * 			...
+	 * @param 	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	if for some worm in getAllWorms():
+	 * 		  |		position.getDistanceFrom(worm.getPosition()) 
+	 * 		  |			< (radius + worm.getRadius())
+	 * 		  |		then result == true
+	 * 		  |	else result == false
+	 */
+	public boolean overlaps(Position position, double radius) {
+		Iterator<Worm> iterator = getAllWorms().iterator();
+		while (iterator.hasNext()) {
+			Worm worm = iterator.next();
+			if (position.getDistanceFrom(worm.getPosition())
+					< (radius + worm.getRadius())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	position
+	 * 			...
+	 * @param 	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	if for some worm in getAllWorms():
+	 * 		  |		position.getDistanceFrom(worm.getPosition()) 
+	 * 		  |			< (radius + worm.getRadius())
+	 * 		  |		then result == worm
+	 * 		  |	else result == null
+	 */
+	public Worm getOverlappingWorm(Position position, double radius) {
+		Iterator<Worm> iterator = getAllWorms().iterator();
+		while (iterator.hasNext()) {
+			Worm worm = iterator.next();
+			if (position.getDistanceFrom(worm.getPosition())
+					< (radius + worm.getRadius())) {
+				return worm;
+			}
+		}
+		return null;
 	}
 	
 	
@@ -614,6 +724,9 @@ public class World {
 	 * @post	...
 	 * 		  |	if (projectile != null)
 	 * 		  |		then new.getProjectile().getWorld() == this
+	 * 		  |	else
+	 * 		  |		if (getProjectile() != null)
+	 * 		  |			then (new this.getProjectile()).getWorld() == null
 	 * @throws	IllegalArgumentException
 	 * 			...
 	 * 		  |	! canHaveAsProjectile(projectile)
@@ -623,10 +736,16 @@ public class World {
 		if (! canHaveAsProjectile(projectile)) {
 			throw new IllegalArgumentException();
 		}
-		this.projectile = projectile;
 		if (projectile != null) {
+			this.projectile = projectile;
 			getProjectile().setWorld(this);
+		} else {
+			if (getProjectile() != null) {
+				getProjectile().setWorld(null);
+				this.projectile = projectile;
+			}
 		}
+		
 	}
 	
 	/**
@@ -704,7 +823,45 @@ public class World {
 	}
 	
 	/**
-	 * Return a set collecting all worms associated with this world.
+	 * ...
+	 */
+	@Basic
+	public int getNbWorms() {
+		return getAllWorms().size();		
+	}
+	
+	/**
+	 * Return the index at which the given worm is registered as a worm for this
+	 * world.
+	 * 
+	 * @param 	worm
+	 * 			The worm to look for.
+	 * @return	...
+	 * 		  |	result == getAllWorms().getIndexOf(worm)
+	 */
+	public int getIndexOfWorm(Worm worm) {
+		return worms.indexOf(worm);
+	}
+	
+	/**
+	 * ...
+	 * 
+	 * @param 	index
+	 * 			...
+	 * @return	...
+	 * 		  |	getWormAt(result) == worm
+	 * @throws	IndexOutOfBoundException
+	 * 			...
+	 * 		 |	(index < 0) || (index > getNbWorms() - 1)
+	 */
+	@Basic
+	public Worm getWormAt(int index) throws IndexOutOfBoundsException {
+		return getAllWorms().get(index);
+	}
+	
+	
+	/**
+	 * Return a list collecting all worms associated with this world.
 	 * 
 	 * @return	...
 	 * 		  |	result != null
@@ -713,12 +870,12 @@ public class World {
 	 * 		  |		result.contains(worm) ==
 	 * 		  |		this.hasAsWorm(worm)
 	 */
-	public Set<Worm> getAllWorms() {
+	public List<Worm> getAllWorms() {
 		return worms;
 	}
 	
 	/**
-	 * Add the given worm to the set of worms attached to this world.
+	 * Add the given worm to the list of worms attached to this world.
 	 * 
 	 * @param 	worm
 	 * 			...
@@ -743,7 +900,7 @@ public class World {
 	}
 	
 	/**
-	 * Remove the given worm from the set of worms attached to this world.
+	 * Remove the given worm from the list of worms attached to this world.
 	 * 
 	 * @param 	worm
 	 * 			...
@@ -751,7 +908,8 @@ public class World {
 	 * 		  |	! new.hasAsWorm(worm)
 	 * @post	...
 	 * 		  |	if (this.hasAsWorm(worm))
-	 * 		  |		then ((new worm).getWorld() == null)
+	 * 		  |		then ( ((new worm).getWorld() == null) 
+	 * 		  |			&& ((new worm).isTerminated())
 	 * @throws	IllegalArgumentException
 	 * 			The given worm is not effective.
 	 * 		  |	worm == null
@@ -760,12 +918,13 @@ public class World {
 		if (worm == null) throw new IllegalArgumentException();
 		if (hasAsWorm(worm)) {
 			worm.setWorld(null);
+			worm.terminate();
 		}
 		worms.remove(worm);
 	}
 	
 	/**
-	 * Set collecting references to worms attached to this world.
+	 * List collecting references to worms attached to this world.
 	 * 
 	 * @invar	...
 	 * 		  |	worms != null
@@ -776,7 +935,7 @@ public class World {
 	 * 		  |	for each worm in Worm:
 	 * 		  |		(worm.getWorld() == this)
 	 */
-	private final Set<Worm> worms = new HashSet<Worm>();
+	private final List<Worm> worms = new ArrayList<Worm>();
 	
 	/**
 	 * Return the projectile and all the worms attached to this world
@@ -799,8 +958,111 @@ public class World {
 	
 	
 	//GAME
-	public void startGame() {}
+	public void startGame() {
+		gameStarted = true;
+		startNextTurn();
+	}
 	
-	public Worm getWinningWorm() { return null;}
+	public void startNextTurn() {
+		if (! isGameFinished()) {
+			int index = worms.indexOf(getCurrentWorm());
+			if (index >= worms.size() - 1) {
+				index = 0;
+			} else {
+				index += 1;
+			}
+			setCurrentWorm(worms.get(index));
+		}
+	}
+	
+	public void addWorm() {
+		if (! isGameStarted()) {			
+			Worm newWorm = new Worm(new Position(0, 0), 0, 1, "Name");
+			
+			double minRadius = newWorm.getLowerRadiusBound();
+			double maxRadius = 4 * minRadius;
+			newWorm.setRadius(randomDouble(minRadius, maxRadius));
+			
+			double direction = randomDouble(Worm.getLowerAngleBound(),
+					Worm.getUpperAngleBound());
+			newWorm.setDirection(direction);
+			
+			Position position = searchAdjacentPosition(newWorm);
+			while (position == null) {
+				position = searchAdjacentPosition(newWorm);
+			}
+			newWorm.setPosition(position);
+			
+			addAsWorm(newWorm);
+		}
+	}
+	
+	private Position searchAdjacentPosition(Worm worm) {
+		double R = worm.getRadius();
+		double x = randomDouble(0, getWidth());
+		double y = randomDouble(0, getHeight());
+		Position position = new Position(x, y);
+		
+		double x0 = getWidth() / 2.0;
+		double y0 = getHeight() / 2.0;
+		double angle = Math.atan((y0 - y) / (x0 - x));
+		double ds = 0.1 * worm.getRadius();
+		
+		while ((! isAdjacent(position, R)) && isInsideWorldBorders(position)) {
+			double dx = ds * Math.cos(angle);
+			double dy = ds * Math.sin(angle);
+			position = position.translate(dx, dy);
+		}
+		
+		if (! isInsideWorldBorders(position)){
+			return null;
+		} else {
+			return position;
+		}
+	}
+	
+	public Worm getWinningWorm() {
+		Worm winningWorm;
+		Iterator<Worm> iterator = worms.iterator();
+		winningWorm = iterator.next();
+		while (iterator.hasNext()) {
+			Worm otherWorm = iterator.next();
+			if (otherWorm.getCurrentHitPoints() > winningWorm
+					.getCurrentHitPoints()) {
+				winningWorm = otherWorm;
+			}
+		}
+		return winningWorm;
+	}
+	
+	public boolean isGameFinished() {
+		if (worms.size() == 1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	
+	
+	
+	public boolean isGameStarted() {
+		return gameStarted;
+	}
+	
+	private boolean gameStarted = false;
+	
+	
+	
+	
+	public Worm getCurrentWorm() {
+		return currentWorm;
+	}
+	
+	private void setCurrentWorm(Worm worm) {
+		currentWorm = worm;
+	}
+	
+	private Worm currentWorm;
 	
 }

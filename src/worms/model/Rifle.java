@@ -8,11 +8,11 @@ import be.kuleuven.cs.som.annotate.Value;
 public class Rifle extends Weapon {
 	
 	public Rifle () {
-		super ("Rifle", 10, 10, 20);	
+		super ("Rifle", 10, 0.01, 20);	
 	}
 	
 	@Basic @Immutable
-	public double getForce() {
+	public double getForce(int propulsion) {
 		return 1.5;
 	}
 

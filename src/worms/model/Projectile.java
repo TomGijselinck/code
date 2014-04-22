@@ -15,7 +15,7 @@ import be.kuleuven.cs.som.annotate.*;
  * @version	1.0
  *
  */
-public class Projectile {
+public class Projectile extends GameObject {
 	
 	//CONSTRUCTORS
 	/**
@@ -23,19 +23,23 @@ public class Projectile {
 	 * 
 	 * @param 	mass
 	 * 		  	...
+	 * @param 	position
+	 * 			...
+	 * @effect	...
+	 * 		  |	super(position, direction, radius, mass)
 	 * @post	...
-	 * 		  |	new.getMass() == mass
+	 * 		  |	new.getDamage() == damage
 	 * @post	...
-	 * 		  |	! new.isTerminated()
+	 * 		  |	new.getRadius() ==
+	 * 		  |		Math.pow((0.75 * getMass()) / (Math.PI * getDensity()), 1/3)
 	 */
-	public Projectile(Position position, double direction, int mass,
-			int radius, int damage) {
-		this.position = position;
-		this.direction = direction;
-		this.mass = mass;
-		this.radius = radius;
+	//TODO documentation aanvullen & checkers aanmaken voor argumenten
+	public Projectile(Position position, double direction, double mass, 
+			int damage, double launchForce) {
+		super(position, direction, 1, mass);
+		setRadius();
 		this.damage = damage;
-		this.isTerminated = false;
+		this.launcheForce = launchForce;
 	}
 	
 	
@@ -56,71 +60,14 @@ public class Projectile {
 	 * 		  |	if (! this.isTerminated())
 	 * 		  |		then (! (new.getWorld()).hasProjectile() )
 	 */
+	@Override
 	public void terminate() {
 		if (! isTerminated()) {
 			getWorld().setProjectile(null);
 		}
 		setWorld(null);
-		isTerminated = true;
+		super.terminate();
 	}
-	
-	/**
-	 * Check whether this projectile is terminated.
-	 */
-	@Basic
-	public boolean isTerminated() {
-		return isTerminated;
-	}
-	
-	/**
-	 * Variable registering whether this projectile is terminated.
-	 */
-	private boolean isTerminated;
-	
-	
-	
-	
-	/**
-	 * Return the orientation of this projectile.
-	 */
-	@Basic
-	public double getDirection() {
-		return direction;
-	}
-	
-	public void setDirection(double direction) {
-		this.direction = direction;
-	}
-	
-	private double direction;
-	
-	
-	
-	
-	/**
-	 * Return the mass of this projectile.
-	 */
-	@Basic 
-	@Immutable
-	public int getMass() {
-		return mass;
-	}
-	
-	private int mass;
-	
-	
-	
-	
-	/**
-	 * Return the radius of this projectile.
-	 */
-	@Basic 
-	@Immutable
-	public double getRadius() {
-		return radius;
-	}
-	
-	private double radius;
 	
 	
 	
@@ -135,16 +82,33 @@ public class Projectile {
 	
 	
 	
-	
-	//ASSOCIATIONS	
 	/**
-	 * Return the world where this projectile is active in.
+	 * ...
+	 * 
+	 * @post	...
+	 * 		  |	new.getRadius() ==
+	 * 		  |		Math.pow((0.75 * getMass()) / (Math.PI * getDensity()), 1/3)
 	 */
-	@Basic
-	public World getWorld() {
-		return world;
+	public void setRadius() {
+		double radius = Math.pow((0.75 * getMass()) / (Math.PI * getDensity()),
+				1/3.0);
+		setRadius(radius);
 	}
 	
+	@Basic
+	@Immutable
+	public double getLaunchForce() {
+		return launcheForce;
+	}
+	
+	private double launcheForce;
+	
+
+	
+	
+	
+	
+	//ASSOCIATIONS
 	/**
 	 * Check whether this projectile can be attached to the given world.
 	 * 
@@ -155,10 +119,10 @@ public class Projectile {
 	 * 		  |	  ( (world == null)
 	 * 		  |  || world.canHaveAsProjectile(this) )
 	 */
+	@Override
 	public boolean canHaveAsWorld(World world) {
 		return
-			 ( (world == null)
-			|| world.canHaveAsProjectile(this)	);
+			 ( (world == null) || world.canHaveAsProjectile(this));
 	}
 	
 	/**
@@ -171,78 +135,114 @@ public class Projectile {
 	 * 		  |		( (getWorld() == null)
 	 * 		  |	   || (getWorld().getProjectile() == this) )
 	 */
-	public boolean hasProperWorld() { return true;}
+	@Override
+	public boolean hasProperWorld() {
+		return 
+			( (getWorld() == null)
+		   || (getWorld().getProjectile() == this));
+	}
 	
+	
+	
+	
+	@Basic
+	public double getDensity() {
+		return density;
+	}
+	
+	private static final double density = 7800; 
+	
+	
+	
+	
+	//JUMP
 	/**
-	 * Set the world where this projectile is active in to the given world.
+	 * ...
 	 * 
-	 * @param 	world
-	 * 			...
-	 * @post	...
-	 * 		  |	new.getWorld() == world
+	 * @return	...
+	 * 		  |	result == 
+	 * 		  |		getWorld().isPassableForObject(getPosition(), getRadius())
 	 */
-	public void setWorld(World world) {
-		this.world = world;
+	@Override
+	public boolean canJump() {
+		return getWorld().isPassableForObject(getPosition(), getRadius());
 	}
 	
 	/**
-	 * Variable referencing the world where this projectile is in.
-	 */
-	private World world;
-	
-	/**
-	 * Return the position of this projectile.
-	 */
-	public Position getPosition() {
-		return position;
-	}
-	
-	/**
-	 * Checks whether this projectile can have the given position as its 
-	 * position.
+	 * Returns the time in seconds this worm needs for jumping.
 	 * 
-	 * @param	position
-	 * 			The position to check.
-	 * @return	True if the given position is not effective if this projectile  
-	 * 			is terminated.
-	 * 		  |	if (isTerminated())
-	 * 		  |		then result == (position == null)
-	 * 			Otherwise true if and only if the given position is effective.
-	 * 		  |	else result == (position != null) 
+	 * @param	dt
+	 * 			The time step in which a worm will not completely move through
+	 * 			a piece of impassable terrain.
+	 * @return	If there exists a position in the jump trajectory of this worm 
+	 * 			inside the world of this worm that is adjacent or creates a 
+	 * 			partial overlap with a worm in the world of this projectile,  
+	 * 			the resulting jump time is equal to the time until this worms 
+	 * 			reaches that position.
+	 * 		  |	let
+	 * 		  |		jumpPosition = jumpStep(time, jumpSpeed())
+	 * 		  |		R = getRadius()
+	 * 		  |	in
+	 * 		  |		if for some time in double:
+	 * 		  |			if ( ( getWorld().isImpassableForObject(jumpPosition, R)
+	 * 		  |			    || getWorld().overlaps(jumpPosition, R) )
+	 * 		  |			  && getWorld().isInsideWorldBorders(jumpPosition) 
+	 * 		  |			  && (for each t in 0..time where t < time:
+	 *   	  |					getWorld().isPassable(jumpStep(t)
+	 *   	  |				 && (! getWorld().isAdjacent(jumpPosition, R))	
+	 *   	  |				 && (! getWorld().overlaps()))) )
+	 * 		  |				then result == time
+	 * 			Otherwise, if this worm leaves its game world, the resulting 
+	 * 			jump time is equal to positive infinity (i.e. an infinite jump
+	 * 			in an infinite and undefined space).
+	 * 		  |	else if for some time in double:
+	 * 		  |		if (! getWorld().isInsideWorldBorders(jumpPosition))
+	 * 		  |			then result == Double.POSITIVE_INFINITY
 	 */
-	public boolean canHaveAsPosition(Position position) { return true;}
-	
-	/**
-	 * Check whether this projectile has a proper position.
-	 * 
-	 * @return	True if and only if this projectile can have its position as its
-	 * 			position.
-	 * 		  |	result == canHaveAsPosition(getPosition()
-	 */
-	public boolean hasProperPosition() { return true;}
-	
-	/**
-	 * Set the position of this projectile to the given position.
-	 * 
-	 * @param 	position
-	 * 			The position to attach this projectile to.
-	 * @post	This projectile references the given position as its position.
-	 * 		  |	new.getPosition() == position
-	 */
-	public void setPosition(Position position) {}
-	
-	/**
-	 * Variable referencing the position to which this projectile is attached.
-	 */
-	private Position position;
-	
-	
-	
+	@Override
+	public double jumpTime(double dt) {
+		double jumpTime = 0;
+		boolean jumping = true;
+		boolean insideWorldBorders = true;
+		Position jumpPosition = getPosition().translate(0, 0);
+		World world = getWorld();
+		double radius = getRadius();
+		double jumpSpeed = jumpSpeed(getLaunchForce());
 		
-	public void jump() {}
+		while (jumping && insideWorldBorders) {
+			jumpTime += dt;
+			jumpPosition = jumpStep(jumpTime, jumpSpeed);
+			if (world.isImpassableForObject(jumpPosition, radius)
+			  || world.overlaps(jumpPosition, radius)) {
+				jumping = false;
+			}
+			if (! world.isInsideWorldBorders(jumpPosition)) {
+				insideWorldBorders = false;
+			}
+		}
+		
+		if (! insideWorldBorders) {
+			jumpTime = Double.POSITIVE_INFINITY;
+		}
+		
+		return jumpTime;
+	}
 	
-	public double jumpTime() { return 0;}
-	
-	public Position jumpStep(double timeInterval) { return new Position(0, 0);}
+	/**
+	 * Returns the initial velocity this projectile has in m/s when jumping.
+	 * 
+	 * @return	The resulting speed of this game object is equal to the speed as
+	 * 			a result of the given force in an interval of 
+	 * 			0.5 seconds.
+	 * 		  |	let 
+	 * 		  |		g = GameObject.getGravityOfEarth()
+	 * 		  | in
+	 * 		  |		result ==
+	 *   	  |			force / this.getMass() * 0.5
+	 */
+	@Override
+	public double jumpSpeed(double force) {
+		return force / getMass() * 0.5;
+	}
 	
 }

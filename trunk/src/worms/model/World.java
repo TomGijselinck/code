@@ -1,12 +1,16 @@
 package worms.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.lang.Math;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import static worms.util.Util.*;
 import be.kuleuven.cs.som.annotate.*;
@@ -469,7 +473,6 @@ public class World {
 		} else {
 			dr = 1/getVerticalScale();
 		}
-		dtheta = dr/outerRadius;
 		
 		//Basic checkpoints
 		for (int i = 1; i <= 4; i++) {
@@ -483,6 +486,7 @@ public class World {
 		
 		while (angle < 2*Math.PI) {
 			radius = innerRadius;
+			dtheta = dr/radius;
 			while (radius <= outerRadius) {
 				x = radius * Math.cos(angle) + x0;
 				y = radius * Math.sin(angle) + y0;
@@ -583,28 +587,18 @@ public class World {
 	 */
 	//TODO: doc aanvullen
 	public boolean objectInsideWorldBorders(Position position, double radius) {
-		double dr;
-		double dtheta;
-		double angle = 0;
 		double x;
 		double y;
 		double x0 = position.getX();
 		double y0 = position.getY();
 		
-		if (getHorizontalScale() > getVerticalScale()) {
-			dr = 1/getHorizontalScale();
-		} else {
-			dr = 1/getVerticalScale();
-		}
-		dtheta = dr/radius;
-		
-		while (angle < 2 * Math.PI) {
-			x = radius * Math.cos(angle) + x0;
-			y = radius * Math.sin(angle) + y0;
-			if (! isInsideWorldBorders(new Position(x, y))) {
+		for (int i = 1; i <= 4; i++) {
+			double alfa = Math.PI * i / 2;
+			x = radius * Math.cos(alfa) + x0;
+			y = radius * Math.sin(alfa) + y0;
+			if (isImpassable(new Position(x, y))) {
 				return false;
 			}
-			angle += dtheta;
 		}
 		return true;
 	}
@@ -725,7 +719,7 @@ public class World {
 	 * 		  |	if (projectile != null)
 	 * 		  |		then new.getProjectile().getWorld() == this
 	 * 		  |	else
-	 * 		  |		if (getProjectile() != null)
+	 * 		  |		if (this.getProjectile() != null)
 	 * 		  |			then (new this.getProjectile()).getWorld() == null
 	 * @throws	IllegalArgumentException
 	 * 			...
@@ -859,6 +853,17 @@ public class World {
 		return getAllWorms().get(index);
 	}
 	
+	public List<String> getAllWormNames() {
+		List<Worm> worms = getAllWorms();
+		List<String> allWormNames = new ArrayList<>();
+		Iterator<Worm> iterator = worms.iterator();
+		while (iterator.hasNext()) {
+			Worm worm = iterator.next();
+			allWormNames.add(worm.getName());
+		}
+		return allWormNames;
+	}
+	
 	
 	/**
 	 * Return a list collecting all worms associated with this world.
@@ -960,7 +965,7 @@ public class World {
 	//GAME
 	public void startGame() {
 		gameStarted = true;
-		startNextTurn();
+		setCurrentWorm(getAllWorms().get(0));
 	}
 	
 	public void startNextTurn() {
@@ -972,12 +977,25 @@ public class World {
 				index += 1;
 			}
 			setCurrentWorm(worms.get(index));
+			Worm worm = getCurrentWorm();
+			worm.setCurrentActionPoints(worm.getActionPointsMaximum());
+			worm.addHitPoints(10);
 		}
 	}
 	
 	public void addWorm() {
-		if (! isGameStarted()) {			
-			Worm newWorm = new Worm(new Position(0, 0), 0, 1, "Name");
+		if (! isGameStarted()) {
+			int max = getAllWorms().size();
+			int index = randomInt(0, max);
+			Collections.shuffle(Arrays.asList(nameList));
+			System.out.println(index);
+			String name = getNameAt(index);
+			List<String> currentWormNames = getAllWormNames();
+			while (currentWormNames.contains(name)) {
+				index = randomInt(0, max);
+				name = getNameAt(index);
+			}
+			Worm newWorm = new Worm(new Position(0, 0), 0, 1, name);
 			
 			double minRadius = newWorm.getLowerRadiusBound();
 			double maxRadius = 4 * minRadius;
@@ -1064,5 +1082,29 @@ public class World {
 	}
 	
 	private Worm currentWorm;
+	
+	private String getNameAt(int index) {
+		return nameList[index];
+	}
+	
+	public String[] getAllNames() {
+		return nameList;
+	}
+	
+	private String[] nameList = {"The Beast", "The Crippler", "Babyface",
+			"Bad Boy", "Sugar", "KO", "The Technician", "Kombo King", 
+			"The Assassin", "Black Widow", "Crazy Legs", "Pitbull", "Bulldog",
+			"The Warrior", "The Warhammer", "The Hammer", "Gangsta", 
+			"The Iceman", "Mr Freeze", "The Monster", "Man of Stone", 
+			"Godzilla", "King Kong", "Red Hot", "Thunder", "Meltdown",
+			"The Nightmare", "El Bandit", "The Capitalizer", "Monkey Man",
+			"Wizard", "Dragoon", "Reaper", "Ninpo", "Gremlin", "Thunderball",
+			"The Ultimate", "Magician", "Warlord", "The Surprise Package", 
+			"Tough Guy", "The Reaper", "The Fallen", "Unforgiven", 
+			"The Country Dream", "King", "Queen", "Moonwalker", "Colossal", 
+			"Fastball", "Speed Demon", "One Punch", "Glass Jaw", 
+			"Hands Of Steel", "Shining Wizard", "Pure Grit", "Celtic Wizard",
+			"True Born", "The Next Level", "The Finest", "Pure", "Solo", 
+			"Dragon", "Solid", "Tainted", "Senator", "Sinister"};
 	
 }

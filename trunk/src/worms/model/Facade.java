@@ -53,7 +53,12 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether or not the given worm is allowed to move.
 	 */
+	//TODO
 	public boolean canMove(Worm worm) {
+		//System.out
+		//		.println("canMove() (" + worm.getName() + "@"
+		//				+ worm.getPosition().toString() + ": "
+		//				+ worm.canMove(worm.getDirection()));
 		return worm.canMove(worm.getDirection());
 	}
 	
@@ -232,6 +237,7 @@ public class Facade implements IFacade {
 	 * @return An array with two elements, with the first element being the
 	 *         x-coordinate and the second element the y-coordinate
 	 */
+	//TODO
 	public double[] getJumpStep(Worm worm, double t) {
 		double[] location = new double[2];
 		try {
@@ -239,8 +245,9 @@ public class Facade implements IFacade {
 			Position position = worm.jumpStep(t, worm.jumpSpeed(F));
 			location[0] = position.getX();
 			location[1] = position.getY();
-		}
-		catch (Exception exc) {
+			//System.out.println("jumpstep (" + worm.getName() + "): "
+			//		+ position.toString());
+		} catch (Exception exc) {
 			throw new ModelException(exc);
 		}
 		return location;
@@ -276,8 +283,18 @@ public class Facade implements IFacade {
 	 *                 
 	 * @return The time duration of the worm's jump.
 	 */
+	//TODO
 	public double getJumpTime(Worm worm, double timeStep) {
-		return worm.jumpTime(timeStep);
+		try {
+		//System.out.println("getting jumpTime...");
+		double time = worm.jumpTime(timeStep);
+		//System.out.println("jumptime for (" + worm.getName()
+		//		+ "): " + time);
+		return time;
+		}
+		catch (Exception exc) {
+			throw new ModelException(exc) ;
+		}
 	}
 
 	/**
@@ -319,7 +336,7 @@ public class Facade implements IFacade {
 	 * Returns the current orientation of the given worm (in radians).
 	 */
 	public double getOrientation(Worm worm) {
-		return worm.getCurrentActionPoints();
+		return worm.getDirection();
 	}
 
 	/**
@@ -574,13 +591,20 @@ public class Facade implements IFacade {
 	 * Makes the given worm shoot its active weapon with the given propulsion yield.
 	 */
 	public void shoot(Worm worm, int yield) {
-		worm.shoot(yield);
+		try {
+			worm.shoot(yield);
+		}
+		catch (Exception exc) {
+			throw new ModelException(exc);
+		}
 	}
 
 	/**
 	 * Starts a game in the given world.
 	 */
+	//TODO
 	public void startGame(World world) {
+		System.out.println("start game");
 		world.startGame();
 	}
 

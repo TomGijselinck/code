@@ -280,5 +280,14 @@ public class WorldTest {
 		System.out.println(world1.getWormAt(2).getRadius());
 	}
 	
+	@Test
+	public void getNameAt_CheckAllNames() {
+		String[] names = world1.getAllNames();
+		for (int i = 0; i < names.length; i++) {
+			String name = names[i];
+			assertTrue(Worm.isValidName(name));
+		}
+	}
+	
 
 }

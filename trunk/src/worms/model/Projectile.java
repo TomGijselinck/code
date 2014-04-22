@@ -156,6 +156,23 @@ public class Projectile extends GameObject {
 	
 	
 	//JUMP
+	@Override
+	public void jump(double timeStep) {
+		try {
+			super.jump(timeStep);
+			if (getWorld().overlaps(getPosition(), getRadius())) {
+				int inflictedHitPoints = getDamage();
+				Worm hitWorm = getWorld().getOverlappingWorm(getPosition(),
+						getRadius());
+				hitWorm.decreaseHitPoints(inflictedHitPoints);
+			}
+		}
+		catch (IllegalArgumentException exc) {
+			terminate();
+		}
+		terminate();
+	}
+	
 	/**
 	 * ...
 	 * 

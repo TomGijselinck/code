@@ -183,4 +183,11 @@ public class Position {
 		return ("(" + getX() + ", " + getY() + ")");
 	}
 	
+	@Override
+	public Position clone() {
+		double x = getX();
+		double y = getY();
+		return new Position(x, y);
+	}
+	
 }

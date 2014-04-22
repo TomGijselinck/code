@@ -223,13 +223,16 @@ public class Worm extends GameObject {
 	/**
 	 * Check whether this worm can fall.
 	 * 
-	 * @return	True if and only if this worm is not adjacent to impassable 
-	 * 			terrain.
+	 * @return	True if and only if this worm has a world and is not adjacent to 
+	 * 			impassable terrain.
 	 * 		  |	result ==
-	 * 		  |		getWorld().isAdjacent(getPosition(), getRadius())
+	 * 		  |	   ( hasWorld()
+	 * 		  |	  && (! getWorld().isAdjacent(getPosition(), getRadius())) )
 	 */
 	public boolean canFall() {
-		return (! getWorld().isAdjacent(getPosition(), getRadius()));
+		return 
+			  (	hasWorld()
+			 &&	(! getWorld().isAdjacent(getPosition(), getRadius())) );
 	}
 	
 	/**
@@ -354,11 +357,13 @@ public class Worm extends GameObject {
 	 * @return	True if and only if this worm has enough action points to 
 	 * 			move the given number of steps in the direction it is facing.
 	 * 		  |	result ==
-	 * 		  |	  (this.getCurrentActionPoints() >= 
+	 * 		  |	  ( (this.getCurrentActionPoints() >= 
 	 * 		  |		  getConsumedActionPoints(direction) )
+	 * 		  |	 && (hasProperWorld()) )
 	 */
 	public boolean canMove(double direction) {
-		return (getCurrentActionPoints() >= getConsumedActionPoints(direction));
+		return ( (getCurrentActionPoints() >= getConsumedActionPoints(direction))
+			  && hasProperWorld() );	
 	}
 	
 	/**
@@ -400,8 +405,9 @@ public class Worm extends GameObject {
 	 */
 	@Override
 	public boolean canJump() {
-		return ( getWorld().isAdjacent(getPosition(), getRadius())
-				&& (getCurrentActionPoints() > 0) );
+		return ( hasWorld()
+			  && getWorld().isAdjacent(getPosition(), getRadius())
+		      && (getCurrentActionPoints() > 0) );
 	}
 	
 	/**
@@ -441,28 +447,54 @@ public class Worm extends GameObject {
 	 * 		  |	else if for some time in double:
 	 * 		  |		if (! getWorld().isInsideWorldBorders(jumpPosition))
 	 * 		  |			then result == Double.POSITIVE_INFINITY
+	 * @throws	IllegalArgumentException
+	 * 			This worm cannot jump.
+	 * 		  |	! canJump()
 	 */
 	@Override
 	public double jumpTime(double dt) {
+		if (! hasWorld()) return Double.POSITIVE_INFINITY;
+		
 		double jumpTime = 0;
 		boolean jumping = true;
-		Position startPosition = getPosition().translate(0, 0);
-		Position jumpPosition = getPosition().translate(0, 0);
+		Position startPosition = getPosition().clone();
+		Position jumpPosition = getPosition().clone();
+		Position pre = jumpPosition.clone();
 		World world = getWorld();
 		double radius = getRadius();
 		double jumpSpeed = jumpSpeed(getLaunchForce());
+		double interval = 0;
+		double ds = 0.1 * getRadius();
 		
 		while (jumping
 				&& (jumpPosition.getDistanceFrom(startPosition) < radius)
 				&& (world.isInsideWorldBorders(jumpPosition))) {
 			jumpTime += dt;
 			jumpPosition = jumpStep(jumpTime, jumpSpeed);
+			interval += jumpPosition.getDistanceFrom(pre);
+			pre = jumpPosition.clone();
+			while (interval < ds) {
+				jumpTime += dt;
+				jumpPosition = jumpStep(jumpTime, jumpSpeed);
+				interval += jumpPosition.getDistanceFrom(pre);
+				pre = jumpPosition.clone();
+			}
+			interval = 0;
 			if (world.isImpassableForObject(jumpPosition, radius)) {jumping = false;}
 		}
 		
 		while (jumping && (world.isInsideWorldBorders(jumpPosition))) {
 			jumpTime += dt;
 			jumpPosition = jumpStep(jumpTime, jumpSpeed);
+			interval += jumpPosition.getDistanceFrom(pre);
+			pre = jumpPosition.clone();
+			while (interval < ds) {
+				jumpTime += dt;
+				jumpPosition = jumpStep(jumpTime, jumpSpeed);
+				interval += jumpPosition.getDistanceFrom(pre);
+				pre = jumpPosition.clone();
+			}
+			interval = 0;
 			if (world.isAdjacent(jumpPosition, radius)) {jumping = false;}
 		
 		}
@@ -738,7 +770,7 @@ public class Worm extends GameObject {
 	 *		  | if (actionPoints >= getActionPointsMaximum())
 	 *		  | 	this.currentActionPoints = getActionPointsMaximum();
 	 */
-	private void setCurrentActionPoints(int actionPoints) {
+	protected void setCurrentActionPoints(int actionPoints) {
 		if (actionPoints <= 0) {
 			currentActionPoints = 0;
 		} else if ((actionPoints > 0)
@@ -775,6 +807,11 @@ public class Worm extends GameObject {
 		if (getCurrentHitPoints() <= 0) {
 			getWorld().removeAsWorm(this);
 		}
+	}
+	
+	//TODO doc schrijven
+	public void addHitPoints(int hitPoints) {
+		setCurrentHitPoints(getCurrentHitPoints() + hitPoints);
 	}
 	
 	/**
@@ -1093,7 +1130,8 @@ public class Worm extends GameObject {
 	
 	//SHOOTING
 	/**
-	 * Fire the active weapon of this worm.
+	 * Fire the active weapon of this worm (i.e. add an active projectile to 
+	 * this world).
 	 * 
 	 * @param 	propulsionYield
 	 * 			The propulsion yield with which the active weapon of this worm
@@ -1140,8 +1178,8 @@ public class Worm extends GameObject {
 	 * 		  |	! canShoot()
 	 */
 	public void shoot(int propulsionYield) {
-		if (! canShoot())
-			throw new IllegalArgumentException();
+		if (! canShoot()) return;
+			
 		Weapon weapon = getActiveWeapon();
 		double force = weapon.getForce(propulsionYield);
 		double R = weapon.getProjectileRadius();
@@ -1149,25 +1187,11 @@ public class Worm extends GameObject {
 		double dx = R * Math.cos(direction);
 		double dy = R * Math.sin(direction);
 		Position initialPosition = getPosition().translate(dx, dy);
-		double timestep = 0.0001;
 		Projectile projectile = new Projectile(initialPosition, direction,
 				weapon.getProjecileMass(), weapon.getDamage(), force);
 
 		decreaseActionPoints(weapon.getActionPointsCost());
 		getWorld().setProjectile(projectile);
-		try {
-			projectile.jump(timestep);
-			if (getWorld().overlaps(projectile.getPosition(),
-					projectile.getRadius())) {
-				int inflictedHitPoints = projectile.getDamage();
-				Worm hitWorm = getWorld().getOverlappingWorm(
-						projectile.getPosition(), projectile.getRadius());
-				hitWorm.decreaseHitPoints(inflictedHitPoints);
-			}
-		} catch (IllegalArgumentException exc) {
-			projectile.terminate();
-		}
-		projectile.terminate();
 	}
 	//TODO testen schrijven
 	

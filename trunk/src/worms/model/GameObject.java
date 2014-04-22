@@ -329,7 +329,7 @@ public abstract class GameObject {
 	 *   	  |	! canJump()
 	 */
 	public void jump(double timeStep) throws IllegalArgumentException {
-		if (!canJump())
+		if (! canJump())
 			throw new IllegalArgumentException();
 		double jumpTime = jumpTime(timeStep);
 		if (jumpTime == Double.POSITIVE_INFINITY) {
@@ -435,8 +435,9 @@ public abstract class GameObject {
 	 * 			that is terminated.
 	 * 		  |	if (isTerminated())
 	 * 		  |		then result == (position == null)
-	 * 			Otherwise true if and only if the given position is effective.
-	 * 		  |	else result == (position != null) 
+	 * 			Otherwise true if and only if the given position is effective 
+	 * 			and is located inside the world of this game object.
+	 * 		  |	else result == (position != null)	 
 	 */
 	public boolean canHaveAsPosition(Position position) {
 		if (isTerminated()) {
@@ -489,6 +490,15 @@ public abstract class GameObject {
 	@Basic
 	public World getWorld() {
 		return world;
+	}
+	
+	/**
+	 * ...
+	 * @return	...
+	 * 		  |	result == getWorld() != null
+	 */
+	public boolean hasWorld() {
+		return getWorld() != null;
 	}
 	
 	/**

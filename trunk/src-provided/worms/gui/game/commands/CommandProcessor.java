@@ -9,7 +9,6 @@ public class CommandProcessor {
 	private Command executingCommand;
 
 	public void enqueueCommand(Command cmd) {
-		System.out.println(cmd.toString());
 		commandQueue.add(cmd);
 	}
 

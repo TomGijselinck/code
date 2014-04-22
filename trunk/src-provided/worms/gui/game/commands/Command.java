@@ -59,6 +59,7 @@ public abstract class Command {
 				}
 			}
 		}
+		System.out.println(toString());
 	}
 
 	/**

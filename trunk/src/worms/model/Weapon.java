@@ -25,7 +25,7 @@ public abstract class Weapon {
 	 * @post ... | new.getName() == name
 	 * @post ... | new.getActionPointCost() == actionPointCost
 	 */
-	public Weapon(String name, int actionPointCost, int projectileMass,
+	public Weapon(String name, int actionPointCost, double projectileMass,
 			int damage) {
 		this.name = name;
 		this.actionPointCost = actionPointCost;
@@ -51,11 +51,11 @@ public abstract class Weapon {
 
 	@Basic
 	@Immutable
-	public int getProjecileMass() {
+	public double getProjecileMass() {
 		return projectileMass;
 	}
 
-	private int projectileMass;
+	private double projectileMass;
 
 	@Basic
 	@Immutable
@@ -77,6 +77,8 @@ public abstract class Weapon {
 	}
 
 	private int projectileDensity = 7800;
+	
+	public abstract double getForce(int propulsion);
 
 	@Override
 	public boolean equals(Object other) {
@@ -98,7 +100,7 @@ public abstract class Weapon {
 		hash = 29 * hash + this.getActionPointsCost();
 		hash = 29 * hash + this.getDamage();
 		hash = 29 * hash + this.getName().hashCode();
-		hash = 29 * hash + this.getProjecileMass();
+		hash = (int) (29 * hash + this.getProjecileMass());
 		return hash;
 
 	}

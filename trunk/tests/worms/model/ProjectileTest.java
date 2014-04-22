@@ -2,7 +2,11 @@ package worms.model;
 
 import static org.junit.Assert.*;
 
+import java.util.Random;
+
 import org.junit.*;
+
+import static worms.util.Util.*;
 
 public class ProjectileTest {
 
@@ -42,13 +46,15 @@ public class ProjectileTest {
 	
 	@Before
 	public void setup() {
-		projectile = new Projectile(new Position(2, 4), 10);
-		world = new World(5, 5, passableMap);
+		projectile = new Projectile(new Position(2, 4), 0.7, 0.01, 20, 1.5);
+		world = new World(5, 5, passableMap, new Random());
 	}
 	
 	@Test
 	public void constructor() {
-		assertEquals(10, projectile.getMass());
+		double radius = Math.pow((0.75 * projectile.getMass())
+				/ (Math.PI * projectile.getDensity()), 1 / 3.0);
+		assertTrue(fuzzyEquals(radius, projectile.getRadius()));
 	}
 	
 	@Test

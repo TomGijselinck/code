@@ -8,7 +8,7 @@ import be.kuleuven.cs.som.annotate.Value;
 public class Bazooka extends Weapon {
 	
 	public Bazooka () {
-		super ("Bazooka", 50, 300, 80);
+		super ("Bazooka", 50, 0.3, 80);
 	}	
 	
 	@Basic @Immutable

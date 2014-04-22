@@ -33,6 +33,12 @@ public class WormTest {
 	private static Worm moveableWorm;
 	
 	/**
+	 * Variable referencing a worm with position (0.5, 1), direction 0, radius 
+	 * 0.5 and name "FalloutWorm".
+	 */
+	private static Worm fallOutWorm;
+	
+	/**
 	 * Variable referencing a worm with position (2, 4), direction 0, radius 
 	 * 0.5, and name "FallWorm".
 	 */
@@ -43,6 +49,8 @@ public class WormTest {
 	 * as the passable map.
 	 */
 	private static World world;
+	
+	private static World world2;
 	
 	// 10x10 pixels
 		//     0 1 2 3 4 5 6 7 8 9
@@ -70,7 +78,33 @@ public class WormTest {
 				{false, false, 	false, 	false,	false,	false,	false,	false,	false,	false}
 		};
 		
-		private static double timeStep = 0.005;
+		// 10x10 pixels
+		//     0 1 2 3 4 5 6 7 8 9
+		//    --------------------
+		//  1| . . . . . . . . . .
+		//  2| . . . . . . . . . .
+		//  3| . . . . . . . . . .
+		//  4| . . . . . . . . . .
+		//  5| . . . . . . . . . .
+		//  6| . . . . . . . . . .
+		//  7| . . . . . . . . . .
+		//  8| . . . . . . . . . .
+		//  9| . . . . . . . . . .
+		// 10| X X X . . . . X X X
+		private boolean[][] passableMap2 = new boolean[][] {
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+				{false, false, 	false, 	true,	true,	true,	true,	false,	false,	false}
+		};
+		
+		private static double timeStep = 0.0001;
 
 	/**
 	 * Set up a mutable test fixture.
@@ -83,10 +117,13 @@ public class WormTest {
 		standardWorm = new Worm(new Position(3.5, 1.5), 0, 1, "Standard");
 		moveableWorm = new Worm(new Position(0.5, 1), 0, 0.5, "MoveWorm");
 		fallableWorm = new Worm(new Position(2, 4), 0, 0.5, "FallWorm");
+		fallOutWorm = new Worm(new Position(0.5, 1), 0, 0.5, "FalloutWorm");
 		world = new World(5, 5, passableMap, new Random());
+		world2 = new World(5, 5, passableMap2, new Random());
 		world.addAsWorm(standardWorm);
 		world.addAsWorm(moveableWorm);
 		world.addAsWorm(fallableWorm);
+		world2.addAsWorm(fallOutWorm);
 	}
 
 	@Test
@@ -152,9 +189,16 @@ public class WormTest {
 	}
 	
 	@Test
+	public void move_FallOutOfMap() {
+		int steps = 4;
+		for (int i = 0; i<steps; i++) {
+			fallOutWorm.move(1);		
+		}
+	}
+	
+	@Test
 	public void  fall_SingleCase() {
 		fallableWorm.move(4);
-		System.out.println(fallableWorm.getPosition().toString());
 		assertTrue(fuzzyEquals(1.0, fallableWorm.getPosition().getY(), 0.05));
 	}
 
@@ -197,6 +241,12 @@ public class WormTest {
 	public void canJump_ZeroActionPoints() {
 		standardWorm.decreaseActionPoints(5000);
 		assertFalse(standardWorm.canJump());
+	}
+	
+	@Test
+	public void jumpTime_SingleCase() {
+		moveableWorm.turn(0.3);
+		double time = standardWorm.jumpTime(timeStep);
 	}
 
 	@Test
@@ -417,6 +467,7 @@ public class WormTest {
 		int inflictedHP = moveableWorm.getActiveWeapon().getDamage();
 		moveableWorm.turn(0.3);
 		moveableWorm.shoot(100);
+		moveableWorm.getWorld().getProjectile().jump(timeStep);
 		assertEquals(initialHP - inflictedHP,
 				standardWorm.getCurrentHitPoints());
 	}
@@ -425,6 +476,7 @@ public class WormTest {
 	public void shoot_HitImpassableTerrain() {
 		moveableWorm.turn(1.55);
 		moveableWorm.shoot(100);
+		moveableWorm.getWorld().getProjectile().jump(timeStep);
 		assertTrue(moveableWorm.getWorld().getProjectile() == null);
 	}
 

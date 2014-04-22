@@ -20,6 +20,8 @@ public class PartialFacadeTest {
 	private Random random;
 
 	private World world;
+	
+	private World world1;
 
 	// X X X X
 	// . . . .
@@ -28,12 +30,39 @@ public class PartialFacadeTest {
 	private boolean[][] passableMap = new boolean[][] {
 			{ false, false, false, false }, { true, true, true, true },
 			{ true, true, true, true }, { false, false, false, false } };
+	
+	// 10x10 pixels
+			//     0 1 2 3 4 5 6 7 8 9
+			//    --------------------
+			//  1| . . . . . . . . . .
+			//  2| . . X . . . . . . .
+			//  3| X X X . . . . X . .
+			//  4| . X X X X X X X . .
+			//  5| . . . . . . . . . .
+			//  6| . . . . . . . . . .
+			//  7| . . . . . . O . . .
+			//  8| . . . . . . . . . .
+			//  9| . . . . . . . . . .
+			// 10| X X X X X X X X X X
+			private boolean[][] passableMap1 = new boolean[][] {
+					{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+					{true, 	true, 	false, 	true,	true,	true,	true,	true,	true,	true},
+					{false, false, 	false, 	true,	true,	true,	true,	false,	true,	true},
+					{true, false, 	false, 	false,	false,	false,	false,	false,	true,	true},
+					{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+					{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+					{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+					{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+					{true, 	true, 	true, 	true,	true,	true,	true,	true,	true,	true},
+					{false, false, 	false, 	false,	false,	false,	false,	false,	false,	false}
+			};
 
 	@Before
 	public void setup() {
 		facade = new Facade();
 		random = new Random(7357);
 		world = new World(4.0, 4.0, passableMap, random);
+		world1 = new World(5, 5, passableMap1, new Random());
 	}
 
 	@Test
@@ -88,5 +117,17 @@ public class PartialFacadeTest {
 		facade.fall(worm);
 		assertEquals(1.5, facade.getX(worm), EPS);
 		assertEquals(1.5, facade.getY(worm), EPS);
+	}
+	
+	@Test
+	public void isAdjacent_TrueCase() {
+		assertFalse(facade.isAdjacent(world1, 0.5, 1.5, 0.5));
+	}
+	
+	@Test
+	public void isAdjacent_FalseCaseLoop() {
+		for (int i = 0; i<500000; i++) {
+			assertFalse(facade.isAdjacent(world1, 0.5, 1.5, 0.5));
+		}
 	}
 }

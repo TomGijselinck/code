@@ -123,11 +123,4 @@ public class PartialFacadeTest {
 	public void isAdjacent_TrueCase() {
 		assertFalse(facade.isAdjacent(world1, 0.5, 1.5, 0.5));
 	}
-	
-	@Test
-	public void isAdjacent_FalseCaseLoop() {
-		for (int i = 0; i<500000; i++) {
-			assertFalse(facade.isAdjacent(world1, 0.5, 1.5, 0.5));
-		}
-	}
 }

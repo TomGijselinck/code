@@ -3,14 +3,11 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import worms.exceptions.IllegalJumpException;
-import worms.exceptions.IllegalNameException;
-import worms.exceptions.IllegalStepException;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
  * A class of worms as special kinds of game objects involving as additional 
- * properties actionpoints, hit points, weapons and a name.
+ * properties action points, hit points, weapons and a name.
  * 
  * @invar	The direction of each worm must be a valid direction for any worm.
  * 		  |	isValidDirection(getDirection())
@@ -69,11 +66,9 @@ public class Worm extends GameObject {
 	 * 			worm.
 	 * 		  |	! isValidName(name)
 	 * @effect	This new worm is initialized as a game object with the given 
-	 * 			position, the given direction, the given radius and the given
-	 * 			mass.
-	 * 		  |	super(position, direction, radius, mass)
+	 * 			position, the given direction and the given radius.
+	 * 		  |	super(position, direction, radius, 1)
 	 */
-	//TODO weapons doc herschrijven
 	@Raw
 	public Worm(Position position, double direction, double radius, String name)
 			throws IllegalArgumentException {
@@ -118,39 +113,40 @@ public class Worm extends GameObject {
 	 * 		  |			for each position in isAdjacent(position):
 	 * 		  |		  		( (sqrt((x0 - x*)^2 + (y0 - y*)^2)
 	 * 		  |			  		>= sqrt((x0 - x)^2 + (y0 - y)^2))
-	 * 		  |		   	   && (arctan((x0 - x*)/(y0 - y*))
-	 * 		  |					<= arctan((x0 - x)/(y0 - y))) )
+	 * 		  |		   	   && (arctan((y0 - y*)/(x0 - x*))
+	 * 		  |					<= arctan((y0 - y)/(x0 - x))) )
 	 * 		  |			
 	 * 			Else if there exist passable positions, but no adjacent 
 	 * 			positions, this worm will move to the position with maximum 
 	 * 			distance moved and the least divergence from the orientation of
-	 * 			this worm, and will then fall until the resulting position is
-	 * 			adjacent or, if there exist no such position, the worm will
-	 * 			fall out of the map.
+	 * 			this worm, and will then fall (@effect).
 	 * 		  |	else if (for some t in (t0 - 0.7875)..(t0 + 0.7875):
 	 * 		  |		for some r in 0..getRadius():
 	 * 		  |			isPassable(position) )
 	 * 		  |	then new.getPosition() == position where 
-	 * 		  |		for each position in isPassable(position):
-	 * 		  |			( (sqrt((x0 - x*)^2 + (y0 - y*)^2)
-	 * 		  |			  		>= sqrt((x0 - x)^2 + (y0 - y)^2))
-	 * 		  |		   && (arctan((x0 - x*)/(y0 - y*))
-	 * 		  |				<= arctan((x0 - x)/(y0 - y))) )
-	 * 		  |	   && fallllll
+	 * 		  |		for t in (t0 - 0.7875)..(t0 + 0.7875):
+	 * 		  |			for r in 0..getRadius():
+	 * 		  |				if (isPassable(position))
+	 * 		  |					then ( (sqrt((x0 - x*)^2 + (y0 - y*)^2)
+	 * 		  |			  				>= sqrt((x0 - x)^2 + (y0 - y)^2))
+	 * 		  |		  				&& (arctan((y0 - y*)/(x0 - x*))
+	 * 		  |							<= arctan((y0 - y)/(x0 - x))) )
 	 * 			Otherwise, if no passable positions exist, this worm will not
 	 * 			move.
 	 * 		  |	else new.getPosition() = this.getPosition()
-	 * @throws	IllegalStepException
+	 * @effect	This worm will fall if the position is not adjacent.
+	 * 		  |	if (! getWorld().isAdjacent())
+	 * 		  |		then fall()
+	 * @throws	IllegalArgumentException
 	 * 			This worm cannot move the given number of steps in the optimal
 	 * 			direction.
 	 * 		  |	let
-	 * 		  |		slope = arctan((x0 - x*)/(y0 - y*))
+	 * 		  |		slope = arctan((y0 - y*)/(x0 - x*))
 	 * 		  |	in
 	 * 		  |		(! canMove(slope))
 	 */
-	//TODO formal documentation
-	public void move(int steps) throws IllegalStepException {
-		while (steps > 0) {
+	public void move(int steps) throws IllegalArgumentException {
+		while ((steps > 0) && hasWorld()) {
 			Position adjacentPosition = getOptimalPosition(this, true);
 			if (adjacentPosition == null) {
 				Position passablePosition = getOptimalPosition(this, false);
@@ -163,9 +159,9 @@ public class Worm extends GameObject {
 				}
 			} else {
 				double slope = Math.atan(
-						(this.getPosition().getX() - adjacentPosition.getX())
-						/ (this.getPosition().getY() - adjacentPosition.getY()) );
-				if (! canMove(slope)) throw new IllegalStepException(slope, this);
+						(this.getPosition().getY() - adjacentPosition.getY())
+						/ (this.getPosition().getX() - adjacentPosition.getX()) );
+				if (! canMove(slope)) throw new IllegalArgumentException();
 				setPosition(adjacentPosition);
 				int consumedActionPoints = getConsumedActionPoints(slope);
 				decreaseActionPoints(consumedActionPoints);
@@ -249,7 +245,8 @@ public class Worm extends GameObject {
 		double maxDistance = getRadius();
 		double minDistance = maxDistance;
 		double dr = maxDistance/58;
-		double dtheta = 0.0175;
+		double stepSize = 0.0175;
+		double dtheta;
 		Position optimalPosition;
 		
 		while (maxDivergence <= 0.7875) {
@@ -266,6 +263,7 @@ public class Worm extends GameObject {
 			}
 			divergence = 0;
 			
+			dtheta = dr / distance;
 			while (divergence <= maxDivergence) {
 				optimalPosition = getOptimalPositionFromPolCoo(divergence, 
 						distance, resultIsAdjacent);
@@ -275,7 +273,7 @@ public class Worm extends GameObject {
 				divergence += dtheta;
 			}
 			
-			maxDivergence += dtheta;
+			maxDivergence += stepSize;
 			minDistance -= dr;
 		}
 		
@@ -320,10 +318,10 @@ public class Worm extends GameObject {
 			} 
 			return null;
 		} else if (! resultIsAdjacent) {
-			if (world.isPassable(left)) {
+			if (world.isPassableForObject(left, radius)) {
 				return left;
 			}
-			if (world.isPassable(right)) {
+			if (world.isPassableForObject(right, radius)) {
 				return right;
 			}
 			return null;
@@ -378,15 +376,15 @@ public class Worm extends GameObject {
 	 * 			worm is equal to zero.
 	 * 		  |	if (! this.getPosition().equals(new.getPosition()))
 	 * 		  |		then new.getActionPoints() == 0
-	 * @throws	IllegalJumpException(this)
+	 * @throws	IllegalArgumentException
 	 * 			This worm cannot jump.
 	 * 		  |	! canJump()
 	 */
 	@Override
 	public void jump(double timeStep) 
-			throws IllegalArgumentException, IllegalJumpException {
+			throws IllegalArgumentException, IllegalArgumentException {
 		if (! canJump())
-			throw new IllegalJumpException(this);
+			throw new IllegalArgumentException();
 		Position initialPosition = getPosition();
 		super.jump(timeStep);
 		if (! initialPosition.equals(getPosition())) {
@@ -798,10 +796,15 @@ public class Worm extends GameObject {
 	public int getCurrentHitPoints() { return currentHitPoints;}
 	
 	/**
+	 * Subtract the given hit points from the current hit points this worm has.
 	 * 
-	 * @param inflictedHitPoints
+	 * @param 	inflictedHitPoints
+	 * 			The number of hit points to subtract.
+	 * @effect	Set the new current hit points to the original hit points
+	 * 			decremented with the given hit points.
+	 * 		  |	setCurrentHitPoints(this.getCurrentHitpoints()
+	 * 		  |		- inflictedHitPoints)
 	 */
-	//TODO add specification
 	public void decreaseHitPoints(int inflictedHitPoints) {
 		setCurrentHitPoints(getCurrentHitPoints() - inflictedHitPoints);
 		if (getCurrentHitPoints() <= 0) {
@@ -809,7 +812,15 @@ public class Worm extends GameObject {
 		}
 	}
 	
-	//TODO doc schrijven
+	/**
+	 * Add the given hit points to the current hit points this worm has.
+	 * 
+	 * @param 	hitPoints
+	 * 			The number of hit points to add.
+	 * @effect	Set the new current hit points to the original hit points
+	 * 			incremented with the given hit points.
+	 * 		  |	setCurrentHitPoints(this.getCurrentHitpoints() + hitPoints)
+	 */
 	public void addHitPoints(int hitPoints) {
 		setCurrentHitPoints(getCurrentHitPoints() + hitPoints);
 	}
@@ -868,13 +879,13 @@ public class Worm extends GameObject {
 	 * 			The new name for this worm.
 	 * @post	The new name of this worm is equal to the given name.
 	 * 		  |	this.getName() == name
-	 * @throws	IllegalNameException(name, this)
+	 * @throws	IllegalArgumentException()
 	 * 		  	The given name is not a valid name for any worm.
 	 * 		  |	! isValidName(name)
 	 */
-	public void setName(String name) throws IllegalNameException {
+	public void setName(String name) throws IllegalArgumentException {
 		if (! isValidName(name))
-			throw new IllegalNameException(name, this);
+			throw new IllegalArgumentException();
 		this.name = name;
 	}
 	
@@ -1105,9 +1116,16 @@ public class Worm extends GameObject {
 	 * 
 	 * @post	The new active weapon of this worm is the next weapon in the 
 	 * 			list of weapons attached to this worm.
-	 * 		  |	new.getActiveWeapon() == 
+	 * 		  |	let
+	 * 		  |		currentWeapon = getActiveWeapon();
+	 *		  |		index = weapons.indexOf(currentWeapon);
+	 *		  |		maxIndex = weapons.size();
+	 *		  |	in
+	 * 		  |		if (index + 1 >= maxIndex) 
+	 * 		  |			then new.getActiveWeapon() == getWeaponAt(0)
+	 * 		  |		else
+	 * 		  |			new.getActiveWeapon() == getWeapontAt(index + 1)
 	 */
-	//TODO formele specificatie afwerken
 	public void selectNextWeapon() {
 		Weapon currentWeapon = getActiveWeapon();
 		int index = weapons.indexOf(currentWeapon);
@@ -1172,10 +1190,6 @@ public class Worm extends GameObject {
 	 *		  |			direction, weapon.getProjecileMass(), 
 	 *		  |			weapon.getDamage(), force))
 	 *		  |	 && (projectile.jump(timestep))
-	 *		  |		
-	 * @throws	IllegalArgumentException
-	 * 			This worm cannot shoot its active weapon.
-	 * 		  |	! canShoot()
 	 */
 	public void shoot(int propulsionYield) {
 		if (! canShoot()) return;
@@ -1193,7 +1207,6 @@ public class Worm extends GameObject {
 		decreaseActionPoints(weapon.getActionPointsCost());
 		getWorld().setProjectile(projectile);
 	}
-	//TODO testen schrijven
 	
 	/**
 	 * Checks whether this worm can shoot its active weapon.

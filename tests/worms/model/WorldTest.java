@@ -64,7 +64,7 @@ public class WorldTest {
 	};
 	
 	@Before
-	public void setup() {
+	public void setup() throws Exception {
 		world1 = new World(5, 5, passableMap1, new Random());
 		world2 = new World(6, 6, passableMap2, new Random());
 		worm1 = new Worm(new Position(0.5, 1), 0, 0.5, "First worm");
@@ -276,8 +276,6 @@ public class WorldTest {
 	public void addWorm_SingleCase() {
 		world1.addWorm();
 		assertEquals(3, world1.getNbWorms());
-		System.out.println(world1.getWormAt(2).getPosition().toString());
-		System.out.println(world1.getWormAt(2).getRadius());
 	}
 	
 	@Test

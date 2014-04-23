@@ -131,11 +131,18 @@ public class Position {
 	}
 	
 	/**
+	 * ...
 	 * 
-	 * @param otherPosition
-	 * @return
+	 * @param 	otherPosition
+	 * 			...
+	 * @return	...
+	 * 		  |	let
+	 * 		  |		dx = otherPosition.getX() - getX();
+	 *		  |		dy = otherPosition.getY() - getY();
+	 * 		  |	in
+	 * 		  |		result ==
+	 * 		  |			Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))
 	 */
-	//TODO add documentation
 	public double getDistanceFrom(Position otherPosition) {
 		double dx = otherPosition.getX() - getX();
 		double dy = otherPosition.getY() - getY();

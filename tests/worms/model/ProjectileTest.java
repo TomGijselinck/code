@@ -45,7 +45,7 @@ public class ProjectileTest {
 		};
 	
 	@Before
-	public void setup() {
+	public void setup() throws Exception {
 		projectile = new Projectile(new Position(2, 4), 0.7, 0.01, 20, 1.5);
 		world = new World(5, 5, passableMap, new Random());
 	}

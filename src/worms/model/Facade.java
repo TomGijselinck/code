@@ -53,7 +53,6 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether or not the given worm is allowed to move.
 	 */
-	//TODO
 	public boolean canMove(Worm worm) {
 		//System.out
 		//		.println("canMove() (" + worm.getName() + "@"
@@ -126,7 +125,6 @@ public class Facade implements IFacade {
 			throw new ModelException(exc);
 		}
 	}
-	//TODO use random
 	
 	/**
 	 * Create a new worm that is positioned at the given location in the given
@@ -237,7 +235,6 @@ public class Facade implements IFacade {
 	 * @return An array with two elements, with the first element being the
 	 *         x-coordinate and the second element the y-coordinate
 	 */
-	//TODO
 	public double[] getJumpStep(Worm worm, double t) {
 		double[] location = new double[2];
 		try {
@@ -283,7 +280,6 @@ public class Facade implements IFacade {
 	 *                 
 	 * @return The time duration of the worm's jump.
 	 */
-	//TODO
 	public double getJumpTime(Worm worm, double timeStep) {
 		try {
 		//System.out.println("getting jumpTime...");
@@ -602,9 +598,8 @@ public class Facade implements IFacade {
 	/**
 	 * Starts a game in the given world.
 	 */
-	//TODO
 	public void startGame(World world) {
-		System.out.println("start game");
+		//System.out.println("start game");
 		world.startGame();
 	}
 

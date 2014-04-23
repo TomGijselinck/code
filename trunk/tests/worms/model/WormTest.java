@@ -5,9 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.*;
 import java.util.Random;
 
-import worms.exceptions.IllegalJumpException;
-import worms.exceptions.IllegalNameException;
-import worms.exceptions.IllegalStepException;
 import static worms.util.Util.*;
 
 /**
@@ -138,7 +135,7 @@ public class WormTest {
 		assertTrue(theWorm.hasAsWeapon(new Bazooka()));
 	}
 
-	@Test(expected = IllegalNameException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void extendedConstructor_InvalidName() throws Exception {
 		new Worm(new Position(0, 0), 0, 1, "W");
 	}
@@ -155,17 +152,17 @@ public class WormTest {
 	}
 
 	@Test
-	public void move_Horizontal() {
+	public void move_Horizontal() throws Exception {
 		int initialActionPoints = moveableWorm.getCurrentActionPoints();
 		moveableWorm.move(3);
 		assertTrue(fuzzyEquals(2, moveableWorm.getPosition().getX()));
 		assertTrue(fuzzyEquals(1, moveableWorm.getPosition().getY()));
-		assertEquals(initialActionPoints - 12,
+		assertEquals(initialActionPoints - 3,
 				moveableWorm.getCurrentActionPoints());
 	}
 
 	@Test
-	public void move_UpwardOrientation() {
+	public void move_UpwardOrientation() throws Exception {
 		fallableWorm.turn(Math.PI / 2);
 		fallableWorm.move(1);
 		assertTrue(fuzzyEquals(2, fallableWorm
@@ -175,21 +172,21 @@ public class WormTest {
 	}
 
 	@Test
-	public void move_MultipleIntervals() {
+	public void move_MultipleIntervals() throws Exception {
 		moveableWorm.move(2);
 		moveableWorm.move(1);
 		assertTrue(fuzzyEquals(2, moveableWorm.getPosition().getX()));
 		assertTrue(fuzzyEquals(1, moveableWorm.getPosition().getY()));
 	}
 
-	@Test(expected = IllegalStepException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void move_IllegalCase() throws Exception {
 		standardWorm.decreaseActionPoints(5000);
 		standardWorm.move(1);
 	}
 	
 	@Test
-	public void move_FallOutOfMap() {
+	public void move_FallOutOfMap() throws Exception {
 		int steps = 4;
 		for (int i = 0; i<steps; i++) {
 			fallOutWorm.move(1);		
@@ -197,20 +194,28 @@ public class WormTest {
 	}
 	
 	@Test
-	public void  fall_SingleCase() {
+	public void move_HitBottom() throws Exception {
+		Position initialPosition = moveableWorm.getPosition();
+		moveableWorm.turn(- 0.5 * Math.PI);
+		moveableWorm.move(1);
+		assertTrue(initialPosition.equals(moveableWorm.getPosition()));
+	}
+	
+	@Test
+	public void  fall_SingleCase() throws Exception {
 		fallableWorm.move(4);
 		assertTrue(fuzzyEquals(1.0, fallableWorm.getPosition().getY(), 0.05));
 	}
 
 	@Test
-	public void jump_SingleCase() {
+	public void jump_SingleCase() throws Exception {
 		moveableWorm.turn(0.3);
 		moveableWorm.jump(timeStep);
 		assertEquals(0, moveableWorm.getCurrentActionPoints());
 	}
 
 	@Test
-	public void jump_NotBeyondWormRadius() {
+	public void jump_NotBeyondWormRadius() throws Exception {
 		Position initialPosition = new Position(1.5, 1.75);
 		Worm worm = new Worm(initialPosition, 1.4, 1.2, "BigWorm");
 		world.addAsWorm(worm);
@@ -219,14 +224,14 @@ public class WormTest {
 	}
 	
 	@Test
-	public void jump_OutsideWorldBorders() {
+	public void jump_OutsideWorldBorders() throws Exception {
 		Worm worm = new Worm(new Position(4, 1), 0.7, 0.5, "Outside Borders");
 		world.addAsWorm(worm);
 		worm.jump(timeStep);
 		assertTrue(worm.isTerminated());
 	}
 	
-	@Test(expected = IllegalJumpException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void jump_IllegalJump() throws Exception {
 		standardWorm.decreaseActionPoints(5000);
 		standardWorm.jump(timeStep);
@@ -246,11 +251,11 @@ public class WormTest {
 	@Test
 	public void jumpTime_SingleCase() {
 		moveableWorm.turn(0.3);
-		double time = standardWorm.jumpTime(timeStep);
+		standardWorm.jumpTime(timeStep);
 	}
 
 	@Test
-	public void jumpStep_LegalCase() {
+	public void jumpStep_LegalCase() throws Exception {
 		moveableWorm.turn(0.7);
 		double g = Worm.getGravityOfEarth();
 		double F = moveableWorm.getLaunchForce();
@@ -339,7 +344,7 @@ public class WormTest {
 	}
 
 	@Test
-	public void setRadius_LegalCase() {
+	public void setRadius_LegalCase() throws Exception {
 		standardWorm.setRadius(standardWorm.getLowerRadiusBound() + 1);
 		assertTrue(fuzzyEquals(standardWorm.getLowerRadiusBound() + 1,
 				standardWorm.getRadius()));
@@ -372,12 +377,12 @@ public class WormTest {
 	}
 
 	@Test
-	public void setName_LegalCase() {
+	public void setName_LegalCase() throws Exception {
 		standardWorm.setName("New name");
 		assertEquals("New name", standardWorm.getName());
 	}
 
-	@Test(expected = IllegalNameException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setName_InvalidName() throws Exception {
 		standardWorm.setName("Inval1d nam$");
 	}

@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 import java.lang.Math;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import static worms.util.Util.*;
 import be.kuleuven.cs.som.annotate.*;
@@ -411,10 +410,25 @@ public class World {
 	}
 	
 	/**
+	 *...
 	 *
-	 * @return
+	 * @param	position
+	 *			...
+	 * @param	radius
+	 * 			...
+	 * @return	...
+	 * 		  |	let
+	 * 		  |		top = position.translate(0, radius);
+	 *		  |		bottom = position.translate(0, -radius);
+	 *		  |		left = position.translate(-radius, 0);
+	 *		  |		right = position.translate(radius, 0);
+	 *		  |	in
+	 *		  |		result ==
+	 *		  |			 ( isInsideWorldBorders(top) 
+	 *		  |			&& isInsideWorldBorders(bottom)
+	 *		  |			&& isInsideWorldBorders(left) 
+	 *		  |			&& isInsideWorldBorders(right) )
 	 */
-	//TODO doc voltooien
 	public boolean objectIsInsideWorldBorders(Position position, double radius) {
 		Position top = position.translate(0, radius);
 		Position bottom = position.translate(0, -radius);
@@ -468,7 +482,7 @@ public class World {
 		double x0 = position.getX();
 		double y0 = position.getY();
 		
-		if (getHorizontalScale() > getVerticalScale()) {
+		if (getHorizontalScale() >= getVerticalScale()) {
 			dr = 1/getHorizontalScale();
 		} else {
 			dr = 1/getVerticalScale();
@@ -484,26 +498,32 @@ public class World {
 			}
 		}
 		
-		while (angle < 2*Math.PI) {
-			radius = innerRadius;
+		radius = innerRadius;
+		while  (radius < outerRadius){
 			dtheta = dr/radius;
-			while (radius <= outerRadius) {
+			angle = 0;
+			while  (angle < 2*Math.PI){
 				x = radius * Math.cos(angle) + x0;
 				y = radius * Math.sin(angle) + y0;
 				if (isImpassable(new Position(x, y))) {
 					return false;
 				}
-				radius = radius + dr;
+				angle = angle + dtheta;
 			}
+			radius = radius + dr;
+			
+		}
+		dtheta = dr/outerRadius;
+		angle = 0;
+		while  (angle < 2*Math.PI) {
 			x = outerRadius * Math.cos(angle) + x0;
 			y = outerRadius * Math.sin(angle) + y0;
 			if (isImpassable(new Position(x, y))) {
 				return false;
 			}
 			angle = angle + dtheta;
-			
 		}
-		
+			
 		return true;
 	}
 	
@@ -565,9 +585,9 @@ public class World {
 	 * @effect	...
 	 * 		  |	result ==
 	 * 		  |		(isPassableForObject(position, radius)
-	 * 		  |	   && isImpassableArea(position, 1.1*radius, radius) )
+	 * 		  |	   && isImpassableArea(position, 1.1*radius, radius)
+	 * 		  |	   && objectInsideWorldBorders(position, radius) )
 	 */
-	//TODO doc aanvullen
 	public boolean isAdjacent(Position position, double radius) {
 		double outerRadius = 1.1 * radius;
 		return (isPassableForObject(position, radius)
@@ -583,9 +603,11 @@ public class World {
 	 * @param 	radius
 	 * 			...
 	 * @return	...
-	 * 		  |	...
+	 * 		  |	result ==
+	 * 		  |		for angle in 0..2*Pi:
+	 * 		  |			isPassable(New Position(getRadius * cos(angle), 
+	 * 		  |				getRadius * sin(angle)))
 	 */
-	//TODO: doc aanvullen
 	public boolean objectInsideWorldBorders(Position position, double radius) {
 		double x;
 		double y;
@@ -988,7 +1010,6 @@ public class World {
 			int max = getAllWorms().size();
 			int index = randomInt(0, max);
 			Collections.shuffle(Arrays.asList(nameList));
-			System.out.println(index);
 			String name = getNameAt(index);
 			List<String> currentWormNames = getAllWormNames();
 			while (currentWormNames.contains(name)) {

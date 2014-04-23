@@ -4,7 +4,6 @@ import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Model;
 import be.kuleuven.cs.som.annotate.Raw;
-import worms.exceptions.IllegalRadiusException;
 
 /**
  * A class of game objects involving a position, a direction, a radius, a mass 
@@ -247,7 +246,7 @@ public abstract class GameObject {
 	 * 			The given radius is not a valid radius for this game object.
 	 * 		  |	! canHaveAsRadius(radius)
 	 */
-	public void setRadius(double radius) throws IllegalRadiusException {
+	public void setRadius(double radius) throws IllegalArgumentException {
 		if (! canHaveAsRadius(radius)) 
 			throw new IllegalArgumentException();
 		this.radius = radius;

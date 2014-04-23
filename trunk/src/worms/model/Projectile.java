@@ -26,14 +26,15 @@ public class Projectile extends GameObject {
 	 * @param 	position
 	 * 			...
 	 * @effect	...
-	 * 		  |	super(position, direction, radius, mass)
+	 * 		  |	super(position, direction, 1, mass)
 	 * @post	...
 	 * 		  |	new.getDamage() == damage
+	 * @post	...
+	 * 		  |	new.getLaunchFForce() == launchForce
 	 * @post	...
 	 * 		  |	new.getRadius() ==
 	 * 		  |		Math.pow((0.75 * getMass()) / (Math.PI * getDensity()), 1/3)
 	 */
-	//TODO documentation aanvullen & checkers aanmaken voor argumenten
 	public Projectile(Position position, double direction, double mass, 
 			int damage, double launchForce) {
 		super(position, direction, 1, mass);

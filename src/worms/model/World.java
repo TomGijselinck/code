@@ -58,7 +58,13 @@ public class World {
 		this.width = width;
 		this.height = height;
 		this.passableMap = passableMap;
-		this.isTerminated = false;
+		isTerminated = false;
+		horizontalResolution = getNoHorizontalPixels() / getWidth();
+		verticalResolution = getNoVerticalPixels() / getHeight();
+		horizontalScale = getWidth() / getNoHorizontalPixels();
+		verticalScale = getHeight() / getNoVerticalPixels();
+		pixelWidth = getWidth() / getNoHorizontalPixels();
+		pixelHeight = getHeight() / getNoVerticalPixels();
 	}
 	
 	
@@ -242,48 +248,74 @@ public class World {
 	
 	
 	/**
-	 * Return the horizontal scale of this world in map pixels per worm-meter.
-	 * 
-	 * @return	...
-	 * 		  |	result ==
-	 * 		  |		getNoHorizontalPixels() / getWidth()
+	 * Return the horizontal resolution of this world in map pixels per 
+	 * worm-meter.
 	 */
-	public double getHorizontalScale() { 
-		return getNoHorizontalPixels() / getWidth();
+	@Basic
+	@Immutable
+	public double getHorizontalResolution() { 
+		return horizontalResolution;
 	}
 	
+	private final double horizontalResolution;
+	
 	/**
-	 * Return the vertical scale of this world in map pixels per worm-meter.
-	 * 
-	 * @return	...
-	 * 		  |	result ==
-	 * 		  |		getNoVerticalPixels() / getHeight()
+	 * Return the vertical resolution of this world in map pixels per 
+	 * worm-meter.
 	 */
-	public double getVerticalScale() { 
-		return getNoVerticalPixels() / getHeight();
+	@Basic
+	@Immutable
+	public double getVerticalResolution() { 
+		return verticalResolution;
 	}
+	
+	private final double verticalResolution;
+	
+	/**
+	 * Return the horizontal scale of this world in worm-meter per map pixel.
+	 */
+	@Basic
+	@Immutable
+	public double getHorizontalScale() {
+		return horizontalScale;
+	}
+	
+	private final double horizontalScale;
+	
+	/**
+	 * Return the vertical scale of this world in worm-meter per map pixel.
+	 */
+	@Basic
+	@Immutable
+	public double getVerticalScale() {
+		return verticalScale;
+	}
+	
+	private final double verticalScale;
 	
 	/**
 	 * Return the height of each pixel of the passable map of this world in 
 	 * metre.
-	 * 
-	 * @return	...
-	 * 		  |	getWidth() / getNoHorizontalPixels()
 	 */
+	@Basic
+	@Immutable
 	public double getPixelWidth() { 
-		return getWidth() / getNoHorizontalPixels();
+		return pixelWidth;
 	}
+	
+	private final double pixelWidth;
 	
 	/**
 	 * Return the height of each pixel of the passable map of this world in 
 	 * metre.
-	 * 
-	 * @return	...
-	 * 		  |	getHeight() / getNoVerticalPixels()
 	 */
+	@Basic
+	@Immutable
 	public double getPixelHeight(){ 
-		return getHeight() / getNoVerticalPixels();
+		return pixelHeight;
 	}
+	
+	private final double pixelHeight;
 	
 	
 	
@@ -294,10 +326,10 @@ public class World {
 	 * 	The row is selected by the Y coordinate of the given position.
 	 * 
 	 * @return	...
-	 * 		  |	getNoVerticalPixels() - (int) position.getY() * getVerticalScale()
+	 * 		  |	getNoVerticalPixels() - (int) position.getY() * getVerticalResolution()
 	 */
-	public int getPixelRow(Position position) { 
-		return (getNoVerticalPixels() - (int) (position.getY() * getVerticalScale()) );
+	public int getPixelRow(Position position) {
+		return (getNoVerticalPixels() - (int) (position.getY() * getVerticalResolution()));
 	}
 	
 	/**
@@ -306,10 +338,10 @@ public class World {
 	 * 	The column is selected by the X coordinate of the given position.
 	 * 
 	 * @return	...
-	 * 		  |	(int) position.getX() * getHorizontalScale() + 1
+	 * 		  |	(int) position.getX() * getHorizontalResolution() + 1
 	 */
 	public int getPixelColumn(Position position) { 
-		return (int) (position.getX() * getHorizontalScale() + 1);
+		return (int) (position.getX() * getHorizontalResolution() + 1);
 	}
 	
 	
@@ -483,9 +515,9 @@ public class World {
 		double y0 = position.getY();
 		
 		if (getHorizontalScale() >= getVerticalScale()) {
-			dr = 1/getHorizontalScale();
+			dr = getHorizontalScale();
 		} else {
-			dr = 1/getVerticalScale();
+			dr = getVerticalScale();
 		}
 		
 		//Basic checkpoints

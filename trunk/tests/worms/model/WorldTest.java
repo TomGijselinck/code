@@ -85,13 +85,13 @@ public class WorldTest {
 	}
 	
 	@Test
-	public void getHorizontalScale_SingleCase() { 
-		assertTrue(fuzzyEquals(2, world1.getHorizontalScale()));
+	public void getHorizontalResolution_SingleCase() { 
+		assertTrue(fuzzyEquals(2, world1.getHorizontalResolution()));
 	}
 	
 	@Test
-	public void getVerticalScale_SingleCase() { 
-		assertTrue(fuzzyEquals(2, world1.getVerticalScale()));
+	public void getVerticalResolution_SingleCase() { 
+		assertTrue(fuzzyEquals(2, world1.getVerticalResolution()));
 	}
 	
 	@Test

@@ -9,18 +9,18 @@ public class SequenceStatement extends Statement {
 		super(line, column);
 	}
 	
-	public List<Statement> getSequenceStatements() {
-		return sequenceStatements;
+	public void setSequenceStatements(List<Statement> statements) {
+		Iterator<Statement> iterator = statements.iterator();
+		while (iterator.hasNext()) {
+			adAsStatement(iterator.next());
+		}
 	}
-	
-	private List<Statement> sequenceStatements;
 	
 	@Override
 	public void execute() {
-		Iterator<Statement> iterator = getSequenceStatements().iterator();
+		Iterator<Statement> iterator = getStatements().iterator();
 		while (iterator.hasNext()) {
-			Statement statement = iterator.next();
-			statement.execute();
+			iterator.next().execute();
 		}
 	}
 

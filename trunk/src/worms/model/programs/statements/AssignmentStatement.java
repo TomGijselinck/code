@@ -1,7 +1,7 @@
 package worms.model.programs.statements;
 
-import worms.model.programs.Type;
 import worms.model.programs.expressions.Expression;
+import worms.model.programs.types.Type;
 
 public class AssignmentStatement extends Statement {
 
@@ -9,7 +9,7 @@ public class AssignmentStatement extends Statement {
 			String variableName, Expression rhs) {
 		super(line, column);
 		this.varName = variableName;
-		this.expression = rhs;
+		setExpression(rhs);
 	}
 
 	public String getVariableName() {

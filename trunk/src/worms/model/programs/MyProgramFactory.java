@@ -7,9 +7,21 @@ import worms.model.programs.ProgramFactory.ForeachType;
 import worms.model.programs.expressions.BoolExpression;
 import worms.model.programs.expressions.DoubleConstantExpression;
 import worms.model.programs.expressions.Expression;
+import worms.model.programs.expressions.GetXStatement;
+import worms.model.programs.expressions.GetYStatement;
+import worms.model.programs.expressions.Inspector;
+import worms.model.programs.expressions.NullExpression;
+import worms.model.programs.expressions.SelfExpression;
+import worms.model.programs.expressions.SubtractionExpression;
+import worms.model.programs.expressions.Inspector.InspectorType;
 import worms.model.programs.statements.AssignmentStatement;
+import worms.model.programs.statements.PrintStatement;
 import worms.model.programs.statements.SequenceStatement;
 import worms.model.programs.statements.Statement;
+import worms.model.programs.types.BoolType;
+import worms.model.programs.types.DoubleType;
+import worms.model.programs.types.EntityType;
+import worms.model.programs.types.Type;
 
 public class MyProgramFactory implements ProgramFactory<Expression, Statement, Type<?>>{
 	
@@ -40,85 +52,113 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression representing the logical and operation on two
 	 * expressions e1 and e2
 	 */
-	public Expression createAnd(int line, int column, Expression e1, Expression e2);
+	public Expression createAnd(int line, int column, Expression e1, Expression e2) {
+		return null;
+	}
 
 	/**
 	 * Create an expression representing the logical or operation on two
 	 * expressions e1 and e2
 	 */
-	public Expression createOr(int line, int column, Expression e1, Expression e2);
+	public Expression createOr(int line, int column, Expression e1, Expression e2) {
+		return null;
+	}
 
 	/**
 	 * Create an expression representing the logical not operation on the
 	 * expression e
 	 */
-	public Expression createNot(int line, int column, Expression e);
+	public Expression createNot(int line, int column, Expression e) {
+		return null;
+	}
 
 	/**
 	 * Create an expression representing the literal 'null'
 	 */
-	public Expression createNull(int line, int column);
+	public Expression createNull(int line, int column) {
+		return new NullExpression(line, column);
+	}
 
 	/**
 	 * Create an expression representing a reference to the worm that is
 	 * executing the program
 	 */
-	public Expression createSelf(int line, int column);
+	public Expression createSelf(int line, int column) {
+		return new SelfExpression(line, column);
+	}
 
 	/**
 	 * Create an expression to get the x-coordinate of the entity identified by
 	 * the expression e
 	 */
-	public Expression createGetX(int line, int column, Expression e);
+	public Expression createGetX(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.X);
+	}
 
 	/**
 	 * Create an expression to get the y-coordinate of the entity identified by
 	 * the expression e
 	 */
-	public Expression createGetY(int line, int column, Expression e);
+	public Expression createGetY(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.Y);
+	}
 
 	/**
 	 * Create an expression to get the radius of the entity identified by the
 	 * expression e
 	 */
-	public Expression createGetRadius(int line, int column, Expression e);
+	public Expression createGetRadius(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.RADIUS);
+	}
 
 	/**
 	 * Create an expression to get the direction of the entity identified by the
 	 * expression e
 	 */
-	public Expression createGetDir(int line, int column, Expression e);
+	public Expression createGetDir(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.DIRECTION);
+	}
 
 	/**
 	 * Create an expression to get the action points of the entity identified by
 	 * the expression e
 	 */
-	public Expression createGetAP(int line, int column, Expression e);
+	public Expression createGetAP(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.AP);
+	}
 
 	/**
 	 * Create an expression to get the maximum number of action points of the
 	 * entity identified by the expression e
 	 */
-	public Expression createGetMaxAP(int line, int column, Expression e);
+	public Expression createGetMaxAP(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.MAXAP);
+	}
 
 	/**
 	 * Create an expression to get the hit points of the entity identified by
 	 * the expression e
 	 */
-	public Expression createGetHP(int line, int column, Expression e);
+	public Expression createGetHP(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.HP);
+	}
 
 	/**
 	 * Create an expression to get the maximum number of hit points of the
 	 * entity identified by the expression e
 	 */
-	public Expression createGetMaxHP(int line, int column, Expression e);
+	public Expression createGetMaxHP(int line, int column, Expression e) {
+		return new Inspector(line, column, e, InspectorType.MAXHP);
+	}
 
 	/**
 	 * Create an expression to evaluate whether the worm identified by the
 	 * expression e belongs to the same team as the worm that is executing the
 	 * program
 	 */
-	public Expression createSameTeam(int line, int column, Expression e);
+	public Expression createSameTeam(int line, int column, Expression e) {
+		return null;
+	}
 
 	/**
 	 * Create an expression to get the closest object in the direction theta+e,
@@ -138,7 +178,9 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression that evaluates whether the entity identified by the
 	 * expression e is a food ration
 	 */
-	public Expression createIsFood(int line, int column, Expression e);
+	public Expression createIsFood(int line, int column, Expression e) {
+		return null;
+	}
 
 	/**
 	 * Create an expression that evaluates to the value of the variable with the
@@ -192,7 +234,9 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression that represents the subtraction of the value of
 	 * expression e1 and the value of the expression e2
 	 */
-	public Expression createSubtraction(int line, int column, Expression e1, Expression e2);
+	public Expression createSubtraction(int line, int column, Expression e1, Expression e2) {
+		return new SubtractionExpression(line, column, e1, e2);
+	}
 
 	/**
 	 * Create an expression that represents the multiplication of the value of
@@ -308,7 +352,9 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create a statement that represents printing out the value of the
 	 * expression e
 	 */
-	public S createPrint(int line, int column, Expression e);
+	public Statement createPrint(int line, int column, Expression e) {
+		return new PrintStatement(line, column, e);
+	}
 
 	/* types */
 
@@ -318,7 +364,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 */
 	@Override
 	public Type<?> createDoubleType() {
-		return new Type<Double>();
+		return new DoubleType();
 	}
 
 	/**
@@ -327,7 +373,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 */
 	@Override
 	public Type<?> createBooleanType() {
-		return new Type<Boolean>();
+		return new BoolType();
 	}
 
 	/**
@@ -336,7 +382,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 */
 	@Override
 	public Type<?> createEntityType() {
-		return new Type<Worm>();
+		return new EntityType();
 	}
 
 }

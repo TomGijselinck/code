@@ -3,6 +3,11 @@ package worms.model;
 import static org.junit.Assert.*;
 
 import org.junit.*;
+
+import worms.gui.game.IActionHandler;
+import worms.model.programs.ParseOutcome;
+import worms.model.programs.ParseOutcome.Success;
+
 import java.util.Random;
 
 import static worms.util.Util.*;
@@ -40,6 +45,12 @@ public class WormTest {
 	 * 0.5, and name "FallWorm".
 	 */
 	private static Worm fallableWorm;
+	
+	/**
+	 * Variable referencing a computer controlled worm with position (0.5, 1),
+	 * direction 0, radius 0.5 and name "NPCworm".
+	 */
+	private static Worm NPCworm;
 	
 	/**
 	 * Variable referencing a world with width and height of 5 and passableMap
@@ -101,6 +112,10 @@ public class WormTest {
 				{false, false, 	false, 	true,	true,	true,	true,	false,	false,	false}
 		};
 		
+		private IFacade facade;
+		
+		private IActionHandler handler;
+		
 		private static double timeStep = 0.0001;
 
 	/**
@@ -115,6 +130,7 @@ public class WormTest {
 		moveableWorm = new Worm(new Position(0.5, 1), 0, 0.5, "MoveWorm");
 		fallableWorm = new Worm(new Position(2, 4), 0, 0.5, "FallWorm");
 		fallOutWorm = new Worm(new Position(0.5, 1), 0, 0.5, "FalloutWorm");
+		NPCworm = new Worm(new Position(0.5,  1.5), 0, 0.5, "NPCworm");
 		world = new World(5, 5, passableMap, new Random());
 		world2 = new World(5, 5, passableMap2, new Random());
 		world.addAsWorm(standardWorm);
@@ -483,6 +499,18 @@ public class WormTest {
 		moveableWorm.shoot(100);
 		moveableWorm.getWorld().getProjectile().jump(timeStep);
 		assertTrue(moveableWorm.getWorld().getProjectile() == null);
+	}
+	
+	@Test
+	//TODO: aanpassen!
+	public void TestProgram() {
+		String programText = "double a; double b := 3; a := 5 - b; print a;";
+		handler = new SimpleActionHandler(facade);
+		ParseOutcome<?> outcome = facade.parseProgram(programText, handler);
+		assertTrue(outcome.isSuccess());
+		Program program = ((Success) outcome).getResult();
+		NPCworm.setProgram(program);
+		NPCworm.getProgram().run();
 	}
 
 }

@@ -1145,6 +1145,31 @@ public class Worm extends GameObject {
 	
 	
 	
+	/**
+	 * Return the program of this worm.
+	 */
+	@Basic
+	public Program getProgram() {
+		return program;
+	}
+	
+	/**
+	 * Set the program of this worm to the given program.
+	 * 
+	 * @param 	program
+	 * 			The program to set.
+	 */
+	public void setProgram(Program program) {
+		this.program = program;
+	}
+	
+	/**
+	 * Variable referencing the program of this worm.
+	 */
+	private Program program;
+	
+	
+	
 	
 	//SHOOTING
 	/**

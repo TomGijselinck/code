@@ -1,13 +1,13 @@
 package worms.model.programs.expressions;
 
+import worms.model.programs.types.Type;
 import be.kuleuven.cs.som.annotate.Basic;
 
 public class VariableExpression extends Expression {
 	
 	public VariableExpression(int line, int column, String name) {
-		super(line, column, name);
+		super(line, column);
 		this.name = name;
-		this.value = null;
 	}
 	
 	@Basic
@@ -17,12 +17,11 @@ public class VariableExpression extends Expression {
 	
 	private String name;
 	
-	//TODO: werk af na statements
 	@Override
-	public Object evaluate() {
+	public Type<?> evaluate() {
+		Type<?> value;
+		value = getStatement().getProgram().getGlobalVariables().get(name);
 		return value;
 	}
-	
-	private Object value;
 
 }

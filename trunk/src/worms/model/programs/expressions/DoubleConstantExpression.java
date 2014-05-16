@@ -1,5 +1,7 @@
 package worms.model.programs.expressions;
 
+import worms.model.programs.types.DoubleType;
+
 public class DoubleConstantExpression extends Expression{
 	
 	public DoubleConstantExpression(int line, int column, double d) {
@@ -7,19 +9,16 @@ public class DoubleConstantExpression extends Expression{
 		setValue(d);
 	}
 	
-	public double getValue() {
+	@Override
+	public DoubleType evaluate() {
 		return value;
 	}
 	
 	private void setValue(double value) {
-		this.value = value;
+		this.value = new DoubleType(value);
 	}
 	
-	private double value;
-	
-	@Override
-	public Double evaluate() {
-		return getValue();
-	}
+	private DoubleType value;
 
 }
+;

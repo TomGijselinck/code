@@ -11,6 +11,8 @@ import java.util.Set;
 import java.lang.Math;
 
 
+
+import worms.model.programs.Program;
 import static worms.util.Util.*;
 import be.kuleuven.cs.som.annotate.*;
 
@@ -790,7 +792,7 @@ public class World {
 		} else {
 			if (getProjectile() != null) {
 				getProjectile().setWorld(null);
-				this.projectile = projectile;
+				this.projectile = null;
 			}
 		}
 		
@@ -1019,7 +1021,14 @@ public class World {
 	//GAME
 	public void startGame() {
 		gameStarted = true;
-		setCurrentWorm(getAllWorms().get(0));
+		int index = 0;
+		setCurrentWorm(getAllWorms().get(index));
+		while (getCurrentWorm().hasProgram()) {
+			System.out.println("worm " + getCurrentWorm().getName() + " has a program");
+			getCurrentWorm().getProgram().run();
+			index += 1;
+			setCurrentWorm(getAllWorms().get(index));
+		}
 	}
 	
 	public void startNextTurn() {
@@ -1034,10 +1043,13 @@ public class World {
 			Worm worm = getCurrentWorm();
 			worm.setCurrentActionPoints(worm.getActionPointsMaximum());
 			worm.addHitPoints(10);
+			if (getCurrentWorm().hasProgram()) {
+				getCurrentWorm().getProgram().run();
+			}
 		}
 	}
 	
-	public void addWorm() {
+	public void addWorm(Program program) {
 		if (! isGameStarted()) {
 			int max = getAllWorms().size();
 			int index = randomInt(0, max);
@@ -1050,6 +1062,7 @@ public class World {
 			}
 			Worm newWorm = new Worm(new Position(0, 0), 0, 1, name);
 			
+			//find possible position
 			double minRadius = newWorm.getLowerRadiusBound();
 			double maxRadius = 4 * minRadius;
 			newWorm.setRadius(randomDouble(minRadius, maxRadius));
@@ -1063,6 +1076,7 @@ public class World {
 				position = searchAdjacentPosition(newWorm);
 			}
 			newWorm.setPosition(position);
+			newWorm.setProgram(program);
 			
 			addAsWorm(newWorm);
 		}

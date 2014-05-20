@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Random;
 
 import worms.exceptions.ModelException;
+import worms.gui.game.IActionHandler;
+import worms.model.programs.ParseOutcome;
+import worms.model.programs.Program;
 
 
 public class Facade implements IFacade {
@@ -14,6 +17,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement teams, this method should have no effect)
 	 */
+	@Override
 	public void addEmptyTeam(World world, String newName) {
 		//do nothing
 	}
@@ -24,6 +28,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement food, this method should have no effect)
 	 */
+	@Override
 	public void addNewFood(World world) {
 		//do nothing
 	}
@@ -34,9 +39,10 @@ public class Facade implements IFacade {
 	 * The new worm can have an arbitrary (but valid) radius and direction.
 	 * The new worm may (but isn't required to) have joined a team.
 	 */
-	public void addNewWorm(World world) {
+	@Override
+	public void addNewWorm(World world, Program program) {
 		try {
-			world.addWorm();
+			world.addWorm(program);
 		}
 		catch (Exception exc) {
 			throw new ModelException(exc);
@@ -46,6 +52,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether or not the given worm can fall down
 	 */
+	@Override
 	public boolean canFall(Worm worm) {
 		return worm.canFall();
 	}
@@ -53,6 +60,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether or not the given worm is allowed to move.
 	 */
+	@Override
 	public boolean canMove(Worm worm) {
 		//System.out
 		//		.println("canMove() (" + worm.getName() + "@"
@@ -64,6 +72,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether or not the given worm can turn by the given angle.
 	 */
+	@Override
 	public boolean canTurn(Worm worm, double angle) {
 		return worm.canTurn(angle);
 	}
@@ -80,6 +89,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement food, this method should have no effect)
 	 */
+	@Override
 	public Food createFood(World world, double x, double y) {
 		return new Food(); //not implemented
 	}
@@ -116,6 +126,7 @@ public class Facade implements IFacade {
 	 * 
 	 * @return The world.
 	 */
+	@Override
 	public World createWorld(double width, double height,
 			boolean[][] passableMap, Random random) {
 		try {
@@ -144,12 +155,14 @@ public class Facade implements IFacade {
 	 * @param name
 	 * The name of the new worm
 	 */
+	@Override
 	public Worm createWorm(World world, double x, double y, double direction,
-			double radius, String name) {
+			double radius, String name, Program program) {
 		try {
 			if (direction < 0) direction += 2 * Math.PI;
 			Worm worm = new Worm(new Position(x, y), direction, radius, name);
 			world.addAsWorm(worm);
+			worm.setProgram(program);
 			return worm;
 		}
 		catch (Exception exc) {
@@ -161,6 +174,7 @@ public class Facade implements IFacade {
 	 * Makes the given worm fall down until it rests on impassable terrain 
 	 * again.
 	 */
+	@Override
 	public void fall(Worm worm) {
 		try {
 			worm.fall();
@@ -173,6 +187,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the current number of action points of the given worm.
 	 */
+	@Override
 	public int getActionPoints(Worm worm) {
 		return worm.getCurrentActionPoints();
 	}
@@ -180,6 +195,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the active projectile in the world, or null if no active projectile exists.
 	 */
+	@Override
 	public Projectile getActiveProjectile(World world) {
 		return world.getProjectile();
 	}
@@ -187,6 +203,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the active worm in the given world (i.e., the worm whose turn it is).
 	 */
+	@Override
 	public Worm getCurrentWorm(World world) {
 		return world.getCurrentWorm();
 	}
@@ -196,6 +213,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement food, this method must always return an empty collection)
 	 */
+	@Override
 	public Collection<Food> getFood(World world) {
 		return new HashSet<>();
 	}
@@ -203,6 +221,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the current number of hit points of the given worm.
 	 */
+	@Override
 	public int getHitPoints(Worm worm) {
 		return worm.getCurrentHitPoints();
 	}
@@ -214,6 +233,7 @@ public class Facade implements IFacade {
 	 * @return An array with two elements, with the first element being the
 	 *         x-coordinate and the second element the y-coordinate
 	 */
+	@Override
 	public double[] getJumpStep(Projectile projectile, double t) {
 		double[] location = new double[2];
 		try {
@@ -235,6 +255,7 @@ public class Facade implements IFacade {
 	 * @return An array with two elements, with the first element being the
 	 *         x-coordinate and the second element the y-coordinate
 	 */
+	@Override
 	public double[] getJumpStep(Worm worm, double t) {
 		double[] location = new double[2];
 		try {
@@ -263,6 +284,7 @@ public class Facade implements IFacade {
 	 *                 
 	 * @return The time duration of the projectile's jump.
 	 */
+	@Override
 	public double getJumpTime(Projectile projectile, double timeStep) {
 		return projectile.jumpTime(timeStep);
 	}
@@ -280,6 +302,7 @@ public class Facade implements IFacade {
 	 *                 
 	 * @return The time duration of the worm's jump.
 	 */
+	@Override
 	public double getJumpTime(Worm worm, double timeStep) {
 		try {
 		//System.out.println("getting jumpTime...");
@@ -296,6 +319,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the mass of the given worm.
 	 */
+	@Override
 	public double getMass(Worm worm) {
 		return worm.getMass();
 	}
@@ -303,6 +327,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the maximum number of action points of the given worm.
 	 */
+	@Override
 	public int getMaxActionPoints(Worm worm) {
 		return worm.getActionPointsMaximum();
 	}
@@ -310,6 +335,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the maximum number of hit points of the given worm.
 	 */
+	@Override
 	public int getMaxHitPoints(Worm worm) {
 		return worm.getHitPointsMaximum();
 	}
@@ -317,6 +343,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the minimal radius of the given worm.
 	 */
+	@Override
 	public double getMinimalRadius(Worm worm) {
 		return worm.getLowerRadiusBound();
 	}
@@ -324,6 +351,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the name the given worm.
 	 */
+	@Override
 	public String getName(Worm worm) {
 		return worm.getName();
 	}
@@ -331,6 +359,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the current orientation of the given worm (in radians).
 	 */
+	@Override
 	public double getOrientation(Worm worm) {
 		return worm.getDirection();
 	}
@@ -340,6 +369,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement food, this method may return any value)
 	 */
+	@Override
 	public double getRadius(Food food) {
 		return 0;
 	}
@@ -347,6 +377,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the radius of the given projectile.
 	 */
+	@Override
 	public double getRadius(Projectile projectile) {
 		return projectile.getRadius();
 	}
@@ -354,6 +385,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the radius of the given worm.
 	 */
+	@Override
 	public double getRadius(Worm worm) {
 		return worm.getRadius();
 	}
@@ -363,6 +395,7 @@ public class Facade implements IFacade {
 	 * Returns the name of the weapon that is currently active for the given worm,
 	 * or null if no weapon is active.
 	 */
+	@Override
 	public String getSelectedWeapon(Worm worm) {
 		return worm.getActiveWeapon().getName();
 	}
@@ -373,6 +406,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement teams, this method should always return null)
 	 */
+	@Override
 	public String getTeamName(Worm worm) {
 		return null;
 	}
@@ -383,6 +417,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement teams, this method should always return the name of the winning worm, or null if there is no winner)
 	 */
+	@Override
 	public String getWinner(World world) {
 		return world.getWinningWorm().getName();
 	}
@@ -390,6 +425,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns all the worms in the given world
 	 */
+	@Override
 	public Collection<Worm> getWorms(World world) {
 		return world.getAllWorms();
 	}
@@ -399,6 +435,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement food, this method may return any value)
 	 */
+	@Override
 	public double getX(Food food) {
 		return 0;
 	}
@@ -406,6 +443,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the x-coordinate of the given projectile.
 	 */
+	@Override
 	public double getX(Projectile projectile) {
 		return projectile.getPosition().getX();
 	}
@@ -413,6 +451,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the x-coordinate of the current location of the given worm.
 	 */
+	@Override
 	public double getX(Worm worm) {
 		return worm.getPosition().getX();
 	}
@@ -422,6 +461,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement food, this method may return any value)
 	 */
+	@Override
 	public double getY(Food food) {
 		return 0;
 	}
@@ -429,6 +469,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the y-coordinate of the given projectile.
 	 */
+	@Override
 	public double getY(Projectile projectile) {
 		return projectile.getPosition().getY();
 	}
@@ -436,6 +477,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns the y-coordinate of the current location of the given worm.
 	 */
+	@Override
 	public double getY(Worm worm) {
 		return worm.getPosition().getY();
 	}
@@ -445,6 +487,7 @@ public class Facade implements IFacade {
 	 * 
 	 * (For single-student groups that do not implement food, this method should always return false)
 	 */
+	@Override
 	public boolean isActive(Food food) {
 		return false;
 	}
@@ -452,6 +495,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether the given projectile is still alive (active).
 	 */
+	@Override
 	public boolean isActive(Projectile projectile) {
 		return (! projectile.isTerminated());
 	}
@@ -468,6 +512,7 @@ public class Facade implements IFacade {
 	 * 
 	 * @return True if the given region is passable and adjacent to impassable terrain, false otherwise.
 	 */
+	@Override
 	public boolean isAdjacent(World world, double x, double y, double radius) {
 		Position position = new Position(x, y);
 		return world.isAdjacent(position, radius);
@@ -476,6 +521,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether the given worm is alive
 	 */
+	@Override
 	public boolean isAlive(Worm worm) {
 		return (! worm.isTerminated());
 	}
@@ -483,6 +529,7 @@ public class Facade implements IFacade {
 	/**
 	 * Returns whether the game in the given world has finished.
 	 */
+	@Override
 	public boolean isGameFinished(World world) {
 		return world.isGameFinished();
 	}
@@ -499,6 +546,7 @@ public class Facade implements IFacade {
 	 * 
 	 * @return True if the given region is impassable, false otherwise.
 	 */
+	@Override
 	public boolean isImpassable(World world, double x, double y, double radius) {
 		Position position = new Position(x, y);
 		return world.isImpassableForObject(position, radius);
@@ -513,6 +561,7 @@ public class Facade implements IFacade {
 	 * @param timeStep An elementary time interval during which you may assume
 	 *                 that the projectile will not completely move through a piece of impassable terrain.
 	 */
+	@Override
 	public void jump(Projectile projectile, double timeStep) {
 		try {
 			projectile.jump(timeStep);
@@ -531,6 +580,7 @@ public class Facade implements IFacade {
 	 * @param timeStep An elementary time interval during which you may assume
 	 *                 that the worm will not completely move through a piece of impassable terrain.
 	 */
+	@Override
 	public void jump(Worm worm, double timeStep) {
 		try {
 			worm.jump(timeStep);
@@ -543,6 +593,7 @@ public class Facade implements IFacade {
 	/**
 	 * Moves the given worm according to the rules in the assignment.
 	 */
+	@Override
 	public void move(Worm worm) {
 		try {
 			worm.move(1);
@@ -555,6 +606,7 @@ public class Facade implements IFacade {
 	/**
 	 * Renames the given worm.
 	 */
+	@Override
 	public void rename(Worm worm, String newName) {
 		try {
 			worm.setName(newName);
@@ -567,6 +619,7 @@ public class Facade implements IFacade {
 	/**
 	 * Activates the next weapon for the given worm
 	 */
+	@Override
 	public void selectNextWeapon(Worm worm) {
 		worm.selectNextWeapon();
 	}
@@ -574,6 +627,7 @@ public class Facade implements IFacade {
 	/**
 	 * Sets the radius of the given worm to the given value.
 	 */
+	@Override
 	public void setRadius(Worm worm, double newRadius) {
 		try {
 			worm.setRadius(newRadius);
@@ -586,6 +640,7 @@ public class Facade implements IFacade {
 	/**
 	 * Makes the given worm shoot its active weapon with the given propulsion yield.
 	 */
+	@Override
 	public void shoot(Worm worm, int yield) {
 		try {
 			worm.shoot(yield);
@@ -598,6 +653,7 @@ public class Facade implements IFacade {
 	/**
 	 * Starts a game in the given world.
 	 */
+	@Override
 	public void startGame(World world) {
 		//System.out.println("start game");
 		world.startGame();
@@ -606,6 +662,7 @@ public class Facade implements IFacade {
 	/**
 	 * Starts the next turn in the given world
 	 */
+	@Override
 	public void startNextTurn(World world) {
 		world.startNextTurn();
 	}
@@ -613,8 +670,54 @@ public class Facade implements IFacade {
 	/**
 	 * Turns the given worm by the given angle.
 	 */
+	@Override
 	public void turn(Worm worm, double angle) {
 		worm.turn(angle);
+	}
+	
+	/**
+	 * Try to parse the given program.
+	 * You can use an instance of the worms.model.programs.ProgramParser.
+	 * 
+	 * When the program is executed, the execution of an action statement
+	 * must call the corresponding method of the given action handler.
+	 * This executes the action as if a human player has initiated it, and
+	 * will eventually call the corresponding method on the facade. 
+	 * 
+	 * @param programText The program text to parse
+	 * @param handler The action handler on which to execute commands
+	 * 
+	 * @return the outcome of parsing the program, which can be a success or a failure.
+	 * You can create a ParseOutcome object by means of its two static methods, success and failure. 
+	 */
+	@Override
+	public ParseOutcome<?> parseProgram(String programText, IActionHandler handler) {
+		Program program = new Program();
+		return program.parseProgram(programText, handler);
+	}
+	
+	/**
+	 * Returns whether or not the given worm is controlled by a program. 
+	 * 
+	 * @return true if the given worm is controlled by a program, false otherwise
+	 */
+	@Override
+	public boolean hasProgram(Worm worm) {
+		return worm.hasProgram();
+	}
+	
+	/**
+	 * Returns whether or not the given program is well-formed.
+	 * A program is well-formed if a for-each statement does not (directly or
+	 * indirectly) contain one or more action statements.
+	 * 
+	 * @param program The program to check
+	 * 
+	 * @return true if the program is well-formed; false otherwise 
+	 */
+	@Override
+	public boolean isWellFormed(Program program) {
+		return true;
 	}
 
 }

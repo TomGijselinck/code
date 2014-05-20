@@ -11,7 +11,15 @@ public class PrintStatement extends Statement {
 
 	@Override
 	public void execute() {
-		System.out.println(getExpression().evaluate().getValue());
+		if (getProgram().isPaused() && (! canResumeExecution())) {
+			//skip
+		} else {
+			if (getProgram().isPaused()) {
+				getProgram().resume(this);
+			}
+			System.out.println(getExpression().evaluate().getValue());
+		}
+		
 	}
 
 }

@@ -1,8 +1,9 @@
 package worms.model.programs.statements;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import worms.model.Program;
+import worms.model.programs.Program;
 import worms.model.programs.expressions.Expression;
 
 public abstract class Statement {
@@ -24,7 +25,21 @@ public abstract class Statement {
 	
 	private int column;
 	
+	public boolean getExecutionFlag() {
+		return flag;
+	}
+	
+	public void setExecutionFlag(boolean flag) {
+		this.flag = flag;
+	}
+	
+	private boolean flag = false;
+	
 	public abstract void execute();
+	
+	public boolean canResumeExecution() {
+		return getExecutionFlag();
+	}
 	
 	
 	
@@ -32,6 +47,9 @@ public abstract class Statement {
 	//ASSOCIATIONS
 	
 	public Program getProgram() {
+		if (hasParentStatement()) {
+			return getRootProgram();
+		}
 		return program;
 	}
 	
@@ -56,11 +74,11 @@ public abstract class Statement {
 	}
 	
 	public void adAsStatement(Statement statement) {
-		statements.add(statement);
 		statement.setParentStatement(this);
+		statements.add(statement);
 	}
 	
-	private List<Statement> statements;
+	private List<Statement> statements = new ArrayList<Statement>();
 	
 	
 	
@@ -85,8 +103,8 @@ public abstract class Statement {
 	}
 	
 	public void setExpression(Expression expression) {
-		this.expression = expression;
 		expression.setStatement(this);
+		this.expression = expression;
 	}
 	
 	private Expression expression;

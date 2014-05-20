@@ -3,6 +3,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import worms.model.programs.Program;
 import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -1154,12 +1155,22 @@ public class Worm extends GameObject {
 	}
 	
 	/**
+	 * Check whether this worm has a program attached to it.
+	 */
+	public boolean hasProgram() {
+		return (getProgram() != null);
+	}
+	
+	/**
 	 * Set the program of this worm to the given program.
 	 * 
 	 * @param 	program
 	 * 			The program to set.
 	 */
 	public void setProgram(Program program) {
+		if (program != null) {
+			program.setWorm(this);
+		}
 		this.program = program;
 	}
 	
@@ -1248,6 +1259,19 @@ public class Worm extends GameObject {
 		return ( getWorld().isAdjacent(getPosition(), getRadius())
 			  && (getCurrentActionPoints()
 						>= getActiveWeapon().getActionPointsCost()));	
+	}
+	
+	
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+		if (this.getClass() != other.getClass())
+			return false;
+		Worm otherWorm = (Worm) other;
+		return (  (this.getName() == otherWorm.getName())
+				&& this.getPosition().equals(otherWorm.getPosition()) );
 	}
 
 }

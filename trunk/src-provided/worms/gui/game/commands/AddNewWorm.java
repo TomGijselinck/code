@@ -10,8 +10,8 @@ import worms.gui.GUIUtils;
 import worms.gui.WormsGUI;
 import worms.gui.game.PlayGameScreen;
 import worms.model.IFacade;
-import worms.model.Program;
 import worms.model.programs.ParseOutcome;
+import worms.model.programs.Program;
 import worms.model.programs.ParseOutcome.Failure;
 import worms.model.programs.ParseOutcome.Success;
 

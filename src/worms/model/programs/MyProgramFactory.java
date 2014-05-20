@@ -2,22 +2,29 @@ package worms.model.programs;
 
 import java.util.List;
 
-import worms.model.Worm;
-import worms.model.programs.ProgramFactory.ForeachType;
+import worms.model.programs.expressions.ArithmeticOperation;
 import worms.model.programs.expressions.BoolExpression;
+import worms.model.programs.expressions.ComparisonExpression;
 import worms.model.programs.expressions.DoubleConstantExpression;
 import worms.model.programs.expressions.Expression;
-import worms.model.programs.expressions.GetXStatement;
-import worms.model.programs.expressions.GetYStatement;
 import worms.model.programs.expressions.Inspector;
+import worms.model.programs.expressions.IsWormExpression;
 import worms.model.programs.expressions.NullExpression;
+import worms.model.programs.expressions.SearchObjectExpression;
 import worms.model.programs.expressions.SelfExpression;
-import worms.model.programs.expressions.SubtractionExpression;
+import worms.model.programs.expressions.SquarerootExpression;
+import worms.model.programs.expressions.ArithmeticOperation.Operation;
+import worms.model.programs.expressions.ComparisonExpression.Relation;
 import worms.model.programs.expressions.Inspector.InspectorType;
+import worms.model.programs.expressions.VariableExpression;
+import worms.model.programs.statements.ActionStatement;
 import worms.model.programs.statements.AssignmentStatement;
+import worms.model.programs.statements.IfElseStatement;
 import worms.model.programs.statements.PrintStatement;
 import worms.model.programs.statements.SequenceStatement;
 import worms.model.programs.statements.Statement;
+import worms.model.programs.statements.WhileStatement;
+import worms.model.programs.statements.ActionStatement.Action;
 import worms.model.programs.types.BoolType;
 import worms.model.programs.types.DoubleType;
 import worms.model.programs.types.EntityType;
@@ -44,7 +51,8 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	/**
 	 * Create an expression representing a boolean literal, with value b
 	 */
-	public BoolExpression createBooleanLiteral(int line, int column, boolean b) {
+	@Override
+	public Expression createBooleanLiteral(int line, int column, boolean b) {
 		return new BoolExpression(line, column, b);
 	}
 
@@ -52,6 +60,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression representing the logical and operation on two
 	 * expressions e1 and e2
 	 */
+	@Override
 	public Expression createAnd(int line, int column, Expression e1, Expression e2) {
 		return null;
 	}
@@ -60,6 +69,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression representing the logical or operation on two
 	 * expressions e1 and e2
 	 */
+	@Override
 	public Expression createOr(int line, int column, Expression e1, Expression e2) {
 		return null;
 	}
@@ -68,6 +78,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression representing the logical not operation on the
 	 * expression e
 	 */
+	@Override
 	public Expression createNot(int line, int column, Expression e) {
 		return null;
 	}
@@ -75,6 +86,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	/**
 	 * Create an expression representing the literal 'null'
 	 */
+	@Override
 	public Expression createNull(int line, int column) {
 		return new NullExpression(line, column);
 	}
@@ -83,6 +95,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression representing a reference to the worm that is
 	 * executing the program
 	 */
+	@Override
 	public Expression createSelf(int line, int column) {
 		return new SelfExpression(line, column);
 	}
@@ -91,6 +104,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the x-coordinate of the entity identified by
 	 * the expression e
 	 */
+	@Override
 	public Expression createGetX(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.X);
 	}
@@ -99,6 +113,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the y-coordinate of the entity identified by
 	 * the expression e
 	 */
+	@Override
 	public Expression createGetY(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.Y);
 	}
@@ -107,6 +122,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the radius of the entity identified by the
 	 * expression e
 	 */
+	@Override
 	public Expression createGetRadius(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.RADIUS);
 	}
@@ -115,6 +131,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the direction of the entity identified by the
 	 * expression e
 	 */
+	@Override
 	public Expression createGetDir(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.DIRECTION);
 	}
@@ -123,6 +140,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the action points of the entity identified by
 	 * the expression e
 	 */
+	@Override
 	public Expression createGetAP(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.AP);
 	}
@@ -131,6 +149,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the maximum number of action points of the
 	 * entity identified by the expression e
 	 */
+	@Override
 	public Expression createGetMaxAP(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.MAXAP);
 	}
@@ -139,6 +158,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the hit points of the entity identified by
 	 * the expression e
 	 */
+	@Override
 	public Expression createGetHP(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.HP);
 	}
@@ -147,6 +167,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression to get the maximum number of hit points of the
 	 * entity identified by the expression e
 	 */
+	@Override
 	public Expression createGetMaxHP(int line, int column, Expression e) {
 		return new Inspector(line, column, e, InspectorType.MAXHP);
 	}
@@ -156,6 +177,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * expression e belongs to the same team as the worm that is executing the
 	 * program
 	 */
+	@Override
 	public Expression createSameTeam(int line, int column, Expression e) {
 		return null;
 	}
@@ -166,18 +188,25 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * where theta is the current direction of the worm that is executing the
 	 * program
 	 */
-	public Expression createSearchObj(int line, int column, Expression e);
+	@Override
+	public Expression createSearchObj(int line, int column, Expression e) {
+		return new SearchObjectExpression(line, column, e);
+	}
 
 	/**
 	 * Create an expression that evaluates whether the entity identified by the
 	 * expression e is a worm
 	 */
-	public Expression createIsWorm(int line, int column, Expression e);
+	@Override
+	public Expression createIsWorm(int line, int column, Expression e) {
+		return new IsWormExpression(line, column, e);
+	}
 
 	/**
 	 * Create an expression that evaluates whether the entity identified by the
 	 * expression e is a food ration
 	 */
+	@Override
 	public Expression createIsFood(int line, int column, Expression e) {
 		return null;
 	}
@@ -186,87 +215,127 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create an expression that evaluates to the value of the variable with the
 	 * given name
 	 */
-	public Expression createVariableAccess(int line, int column, String name);
+	@Override
+	public Expression createVariableAccess(int line, int column, String name) {
+		return new VariableExpression(line, column, name);
+	}
 
 	/**
 	 * Create an expression that checks whether the value of expression e1 is
 	 * less than the value of the expression e2
 	 */
-	public Expression createLessThan(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createLessThan(int line, int column, Expression e1, Expression e2) {
+		return new ComparisonExpression(line, column, e1, e2, Relation.LESS);
+	}
 
 	/**
 	 * Create an expression that checks whether the value of expression e1 is
 	 * greater than the value of the expression e2
 	 */
-	public Expression createGreaterThan(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createGreaterThan(int line, int column, Expression e1, Expression e2) {
+		return new ComparisonExpression(line, column, e1, e2, Relation.GREATER);
+	}
 
 	/**
 	 * Create an expression that checks whether the value of expression e1 is
 	 * less than or equal to the value of the expression e2
 	 */
-	public Expression createLessThanOrExpressionqualTo(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createLessThanOrEqualTo(int line, int column, Expression e1, Expression e2) {
+		return new ComparisonExpression(line, column, e1, e2, Relation.LESSOREQUAL);
+	}
 
 	/**
 	 * Create an expression that checks whether the value of expression e1 is
 	 * greater than or equal to the value of the expression e2
 	 */
-	public Expression createGreaterThanOrExpressionqualTo(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createGreaterThanOrEqualTo(int line, int column, Expression e1, Expression e2) {
+		return new ComparisonExpression(line, column, e1, e2, Relation.GREATEROREQUAL);
+	}
 
 	/**
 	 * Create an expression that checks whether the value of expression e1 is
 	 * equal to the value of the expression e2
 	 */
-	public Expression createExpressionquality(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createEquality(int line, int column, Expression e1, Expression e2) {
+		return new ComparisonExpression(line, column, e1, e2, Relation.EQUAL);
+	}
 
 	/**
 	 * Create an expression that checks whether the value of expression e1 is
 	 * not equal to the value of the expression e2
 	 */
-	public Expression createInequality(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createInequality(int line, int column, Expression e1, Expression e2) {
+		return new ComparisonExpression(line, column, e1, e2, Relation.NOTEQUAL);
+	}
 
 	/**
 	 * Create an expression that represents the addition of the value of
 	 * expression e1 and the value of the expression e2
 	 */
-	public Expression createAdd(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createAdd(int line, int column, Expression e1, Expression e2) {
+		return new ArithmeticOperation(line, column, e1, e2, Operation.ADDITION);
+	}
 
 	/**
 	 * Create an expression that represents the subtraction of the value of
 	 * expression e1 and the value of the expression e2
 	 */
+	@Override
 	public Expression createSubtraction(int line, int column, Expression e1, Expression e2) {
-		return new SubtractionExpression(line, column, e1, e2);
+		return new ArithmeticOperation(line, column, e1, e2, Operation.SUBTRACTION);
 	}
 
 	/**
 	 * Create an expression that represents the multiplication of the value of
 	 * expression e1 and the value of the expression e2
 	 */
-	public Expression createMul(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createMul(int line, int column, Expression e1, Expression e2) {
+		return new ArithmeticOperation(line, column, e1, e2, Operation.MULTIPLICATION);
+	}
 
 	/**
 	 * Create an expression that represents the division of the value of
 	 * expression e1 and the value of the expression e2
 	 */
-	public Expression createDivision(int line, int column, Expression e1, Expression e2);
+	@Override
+	public Expression createDivision(int line, int column, Expression e1, Expression e2) {
+		return new ArithmeticOperation(line, column, e1, e2, Operation.DIVISION);
+	}
 
 	/**
 	 * Create an expression that represents the square root of the value of
 	 * expression e1 and the value of the expression e2
 	 */
-	public Expression createSqrt(int line, int column, Expression e);
+	@Override
+	public Expression createSqrt(int line, int column, Expression e) {
+		return new SquarerootExpression(line, column, e);
+	}
 
 	/**
 	 * Create an expression that represents the sine of the value of expression
 	 * e1 and the value of the expression e2
 	 */
-	public Expression createSin(int line, int column, Expression e);
+	@Override
+	public Expression createSin(int line, int column, Expression e) {
+		return null;
+	}
 
 	/**
 	 * Create an expression that represents the cosine of the value of
 	 * expression e1 and the value of the expression e2
 	 */
-	public Expression createCos(int line, int column, Expression e);
+	@Override
+	public Expression createCos(int line, int column, Expression e) {
+		return null;
+	}
 
 	/* actions */
 
@@ -274,37 +343,55 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create a statement that represents a turn of the worm executing the
 	 * program by the value of the angle expression
 	 */
-	public S createTurn(int line, int column, Expression angle);
+	@Override
+	public Statement createTurn(int line, int column, Expression angle) {
+		return new ActionStatement(line, column, angle, Action.TURN);
+	}
 
 	/**
 	 * Create a statement that represents a move of the worm executing the
 	 * program
 	 */
-	public S createMove(int line, int column);
+	@Override
+	public Statement createMove(int line, int column) {
+		return new ActionStatement(line, column, Action.MOVE);
+	}
 
 	/**
 	 * Create a statement that represents a jump of the worm executing the
 	 * program
 	 */
-	public S createJump(int line, int column);
+	@Override
+	public Statement createJump(int line, int column) {
+		return new ActionStatement(line, column, Action.JUMP);
+	}
 
 	/**
 	 * Create a statement that represents toggling the weapon of the worm
 	 * executing the program
 	 */
-	public S createToggleWeap(int line, int column);
+	@Override
+	public Statement createToggleWeap(int line, int column) {
+		return new ActionStatement(line, column, Action.TOGGLEWEAP);
+	}
 
 	/**
 	 * Create a statement that represents firing the current weapon of the worm
 	 * executing the program, where the propulsion yield is given by the yield
 	 * expression
 	 */
-	public S createFire(int line, int column, Expression yield);
+	@Override
+	public Statement createFire(int line, int column, Expression yield) {
+		return new ActionStatement(line, column, yield, Action.FIRE);
+	}
 
 	/**
 	 * Create a statement that represents no action of a worm
 	 */
-	public S createSkip(int line, int column);
+	@Override
+	public Statement createSkip(int line, int column) {
+		return new ActionStatement(line, column, Action.SKIP);
+	}
 
 	/* other statements */
 
@@ -322,22 +409,32 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * statements then or otherwise, depending on the value of the condition
 	 * expression
 	 */
-	public S createIf(int line, int column, Expression condition, S then, S otherwise);
+	@Override
+	public Statement createIf(int line, int column, Expression condition, Statement then, Statement otherwise) {
+		return new IfElseStatement(line, column, condition, then, otherwise);
+	}
 
 	/**
 	 * Create a statement that represents the repeated execution of the body
 	 * statement, as long as the value of the condition expression evaluates to
 	 * true
 	 */
-	public S createWhile(int line, int column, Expression condition, S body);
+	@Override
+	public Statement createWhile(int line, int column, Expression condition, Statement body) {
+		return new WhileStatement(line, column, condition, body);
+	}
 
 	/**
 	 * Create a statement that represents the repeated execution of the body
 	 * statement, where for each execution the value of the variable with the
 	 * given name is set to a different object of the given type.
 	 */
-	public S createForeach(int line, int column, ForeachType type,
-			String variableName, S body);
+	@Override
+	public Statement createForeach(int line, int column,
+			worms.model.programs.ProgramFactory.ForeachType type,
+			String variableName, Statement body) {
+		return null;
+	}
 
 	/**
 	 * Create a statement that represents the sequential execution of the given
@@ -352,6 +449,7 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	 * Create a statement that represents printing out the value of the
 	 * expression e
 	 */
+	@Override
 	public Statement createPrint(int line, int column, Expression e) {
 		return new PrintStatement(line, column, e);
 	}

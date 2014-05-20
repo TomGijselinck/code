@@ -6,6 +6,7 @@ import org.junit.*;
 
 import worms.gui.game.IActionHandler;
 import worms.model.programs.ParseOutcome;
+import worms.model.programs.Program;
 import worms.model.programs.ParseOutcome.Success;
 
 import java.util.Random;
@@ -137,6 +138,7 @@ public class WormTest {
 		world.addAsWorm(moveableWorm);
 		world.addAsWorm(fallableWorm);
 		world2.addAsWorm(fallOutWorm);
+		facade = new Facade();
 	}
 
 	@Test
@@ -504,13 +506,15 @@ public class WormTest {
 	@Test
 	//TODO: aanpassen!
 	public void TestProgram() {
-		String programText = "double a; double b := 3; a := 5 - b; print a;";
+		String programText = "double a := 5; while(a > 0) {move; print a; a := a - 1;}";
 		handler = new SimpleActionHandler(facade);
 		ParseOutcome<?> outcome = facade.parseProgram(programText, handler);
 		assertTrue(outcome.isSuccess());
 		Program program = ((Success) outcome).getResult();
 		NPCworm.setProgram(program);
+		System.out.println(NPCworm.getPosition().toString());
 		NPCworm.getProgram().run();
+		System.out.println(NPCworm.getPosition().toString());
 	}
 
 }

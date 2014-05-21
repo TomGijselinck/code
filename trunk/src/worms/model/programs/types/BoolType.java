@@ -4,6 +4,7 @@ public class BoolType extends Type<Boolean> {
 	
 	public BoolType() {
 		super();
+		setValue(false);
 	}
 	
 	public BoolType(Boolean value) {

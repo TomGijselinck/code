@@ -6,6 +6,7 @@ public class EntityType extends Type<Worm> {
 	
 	public EntityType() {
 		super();
+		setValue(null);
 	}
 	
 	public EntityType(Worm value) {

@@ -10,8 +10,8 @@ import worms.gui.GUIUtils;
 import worms.gui.WormsGUI;
 import worms.gui.game.PlayGameScreen;
 import worms.model.IFacade;
+import worms.model.Program;
 import worms.model.programs.ParseOutcome;
-import worms.model.programs.Program;
 import worms.model.programs.ParseOutcome.Failure;
 import worms.model.programs.ParseOutcome.Success;
 
@@ -39,7 +39,12 @@ public class AddNewWorm extends InstantaneousCommand {
 				if (parsed != null) {
 					if (parsed.isSuccess()) {
 						Program program = ((Success) parsed).getResult();
-						getFacade().addNewWorm(getWorld(), program);
+						if (getFacade().isWellFormed(program)) {
+							getFacade().addNewWorm(getWorld(), program);
+						} else {
+							cancelExecution();
+							getGUI().showError("The program is not well-formed");
+						}
 						return;
 					} else {
 						List<String> errors = ((Failure) parsed).getResult();
@@ -52,8 +57,10 @@ public class AddNewWorm extends InstantaneousCommand {
 						return;
 					}
 				}
+			} else {
+				cancelExecution();
+				return;
 			}
-			cancelExecution();
 		} else {
 			getFacade().addNewWorm(getWorld(), null);
 		}

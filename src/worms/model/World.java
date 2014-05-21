@@ -1024,7 +1024,6 @@ public class World {
 		int index = 0;
 		setCurrentWorm(getAllWorms().get(index));
 		while (getCurrentWorm().hasProgram()) {
-			System.out.println("worm " + getCurrentWorm().getName() + " has a program");
 			getCurrentWorm().getProgram().run();
 			index += 1;
 			setCurrentWorm(getAllWorms().get(index));

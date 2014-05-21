@@ -47,7 +47,9 @@ public class Program {
 	
 	private ProgramParser<Expression, Statement, Type<?>> parser;
 	
-	public Map<String, Type<?>> getGlobalVariables() { return null;}
+	public Map<String, Type<?>> getGlobalVariables() {
+		return globalVariables;
+	}
 	
 	public void setGlobalVariable(String name, Type<?> value) {
 		globalVariables.put(name, value);

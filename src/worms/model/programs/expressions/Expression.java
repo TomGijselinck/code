@@ -39,7 +39,11 @@ public abstract class Expression {
 	}
 	
 	public Statement getStatement() {
-		return statement;
+		Expression expression = this;
+		while (expression.hasParentExpression()) {
+			expression = getParentExpression();
+		}
+		return expression.statement;
 	}
 	
 	public void setStatement(Statement statement) {

@@ -1,6 +1,6 @@
 package worms.model.programs.expressions;
 
-import worms.model.programs.types.Type;
+import worms.model.programs.types.NullType;
 
 public class NullExpression extends Expression {
 	
@@ -9,8 +9,8 @@ public class NullExpression extends Expression {
 	}
 
 	@Override
-	public Type<?> evaluate() {
-		return null;
+	public NullType evaluate() {
+		return new NullType();
 	}
 
 }

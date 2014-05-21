@@ -20,12 +20,6 @@ public class AssignmentStatement extends Statement {
 
 	private final String varName;
 
-	public Expression getExpression() {
-		return expression;
-	}
-
-	private Expression expression;
-
 	@Override
 	public void execute() {
 		if (getProgram().isPaused() && (! canResumeExecution())) {

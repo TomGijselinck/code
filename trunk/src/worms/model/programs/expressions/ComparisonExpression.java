@@ -27,16 +27,16 @@ public class ComparisonExpression extends BinaryExpression {
 	@Override
 	public BoolType evaluate() {
 		boolean result;
-		double a = (Double) getFirstChildExpression().evaluate().getValue();
-		double b = (Double) getSecondChildExpression().evaluate().getValue();
+		Object a = getFirstChildExpression().evaluate().getValue();;
+		Object b = getSecondChildExpression().evaluate().getValue();
 		if (getRelation() == Relation.LESS) {
-			result = a < b;
+			result = (Double) a < (Double) b;
 		} else if (getRelation() == Relation.LESSOREQUAL) {
-			result = a <= b;
+			result = (Double) a <= (Double) b;
 		} else if (getRelation() == Relation.GREATER) {
-			result = a > b;
+			result = (Double) a > (Double) b;
 		} else if (getRelation() == Relation.GREATEROREQUAL) {
-			result = a >= b;
+			result = (Double) a >= (Double) b;
 		} else if (getRelation() == Relation.EQUAL) {
 			result =  a == b;
 		} else if (getRelation() == Relation.NOTEQUAL) {

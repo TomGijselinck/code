@@ -1,6 +1,7 @@
 package worms.model.programs.statements;
 
 import be.kuleuven.cs.som.annotate.Immutable;
+import worms.model.programs.expressions.BoolExpression;
 import worms.model.programs.expressions.Expression;
 import worms.model.programs.statements.Statement;
 
@@ -9,12 +10,16 @@ public class IfElseStatement extends Statement {
 	public IfElseStatement(int line, int column, Expression condition,
 			Statement then, Statement otherwise) {
 		super(line, column);
-		condition.setStatement(this);
-		then.setParentStatement(this);
-		otherwise.setParentStatement(this);
-		this.condition = condition;
+		if (condition == null) {
+			this.condition = new BoolExpression(line, column, true);
+		} else {
+			this.condition = condition;
+		}
+		this.condition.setStatement(this);
 		this.then = then;
+		this.then.setParentStatement(this);
 		this.otherwise = otherwise;
+		this.otherwise.setParentStatement(this);
 	}
 	
 	@Immutable

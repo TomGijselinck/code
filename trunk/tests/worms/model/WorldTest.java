@@ -274,7 +274,7 @@ public class WorldTest {
 	
 	@Test
 	public void addWorm_SingleCase() {
-		world1.addWorm();
+		world1.addWorm(null);
 		assertEquals(3, world1.getNbWorms());
 	}
 	

@@ -10,8 +10,6 @@ import java.util.Random;
 import java.util.Set;
 import java.lang.Math;
 
-
-
 import worms.model.programs.Program;
 import static worms.util.Util.*;
 import be.kuleuven.cs.som.annotate.*;
@@ -1019,11 +1017,11 @@ public class World {
 	
 	
 	//GAME
-	public void startGame() {
+	public void startGame() {		
 		gameStarted = true;
 		int index = 0;
 		setCurrentWorm(getAllWorms().get(index));
-		while (getCurrentWorm().hasProgram()) {
+		while (getCurrentWorm().hasProgram()) {			
 			getCurrentWorm().getProgram().run();
 			index += 1;
 			setCurrentWorm(getAllWorms().get(index));

@@ -6,7 +6,6 @@ import org.junit.*;
 
 import worms.gui.game.IActionHandler;
 import worms.model.programs.ParseOutcome;
-import worms.model.programs.Program;
 import worms.model.programs.ParseOutcome.Success;
 
 import java.util.Random;

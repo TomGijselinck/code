@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 import java.lang.Math;
 
-import worms.model.programs.Program;
 import static worms.util.Util.*;
 import be.kuleuven.cs.som.annotate.*;
 

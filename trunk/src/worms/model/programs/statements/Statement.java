@@ -3,7 +3,7 @@ package worms.model.programs.statements;
 import java.util.ArrayList;
 import java.util.List;
 
-import worms.model.programs.Program;
+import worms.model.Program;
 import worms.model.programs.expressions.Expression;
 
 public abstract class Statement {

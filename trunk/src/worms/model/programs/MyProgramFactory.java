@@ -219,6 +219,27 @@ public class MyProgramFactory implements ProgramFactory<Expression, Statement, T
 	public Expression createVariableAccess(int line, int column, String name) {
 		return new VariableExpression(line, column, name);
 	}
+	
+	/**
+	 * OPTIONAL METHOD
+	 * This method is only relevant for students that choose to work on static type checking.
+	 * You may ignore this method if you want,
+	 * and only implement the version of this method without the type argument. 
+	 * - If you do not use this method, return null.
+	 * - Otherwise, return null from the other createVariableAccess method.
+	 *  
+	 * Create an expression that evaluates to the value of the variable with the
+	 * given name.
+	 * 
+	 * The given type is the type of the variable with the given name,
+	 * as determined while parsing the variable declarations in the program.
+	 * 
+	 * If the variable with the given name was not declared, the given type is null.  
+	 */
+	//TODO: update
+	public Expression createVariableAccess(int line, int column, String name, Type<?> type) {
+		return null;
+	}
 
 	/**
 	 * Create an expression that checks whether the value of expression e1 is

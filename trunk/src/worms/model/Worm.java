@@ -3,7 +3,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import worms.model.programs.Program;
 import be.kuleuven.cs.som.annotate.*;
 
 /**

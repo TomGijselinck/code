@@ -7,7 +7,6 @@ import java.util.Random;
 import worms.exceptions.ModelException;
 import worms.gui.game.IActionHandler;
 import worms.model.programs.ParseOutcome;
-import worms.model.programs.Program;
 
 
 public class Facade implements IFacade {

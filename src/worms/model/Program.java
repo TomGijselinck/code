@@ -47,7 +47,9 @@ public class Program {
 	
 	private ProgramParser<Expression, Statement, Type<?>> parser;
 	
-	public Map<String, Type<?>> getGlobalVariables() { return null;}
+	public Map<String, Type<?>> getGlobalVariables() {
+		return globalVariables;
+	}
 	
 	public void setGlobalVariable(String name, Type<?> value) {
 		globalVariables.put(name, value);
@@ -69,9 +71,21 @@ public class Program {
 		getMainStatement().execute();
 	}
 	
-	public void pause() {}
+	public boolean isPaused() {
+		return pause;
+	}
 	
-	public void unPause() {}
+	private boolean pause = false;
+	
+	public void pause(Statement statement) {
+		pause = true;
+		statement.setExecutionFlag(true);
+	}
+	
+	public void resume(Statement statement) {
+		pause = false;
+		statement.setExecutionFlag(false);
+	}
 	
 	
 	
@@ -82,6 +96,7 @@ public class Program {
 	}
 	
 	public void setMainStatement(Statement main) {
+		main.setProgram(this);
 		mainStatement = main;
 	}
 	
